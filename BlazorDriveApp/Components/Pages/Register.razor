@@ -1,0 +1,44 @@
+﻿@page "/register"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@using APIDrivingProject.Services;
+@using BlazorDriveApp.Models;
+@using APIDrivingProject.Models;
+
+
+<h3>Register</h3>
+
+<EditForm Model="@registerModel" OnValidSubmit="HandleSubmit" FormName="registrationForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="registerModel.Email" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="registerModel.Password" type="password" />
+    </div>
+
+    <button type="submit">Register</button>
+</EditForm>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+
+    private async Task HandleSubmit()
+    {
+        var result = await AuthService.Register(registerModel);
+        if (result.Successful)
+        {
+            // Handle success
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+}
+

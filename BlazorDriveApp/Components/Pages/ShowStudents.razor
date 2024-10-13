@@ -1,0 +1,54 @@
+﻿@page "/students"
+@inject HttpClient Http
+@using BlazorDriveApp.Models;
+<h3>ShowStudents</h3>
+
+
+@if (data == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (data.Count == 0)
+{
+    <p>No Students Found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>StudentId</th>
+                <th>FirstName</th>
+                <th>LastName</th>
+                <th>Email</th>
+                <th>PhoneNumber</th>
+                <th>LessonsTaken</th>
+                <th>HasPassedTheory</th>
+               
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Student student in data)
+            {
+                <tr>
+                    <td>@student.StudentId</td>
+                    <td>@student.FirstName</td>
+                    <td>@student.LastName</td>
+                    <td>@student.Email</td>
+                    <td>@student.PhoneNumber</td>
+                    <td>@student.LessonsTaken</td>
+                    <th>@student.HasPassedTheory</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+private List<Student> data;
+
+protected override async Task OnInitializedAsync()
+{
+        data = await Http.GetFromJsonAsync<List<Student>>("http://localhost:5082/api/students");
+}
+}

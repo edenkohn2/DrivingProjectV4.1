@@ -1,0 +1,46 @@
+﻿@page "/login"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@using BlazorDriveApp.Models;
+@using APIDrivingProject.Services
+@using APIDrivingProject.Models;
+
+
+
+
+<h3>Login</h3>
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="loginModel.Email" />
+    </div>
+
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="loginModel.Password" type="password" />
+    </div>
+
+    <button type="submit">Login</button>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+
+    private async Task HandleLogin()
+    {
+        var result = await AuthService.Login(loginModel);
+
+        if (result.Successful)
+        {
+            Navigation.NavigateTo("/welcome");
+        }
+        else
+        {
+            Console.WriteLine("Login failed");
+        }
+    }
+}
