@@ -1,46 +1,209 @@
 ﻿@page "/login"
-@inject IAuthService AuthService
+@rendermode InteractiveServer
+
+@inject HttpClient Http
 @inject NavigationManager Navigation
-@using BlazorDriveApp.Models;
-@using APIDrivingProject.Services
-@using APIDrivingProject.Models;
+@inject AuthService AuthService
+@using APIDrivingProject.Services;
+@using System.Text.Json
 
-
-
-
-<h3>Login</h3>
-
-<EditForm Model="@loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div>
-        <label>Email:</label>
-        <InputText @bind-Value="loginModel.Email" />
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Sign In</h2>
+        <p>Welcome back! Please sign in to your account.</p>
+        <div class="input-group">
+            <label>Email</label>
+            <InputText @bind-Value="email" class="input-field" />
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <InputText @bind-Value="password" type="password" class="input-field" />
+        </div>
+        <button class="auth-button" @onclick="HandleLogin">Sign In</button>
     </div>
+</div>
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #1c1c1c;
+    }
 
-    <div>
-        <label>Password:</label>
-        <InputText @bind-Value="loginModel.Password" type="password" />
-    </div>
+    .auth-box {
+        background: #000;
+        padding: 2rem;
+        border-radius: 10px;
+        color: #fff;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+    }
 
-    <button type="submit">Login</button>
-</EditForm>
+    .auth-button {
+        background: #e50914;
+        color: #fff;
+        padding: 10px;
+        width: 100%;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+        .auth-button:hover {
+            background: #f40612;
+        }
+</style>
 
 @code {
-    private LoginModel loginModel = new LoginModel();
+    private string email = "";
+    private string password = "";
+    private bool loginFailed = false;
 
     private async Task HandleLogin()
     {
-        var result = await AuthService.Login(loginModel);
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/users/login", new { email, password });
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var resultData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonResponse);
 
-        if (result.Successful)
-        {
-            Navigation.NavigateTo("/welcome");
+                if (resultData != null && resultData.TryGetValue("person", out var personElement))
+                {
+                    var userName = $"{personElement.GetProperty("firstName").GetString()} {personElement.GetProperty("lastName").GetString()}";
+                    if (personElement.TryGetProperty("role", out var roleElement))
+                    {
+                        var role = roleElement.GetString();
+                        AuthService.SetUser(userName, role);
+                        NavigateToDashboard(role);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Role not found in response.");
+                        loginFailed = true;
+                    }
+                }
+                else
+                {
+                    loginFailed = true;
+                }
+            }
+            else
+            {
+                loginFailed = true;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("Login failed");
+            Console.WriteLine($"Error during login: {ex}");
+            loginFailed = true;
+        }
+    }
+
+    private void NavigateToDashboard(string role)
+    {
+        switch (role)
+        {
+            case "Admin":
+                Navigation.NavigateTo("/admin_dashboard", true);
+                break;
+            case "Instructor":
+                Navigation.NavigateTo("/instructor_dashboard", true);
+                break;
+            case "Student":
+                Navigation.NavigateTo("/student_dashboard", true);
+                break;
+            default:
+                Navigation.NavigateTo("/unauthorized", true);
+                break;
         }
     }
 }
+
+<style>
+    /* Background */
+    .login-background {
+        background-color: #141414;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Container */
+    .login-container {
+        max-width: 400px;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        color: white;
+    }
+
+    .login-title {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        font-size: 1rem;
+        color: #b3b3b3;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 4px;
+        background-color: #333;
+        color: white;
+    }
+
+        .input-field::placeholder {
+            color: #b3b3b3;
+        }
+
+        .input-field:focus {
+            border: 1px solid #e50914;
+            outline: none;
+        }
+
+    .login-button {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 1rem;
+        color: white;
+        background-color: #e50914;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .login-button:hover {
+            background-color: #f40612;
+        }
+
+        .login-button:active {
+            transform: scale(0.98);
+        }
+
+    .error-message {
+        color: #e87c03;
+        font-size: 0.85rem;
+        margin-top: 10px;
+    }
+</style>

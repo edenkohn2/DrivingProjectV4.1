@@ -1,4 +1,105 @@
 ﻿@page "/welcome"
+@rendermode InteractiveServer
 
-<h3>Welcome!</h3>
-<p>You have successfully logged in.</p>
+@inject NavigationManager Navigation
+
+<div class="welcome-container">
+    <div class="welcome-content">
+        <h1>Welcome to <span class="highlight">DriveManager</span></h1>
+        <p>Your complete driving school management solution.</p>
+
+        <div class="action-buttons">
+            <button class="btn btn-login" @onclick="NavigateToLogin">Login</button>
+            <button class="btn btn-register" @onclick="NavigateToRegister">Register</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Full-page container */
+    .welcome-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7)), url('https://assets.nflxext.com/ffe/siteui/vlv3/4f8dba6c-4c12-45c4-b1f4-6d29bff0b3ea/ae93b841-7b4e-47d8-9345-ea70a8fbd7f6/IL-en-20230320-popsignuptwoweeks-perspective_alpha_website_large.jpg') center/cover no-repeat;
+        color: white;
+    }
+
+    /* Welcome content box */
+    .welcome-content {
+        text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        max-width: 500px;
+        width: 90%;
+    }
+
+        /* Welcome heading */
+        .welcome-content h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .welcome-content .highlight {
+            color: #e50914;
+        }
+
+        /* Subtitle */
+        .welcome-content p {
+            font-size: 1.2rem;
+            color: #b3b3b3;
+            margin-bottom: 30px;
+        }
+
+    /* Buttons container */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Button styles */
+    .btn {
+        padding: 15px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login {
+        background-color: #e50914;
+        color: white;
+    }
+
+        .btn-login:hover {
+            background-color: #f6121d;
+        }
+
+    .btn-register {
+        background-color: #007bff;
+        color: white;
+    }
+
+        .btn-register:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+@code {
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void NavigateToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+}

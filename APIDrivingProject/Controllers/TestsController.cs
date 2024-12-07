@@ -25,7 +25,7 @@ namespace APIDrivingProject.Controllers
             using (MySqlConnection connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                string query = "SELECT TestId, StudentId, TestType, Date, Passed FROM Tests";
+                string query = "SELECT TestId, StudentId, TestType, Date, Passed FROM tests";
                 MySqlCommand command = new MySqlCommand(query, connection);
                 MySqlDataReader reader = command.ExecuteReader();
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace APIDrivingProject.Models
+﻿namespace BlazorDriveApp.Models
 {
     public class LoginModel
     {

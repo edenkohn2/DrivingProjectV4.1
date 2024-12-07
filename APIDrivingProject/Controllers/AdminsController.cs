@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using APIDrivingProject.Services;
 using APIDrivingProject.Models;
 using System.Collections.Generic;
+
 namespace APIDrivingProject.Controllers
 {
     [Route("api/[controller]")]
@@ -25,7 +26,10 @@ namespace APIDrivingProject.Controllers
             using (MySqlConnection connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                string query = "SELECT AdminId, FirstName, LastName, Email, PhoneNumber, Role FROM Admins";
+                string query = @"SELECT person.PersonId, person.FirstName, person.LastName, person.Email, person.PhoneNumber, admin.AdminRole
+                 FROM person
+                 INNER JOIN admin ON person.PersonId = admin.AdminId";
+
                 MySqlCommand command = new MySqlCommand(query, connection);
                 MySqlDataReader reader = command.ExecuteReader();
 
@@ -33,12 +37,12 @@ namespace APIDrivingProject.Controllers
                 {
                     var admin = new Admin
                     {
-                        AdminId = reader.GetInt32(0),
-                        FirstName = reader.GetString(1),
-                        LastName = reader.GetString(2),
-                        Email = reader.GetString(3),
-                        PhoneNumber = reader.GetString(4),
-                        Role = reader.GetString(5)
+                        PersonId = reader.GetInt32("PersonId"), // שימוש ב-PersonId במקום AdminId
+                        FirstName = reader.GetString("FirstName"),
+                        LastName = reader.GetString("LastName"),
+                        Email = reader.GetString("Email"),
+                        PhoneNumber = reader.GetString("PhoneNumber"),
+                        AdminRole = reader.GetString("AdminRole")
                     };
                     admins.Add(admin);
                 }

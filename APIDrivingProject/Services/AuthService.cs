@@ -1,47 +1,33 @@
-﻿using APIDrivingProject.Models;
-
-namespace APIDrivingProject.Services
+﻿namespace APIDrivingProject.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService
     {
-        private readonly HttpClient _httpClient;
+        private string _userName;
+        private string _userRole;
 
-        public AuthService(HttpClient httpClient)
+        public void SetUser(string userName, string userRole)
         {
-            _httpClient = httpClient;
+            _userName = userName;
+            _userRole = userRole;
         }
 
-        public async Task<RegisterResult> Register(RegisterModel registerModel)
+        public void ClearUser()
         {
-            var response = await _httpClient.PostAsJsonAsync("api/Students/register", registerModel);
-            string Error = "";
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Ensure that the response contains valid JSON
-                var content = await response.Content.ReadAsStringAsync();
-
-                if (string.IsNullOrWhiteSpace(content))
-                {
-                    return new RegisterResult { Successful = false,  };
-                }
-
-                // Deserializing the content to RegisterResult
-                return await response.Content.ReadFromJsonAsync<RegisterResult>();
-            }
-            else
-            {
-                // Handle error case if the request fails
-                return new RegisterResult { Successful = false,  };
-            }
+            _userName = null;
+            _userRole = null;
         }
 
+        public bool IsAuthenticated => !string.IsNullOrEmpty(_userName);
+        public bool IsAdmin => _userRole == "Admin";
+        public bool IsInstructor => _userRole == "Instructor";
+        public bool IsStudent => _userRole == "Student";
+        public bool IsLoggedIn => IsAuthenticated;
 
-        public async Task<LoginResult> Login(LoginModel loginModel)
+        public string UserName => _userName;
+        public string UserRole => _userRole;
+        public void Logout()
         {
-            var response = await _httpClient.PostAsJsonAsync("api/accounts/login", loginModel);
-            return await response.Content.ReadFromJsonAsync<LoginResult>();
+            ClearUser();
         }
     }
-
 }

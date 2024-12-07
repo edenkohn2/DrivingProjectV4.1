@@ -1,6 +1,13 @@
 using APIDrivingProject.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<DatabaseService>();
+
+builder.Services.AddScoped<UserService>();
+
+
 
 
 // Add services to the container.

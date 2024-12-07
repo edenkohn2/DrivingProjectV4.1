@@ -2,15 +2,11 @@
 
 namespace APIDrivingProject.Models
 {
-    public class Student
+    public class Student : Person
     {
-        public int StudentId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public int LessonsTaken { get; set; }
-        public bool HasPassedTheory { get; set; }
+        public int LessonsTaken { get; set; } = 0;
+        public bool HasPassedTheory { get; set; } = false;
+        public bool IsActive { get; set; } = true; // To indicate if the student is still learning
     }
 
 

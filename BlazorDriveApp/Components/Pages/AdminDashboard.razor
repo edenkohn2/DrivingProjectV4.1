@@ -1,0 +1,96 @@
+﻿@using APIDrivingProject.Services;
+
+@page "/admin_dashboard"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!isAuthorized)
+{
+    <p>Unauthorized access. Redirecting...</p>
+}
+else
+{
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, @userName</p>
+
+    <div class="dashboard-sections">
+        <div class="section">
+            <h2>Overview</h2>
+            <p>Quick stats like total students, instructors, upcoming lessons, etc.</p>
+        </div>
+        <div class="section">
+            <h2>Student Management</h2>
+            <button @onclick="NavigateToStudents">Manage Students</button>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isAuthorized = false;
+    private bool isLoading = true;
+    private string userName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // שליפת הנתונים מ-AuthService
+            userName = AuthService.UserName;
+            isAuthorized = AuthService.IsAdmin;
+
+            // אם לא מורשה, נבצע ניתוב לדף Unauthorized
+            if (!isAuthorized)
+            {
+                await Task.Delay(500); // השהיה קטנה כדי להבטיח רינדור
+                Navigation.NavigateTo("/unauthorized", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in AdminDashboard: {ex.Message}");
+            Navigation.NavigateTo("/unauthorized", true);
+        }
+        finally
+        {
+            isLoading = false; // מסיים את מצב הטעינה
+        }
+    }
+
+    private void NavigateToStudents() => Navigation.NavigateTo("/students");
+}
+
+
+
+<style>
+    .dashboard-sections {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .section {
+        padding: 20px;
+        background-color: #f4f4f4;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+        button:hover {
+            background-color: #45a049;
+        }
+</style>

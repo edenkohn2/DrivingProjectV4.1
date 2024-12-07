@@ -1,44 +1,254 @@
 ﻿@page "/register"
-@inject IAuthService AuthService
+@rendermode InteractiveServer
+@inject HttpClient Http
 @inject NavigationManager Navigation
+@inject AuthService AuthService
 @using APIDrivingProject.Services;
 @using BlazorDriveApp.Models;
-@using APIDrivingProject.Models;
 
+<div class="register-background">
+    <div class="register-container">
+        <h1 class="register-title">Sign Up</h1>
+        <p class="register-subtitle">Join us and start learning today!</p>
 
-<h3>Register</h3>
-
-<EditForm Model="@registerModel" OnValidSubmit="HandleSubmit" FormName="registrationForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
-    <div>
-        <label>Email:</label>
-        <InputText @bind-Value="registerModel.Email" />
+        <!-- Form Fields -->
+        <div class="input-group">
+            <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
+            @if (!isFirstNameValid)
+            {
+                <p class="error-message">First name is required.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
+            @if (!isLastNameValid)
+            {
+                <p class="error-message">Last name is required.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="email" placeholder="Email" @bind="email" class="input-field" />
+            @if (!isEmailUnique)
+            {
+                <p class="error-message">Email is already in use.</p>
+            }
+            @if (!isValidEmail)
+            {
+                <p class="error-message">Please enter a valid email.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="password" placeholder="Password" @bind="password" class="input-field" />
+            @if (!isPasswordValid)
+            {
+                <p class="error-message">Password must be at least 8 characters long.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
+            @if (!isPasswordMatch)
+            {
+                <p class="error-message">Passwords do not match.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
+            @if (!isPhoneNumberValid)
+            {
+                <p class="error-message">Phone number is required.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="date" @bind="birthDate" class="input-field" />
+            @if (!isBirthDateValid)
+            {
+                <p class="error-message">You must be at least 16.5 years old.</p>
+            }
+        </div>
+        <div class="input-group">
+            <input type="text" placeholder="Address" @bind="address" class="input-field" />
+            @if (!isAddressValid)
+            {
+                <p class="error-message">Address is required.</p>
+            }
+        </div>
+        <div class="input-group">
+            <select @bind="role" class="input-field">
+                <option value="">Select Role</option>
+                <option value="Student">Student</option>
+                <option value="Instructor">Instructor</option>
+            </select>
+            @if (!isRoleValid)
+            {
+                <p class="error-message">Role selection is required.</p>
+            }
+        </div>
+        <button @onclick="HandleRegister" class="register-button">Register</button>
     </div>
+</div>
 
-    <div>
-        <label>Password:</label>
-        <InputText @bind-Value="registerModel.Password" type="password" />
-    </div>
+<style>
+    /* Background */
+    .register-background {
+        background-color: #141414;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
 
-    <button type="submit">Register</button>
-</EditForm>
+    /* Container */
+    .register-container {
+        max-width: 400px;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    .register-title {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .register-subtitle {
+        font-size: 1rem;
+        color: #b3b3b3;
+        margin-bottom: 20px;
+    }
+
+    /* Input Fields */
+    .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #333;
+        border-radius: 4px;
+        background-color: #333;
+        color: white;
+    }
+
+        .input-field::placeholder {
+            color: #b3b3b3;
+        }
+
+        .input-field:focus {
+            border-color: #e50914;
+            outline: none;
+        }
+
+    /* Error Messages */
+    .error-message {
+        color: #e87c03;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+
+    /* Register Button */
+    .register-button {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 1rem;
+        color: white;
+        background-color: #e50914;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .register-button:hover {
+            background-color: #f40612;
+        }
+
+        .register-button:active {
+            transform: scale(0.98);
+        }
+</style>
 
 @code {
-    private RegisterModel registerModel = new RegisterModel();
+    // Form Fields
+    private string firstName = "";
+    private string lastName = "";
+    private string email = "";
+    private string password = "";
+    private string confirmPassword = "";
+    private string phoneNumber = "";
+    private DateTime birthDate;
+    private string address = "";
+    private string role = "";
 
-    private async Task HandleSubmit()
+    // Validation Flags
+    private bool isFirstNameValid = true;
+    private bool isLastNameValid = true;
+    private bool isPhoneNumberValid = true;
+    private bool isAddressValid = true;
+    private bool isRoleValid = true;
+    private bool isBirthDateValid = true;
+    private bool isPasswordValid = true;
+    private bool isPasswordMatch = true;
+    private bool isEmailUnique = true;
+    private bool isValidEmail = true;
+
+    private async Task HandleRegister()
     {
-        var result = await AuthService.Register(registerModel);
-        if (result.Successful)
+        // Reset validation flags
+        isFirstNameValid = !string.IsNullOrEmpty(firstName);
+        isLastNameValid = !string.IsNullOrEmpty(lastName);
+        isPhoneNumberValid = !string.IsNullOrEmpty(phoneNumber);
+        isAddressValid = !string.IsNullOrEmpty(address);
+        isRoleValid = !string.IsNullOrEmpty(role);
+
+        if (!isFirstNameValid || !isLastNameValid || !isPhoneNumberValid || !isAddressValid || !isRoleValid)
         {
-            // Handle success
+            Console.WriteLine("All required fields must be filled.");
+            return;
+        }
+
+        // Use validation methods
+        isBirthDateValid = RegistrationValidator.IsBirthDateValid(birthDate);
+        isPasswordValid = RegistrationValidator.IsPasswordValid(password);
+        isPasswordMatch = RegistrationValidator.DoPasswordsMatch(password, confirmPassword);
+        isEmailUnique = await RegistrationValidator.IsEmailUniqueAsync(email, Http);
+        isValidEmail = RegistrationValidator.IsEmailValid(email);
+
+        // Exit if any validation fails
+        if (!isBirthDateValid || !isPasswordValid || !isPasswordMatch || !isEmailUnique || !isValidEmail)
+        {
+            Console.WriteLine("Registration validation failed.");
+            return;
+        }
+
+        // Register only if all validations pass
+        var response = await Http.PostAsJsonAsync("api/users/register", new
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            Password = password,
+            PhoneNumber = phoneNumber,
+            Address = address,
+            BirthDate = birthDate,
+            Role = role
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/login");
         }
         else
         {
-            // Handle error
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Registration failed. Status code: {response.StatusCode}. Response: {errorMessage}");
         }
     }
 }
-
