@@ -5,6 +5,7 @@
 @inject NavigationManager Navigation
 @inject AuthService AuthService
 @using APIDrivingProject.Services;
+@using APIDrivingProject.Models;
 @using System.Text.Json
 
 <div class="auth-container">
@@ -69,23 +70,19 @@
             var response = await Http.PostAsJsonAsync("api/users/login", new { email, password });
             if (response.IsSuccessStatusCode)
             {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var resultData = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonResponse);
-
-                if (resultData != null && resultData.TryGetValue("person", out var personElement))
+                var jsonResponse = await response.Content.ReadFromJsonAsync<Dictionary<string, JsonElement>>();
+                if (jsonResponse.TryGetValue("person", out var personElement))
                 {
                     var userName = $"{personElement.GetProperty("firstName").GetString()} {personElement.GetProperty("lastName").GetString()}";
-                    if (personElement.TryGetProperty("role", out var roleElement))
-                    {
-                        var role = roleElement.GetString();
-                        AuthService.SetUser(userName, role);
-                        NavigateToDashboard(role);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Role not found in response.");
-                        loginFailed = true;
-                    }
+                    var role = personElement.GetProperty("role").GetString();
+
+                    Console.WriteLine($"Role received: {role}");
+                    AuthService.SetUser(userName, role);
+
+                    Console.WriteLine($"IsAuthenticated: {AuthService.IsAuthenticated}");
+                    Console.WriteLine($"UserRole: {AuthService.UserRole}");
+
+                    NavigateToDashboard(role);
                 }
                 else
                 {
@@ -104,17 +101,20 @@
         }
     }
 
+
+
     private void NavigateToDashboard(string role)
     {
-        switch (role)
+        Console.WriteLine($"Role received: {role}");
+        switch (role?.ToLowerInvariant())
         {
-            case "Admin":
+            case "admin":
                 Navigation.NavigateTo("/admin_dashboard", true);
                 break;
-            case "Instructor":
+            case "instructor":
                 Navigation.NavigateTo("/instructor_dashboard", true);
                 break;
-            case "Student":
+            case "student":
                 Navigation.NavigateTo("/student_dashboard", true);
                 break;
             default:
@@ -122,6 +122,7 @@
                 break;
         }
     }
+
 }
 
 <style>

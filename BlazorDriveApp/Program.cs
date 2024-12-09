@@ -5,6 +5,7 @@ using BlazorDriveApp.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Blazored.LocalStorage;
+using APIDrivingProject.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +38,11 @@ builder.Services.AddHttpClient<UserService>(client =>
 
 builder.Services.AddScoped<UserService>(); // Register UserService
 builder.Services.AddScoped<DatabaseService>();
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<AuthService>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole(UserRole.Admin.ToString()));
+});
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 

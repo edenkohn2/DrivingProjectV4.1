@@ -4,36 +4,62 @@
 
 <div class="nav-scrollable">
     <ul class="nav flex-column">
+        <!-- Always visible -->
         <li class="nav-item">
             <NavLink class="nav-link" href="/">
                 <span class="bi bi-house-door-fill-nav-menu"></span> Home
             </NavLink>
         </li>
         <li class="nav-item">
-            <NavLink class="nav-link" href="/schedules">
-                <span class="bi bi-list-nested-nav-menu"></span> Schedules
-            </NavLink>
-        </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="/exams">
-                <span class="bi bi-plus-square-fill-nav-menu"></span> Exams
-            </NavLink>
-        </li>
-        <li class="nav-item">
-            <NavLink class="nav-link" href="/notifications">
-                Notifications
-            </NavLink>
-        </li>
-        <li class="nav-item">
             <NavLink class="nav-link" href="/settings">
-                Settings
+                <span class="bi bi-gear-fill-nav-menu"></span> Settings
             </NavLink>
         </li>
+
+        @if (AuthService.IsAuthenticated)
+        {
+            @if (AuthService.IsAdmin)
+            {
+                <!-- Admin-specific menu -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/admin_dashboard">
+                        <span class="bi bi-shield-lock-fill-nav-menu"></span> Admin Dashboard
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/manage_users">
+                        <span class="bi bi-people-fill-nav-menu"></span> Manage Users
+                    </NavLink>
+                </li>
+            }
+            @if (AuthService.IsInstructor)
+            {
+                <!-- Instructor-specific menu -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/instructor_dashboard">
+                        <span class="bi bi-chalkboard-teacher-nav-menu"></span> Instructor Dashboard
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/student_list">
+                        <span class="bi bi-person-lines-fill-nav-menu"></span> Student List
+                    </NavLink>
+                </li>
+            }
+            @if (AuthService.IsStudent)
+            {
+                <!-- Student-specific menu -->
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/student_dashboard">
+                        <span class="bi bi-book-fill-nav-menu"></span> My Dashboard
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/my_lessons">
+                        <span class="bi bi-journal-bookmark-fill-nav-menu"></span> My Lessons
+                    </NavLink>
+                </li>
+            }
+        }
     </ul>
 </div>
-
-
-
-
-
-}

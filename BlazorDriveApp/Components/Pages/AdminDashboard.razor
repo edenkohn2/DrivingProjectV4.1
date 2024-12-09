@@ -5,7 +5,6 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-
 @if (isLoading)
 {
     <p>Loading...</p>
@@ -40,16 +39,28 @@ else
     {
         try
         {
-            // שליפת הנתונים מ-AuthService
-            userName = AuthService.UserName;
-            isAuthorized = AuthService.IsAdmin;
+            // Debugging logs for validation
+            Console.WriteLine($"IsAuthenticated: {AuthService.IsAuthenticated}");
+            Console.WriteLine($"UserRole: {AuthService.UserRole}");
 
-            // אם לא מורשה, נבצע ניתוב לדף Unauthorized
-            if (!isAuthorized)
+            // Check authentication and authorization
+            if (!AuthService.IsAuthenticated)
             {
-                await Task.Delay(500); // השהיה קטנה כדי להבטיח רינדור
-                Navigation.NavigateTo("/unauthorized", true);
+                Console.WriteLine("User not authenticated. Redirecting to /welcome.");
+                Navigation.NavigateTo("/welcome", true);
+                return; // Stop further execution
             }
+
+            if (!AuthService.IsAdmin)
+            {
+                Console.WriteLine("Unauthorized access. Redirecting to /unauthorized.");
+                Navigation.NavigateTo("/unauthorized", true);
+                return; // Stop further execution
+            }
+
+            // Set authorized state and user name
+            userName = AuthService.UserName;
+            isAuthorized = true;
         }
         catch (Exception ex)
         {
@@ -58,14 +69,12 @@ else
         }
         finally
         {
-            isLoading = false; // מסיים את מצב הטעינה
+            isLoading = false; // Stop loading state
         }
     }
 
     private void NavigateToStudents() => Navigation.NavigateTo("/students");
 }
-
-
 
 <style>
     .dashboard-sections {
