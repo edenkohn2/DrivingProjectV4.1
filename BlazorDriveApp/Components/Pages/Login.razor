@@ -71,13 +71,17 @@
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadFromJsonAsync<Dictionary<string, JsonElement>>();
+
                 if (jsonResponse.TryGetValue("person", out var personElement))
                 {
                     var userName = $"{personElement.GetProperty("firstName").GetString()} {personElement.GetProperty("lastName").GetString()}";
+                    var userId = personElement.GetProperty("personId").GetInt32(); // שליפת UserId
+
+
                     var role = personElement.GetProperty("role").GetString();
 
                     Console.WriteLine($"Role received: {role}");
-                    AuthService.SetUser(userName, role);
+                    AuthService.SetUser(userName, role, userId);
 
                     Console.WriteLine($"IsAuthenticated: {AuthService.IsAuthenticated}");
                     Console.WriteLine($"UserRole: {AuthService.UserRole}");
@@ -112,7 +116,7 @@
                 Navigation.NavigateTo("/admin_dashboard", true);
                 break;
             case "instructor":
-                Navigation.NavigateTo("/instructor_dashboard", true);
+                Navigation.NavigateTo("/teacher_dashboard", true);
                 break;
             case "student":
                 Navigation.NavigateTo("/student_dashboard", true);

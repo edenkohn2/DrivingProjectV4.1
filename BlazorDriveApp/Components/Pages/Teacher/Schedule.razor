@@ -1,0 +1,64 @@
+﻿@page "/schedule"
+@using APIDrivingProject.Models
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h1 style="text-align: center; margin-bottom: 1rem;">Instructor Daily Schedule</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+    <table style="width: 100%; border-collapse: collapse; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+        <thead>
+            <tr style="background-color: #007bff; color: white; text-align: left;">
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Time</th>
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Student</th>
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Lesson Type</th>
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Duration</th>
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (schedule.Any())
+            {
+                @foreach (var lesson in schedule)
+                {
+                    <tr style="background-color: #f9f9f9; text-align: left;">
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.Date.ToString("HH:mm")</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.StudentName</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.LessonType</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.Duration minutes</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">₪@lesson.Price</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px; color: #666;">No lessons scheduled for today.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<LessonViewModel> schedule = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Replace `2` with the logged-in instructor's ID
+            int instructorId = 2;
+            DateTime today = DateTime.Today;
+
+            // Fetch today's lessons for the instructor
+            schedule = await Http.GetFromJsonAsync<List<LessonViewModel>>($"api/Instructors/{instructorId}/schedule/today");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading schedule: {ex.Message}");
+        }
+    }
+}

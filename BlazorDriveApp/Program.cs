@@ -27,6 +27,7 @@ builder.Services.AddAuthentication(options =>
     options.CallbackPath = "/signin-google"; // Path for redirect after Google sign-in
 });
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddBlazorBootstrap();
 
 
 

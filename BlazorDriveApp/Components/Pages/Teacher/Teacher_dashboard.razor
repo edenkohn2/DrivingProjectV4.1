@@ -1,0 +1,78 @@
+﻿@page "/teacher_dashboard"
+@using APIDrivingProject.Services
+@using APIDrivingProject.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@rendermode InteractiveServer
+
+<h1 style="text-align: center; font-size: 2.8rem; font-weight: bold; color: #333; margin-bottom: 1rem; text-transform: uppercase;">
+    Teacher Dashboard
+</h1>
+<p style="text-align: center; font-size: 1.4rem; color: #666; margin-bottom: 2rem;">
+    Welcome, <span style="font-weight: bold; color: #007bff;">@teacherName</span>
+</p>
+
+<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px;">
+    <!-- כרטיסיית Schedule -->
+    <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <i class="fas fa-calendar-alt" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
+            Lesson Schedule
+        </h3>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;">View and manage your schedule.</p>
+        <button @onclick="NavigateToLessonSchedule" style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;">
+            View Schedule
+        </button>
+    </div>
+
+    <!-- כרטיסיית Student List -->
+    <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <i class="fas fa-users" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
+            Student List
+        </h3>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;">Manage assigned students.</p>
+        <button @onclick="NavigateToStudentList" style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;">
+            Manage Students
+        </button>
+    </div>
+
+    <!-- כרטיסיית Income Tracking -->
+    <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <i class="fas fa-chart-line" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
+            Track Income
+        </h3>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;">Monitor payments and income.</p>
+        <button @onclick="NavigateToIncomeTracking" style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;">
+            Track Income
+        </button>
+    </div>
+</div>
+
+@code {
+    private string teacherName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (!AuthService.IsAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            teacherName = AuthService.UserName;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading teacher dashboard: {ex.Message}");
+        }
+    }
+
+    private void NavigateToLessonSchedule() => Navigation.NavigateTo("/schedule");
+    private void NavigateToStudentList() => Navigation.NavigateTo("/student_list_v1");
+    private void NavigateToIncomeTracking() => Navigation.NavigateTo("/income_tracking");
+}

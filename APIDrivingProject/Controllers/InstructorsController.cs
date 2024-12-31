@@ -88,10 +88,10 @@ namespace APIDrivingProject.Controllers
             {
                 connection.Open();
                 var query = @"SELECT s.StudentId, p.FirstName, p.LastName, p.Email, p.PhoneNumber 
-                              FROM student s
-                              INNER JOIN person p ON s.StudentId = p.PersonId
-                              INNER JOIN lessons l ON s.StudentId = l.StudentId
-                              WHERE l.InstructorId = @InstructorId";
+                      FROM instructor_student is_map
+                      INNER JOIN student s ON is_map.StudentId = s.StudentId
+                      INNER JOIN person p ON s.StudentId = p.PersonId
+                      WHERE is_map.InstructorId = @InstructorId";
                 var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@InstructorId", instructorId);
 
@@ -114,30 +114,124 @@ namespace APIDrivingProject.Controllers
             return Ok(students);
         }
 
+
         [HttpGet("{instructorId}/schedule")]
         public IActionResult GetScheduleForInstructor(int instructorId)
         {
-            var schedule = new List<Lesson>();
+            try
+            {
+                var schedule = new List<Lesson>();
+
+                using (var connection = _databaseService.GetConnection())
+                {
+                    connection.Open();
+                    var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType 
+                          FROM lessons l
+                          WHERE l.InstructorId = @InstructorId";
+                    var command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@InstructorId", instructorId);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            schedule.Add(new Lesson
+                            {
+                                LessonId = reader.GetInt32("LessonId"),
+                                Date = reader.GetDateTime("Date"),
+                                Duration = reader.GetInt32("Duration"),
+                                LessonType = reader.GetString("LessonType")
+                            });
+                        }
+                    }
+                }
+
+                return Ok(schedule);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error fetching schedule: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpPost("{instructorId}/lessons")]
+        public IActionResult AddLessonForInstructor(int instructorId, [FromBody] Lesson lesson)
+        {
+            try
+            {
+                using (var connection = _databaseService.GetConnection())
+                {
+                    connection.Open();
+
+                    // בדיקת שיוך התלמיד למורה
+                    var checkQuery = @"SELECT COUNT(*) 
+                               FROM instructor_student 
+                               WHERE InstructorId = @InstructorId AND StudentId = @StudentId";
+                    var checkCommand = new MySqlCommand(checkQuery, connection);
+                    checkCommand.Parameters.AddWithValue("@InstructorId", instructorId);
+                    checkCommand.Parameters.AddWithValue("@StudentId", lesson.StudentId);
+
+                    var count = Convert.ToInt32(checkCommand.ExecuteScalar());
+                    if (count == 0)
+                    {
+                        return BadRequest("Student is not assigned to this instructor.");
+                    }
+
+                    // הוספת שיעור
+                    var query = @"INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
+                          VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
+                    var command = new MySqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@StudentId", lesson.StudentId);
+                    command.Parameters.AddWithValue("@InstructorId", instructorId);
+                    command.Parameters.AddWithValue("@Date", lesson.Date);
+                    command.Parameters.AddWithValue("@Duration", lesson.Duration);
+                    command.Parameters.AddWithValue("@LessonType", lesson.LessonType);
+                    command.Parameters.AddWithValue("@Price", lesson.Price);
+
+                    command.ExecuteNonQuery();
+                }
+
+                return Ok("Lesson added successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error adding lesson: {ex.Message}");
+            }
+        }
+        [HttpGet("{instructorId}/schedule/today")]
+        public IActionResult GetTodayScheduleForInstructor(int instructorId)
+        {
+            var today = DateTime.Today;
+            var schedule = new List<object>();
 
             using (var connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType 
-                              FROM lessons l
-                              WHERE l.InstructorId = @InstructorId";
+                var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price, 
+                             CONCAT(p.FirstName, ' ', p.LastName) AS StudentName
+                      FROM lessons l
+                      INNER JOIN student s ON l.StudentId = s.StudentId
+                      INNER JOIN person p ON s.StudentId = p.PersonId
+                      WHERE l.InstructorId = @InstructorId AND DATE(l.Date) = @Today
+                      ORDER BY l.Date";
                 var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@InstructorId", instructorId);
+                command.Parameters.AddWithValue("@Today", today);
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        schedule.Add(new Lesson
+                        schedule.Add(new
                         {
                             LessonId = reader.GetInt32("LessonId"),
                             Date = reader.GetDateTime("Date"),
                             Duration = reader.GetInt32("Duration"),
-                            LessonType = reader.GetString("LessonType")
+                            LessonType = reader.GetString("LessonType"),
+                            Price = reader.GetDecimal("Price"),
+                            StudentName = reader.GetString("StudentName")
                         });
                     }
                 }
@@ -146,26 +240,8 @@ namespace APIDrivingProject.Controllers
             return Ok(schedule);
         }
 
-        [HttpPost("{instructorId}/lessons")]
-        public IActionResult AddLessonForInstructor(int instructorId, [FromBody] Lesson lesson)
-        {
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
-                              VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@StudentId", lesson.StudentId);
-                command.Parameters.AddWithValue("@InstructorId", instructorId);
-                command.Parameters.AddWithValue("@Date", lesson.Date);
-                command.Parameters.AddWithValue("@Duration", lesson.Duration);
-                command.Parameters.AddWithValue("@LessonType", lesson.LessonType);
-                command.Parameters.AddWithValue("@Price", lesson.Price);
 
-                command.ExecuteNonQuery();
-            }
-
-            return Ok("Lesson added successfully");
-        }
     }
+
 }
+

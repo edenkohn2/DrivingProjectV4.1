@@ -1,0 +1,112 @@
+﻿@page "/add_lesson"
+@using APIDrivingProject.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h1 style="text-align: center; margin-bottom: 1rem;">Create New Lesson</h1>
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+    <label for="student" style="display: block; margin-bottom: 10px; font-weight: bold;">Select Student:</label>
+    <select id="student" @bind="selectedStudentId" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
+        <option value="" disabled>Select a student</option>
+        @foreach (var student in students)
+        {
+            <option value="@student.PersonId">@student.FirstName @student.LastName</option>
+        }
+    </select>
+
+    <label for="lessonType" style="display: block; margin-bottom: 10px; font-weight: bold;">Lesson Type:</label>
+    <select id="lessonType" @bind="selectedLessonType" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
+        <option value="" disabled>Select a lesson type</option>
+        <option value="Single">Single</option>
+        <option value="OneAndAHalf">One and a Half</option>
+        <option value="Double">Double</option>
+    </select>
+
+    <label for="lessonDate" style="display: block; margin-bottom: 10px; font-weight: bold;">Lesson Date:</label>
+    <input type="datetime-local" id="lessonDate" @bind="lessonDate" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+
+    <label for="lessonPrice" style="display: block; margin-bottom: 10px; font-weight: bold;">Price:</label>
+    <input type="number" id="lessonPrice" @bind="lessonPrice" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+
+    <button @onclick="CreateLesson" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Create Lesson
+    </button>
+</div>
+
+<p style="text-align: center; margin-top: 20px; color: green;" hidden="@(successMessageVisible == false)">@successMessage</p>
+<p style="text-align: center; margin-top: 20px; color: red;" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+
+@code {
+    private List<Student> students = new();
+    private int selectedStudentId;
+    private string selectedLessonType = string.Empty;
+    private DateTime lessonDate;
+    private decimal lessonPrice;
+    private string successMessage = string.Empty;
+    private bool successMessageVisible = false;
+    private string errorMessage = string.Empty;
+    private bool errorMessageVisible = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Fetching students assigned to the current instructor
+            int instructorId = 2; // Replace with the actual instructor ID from session or auth
+            students = await Http.GetFromJsonAsync<List<Student>>($"api/Instructors/{instructorId}/students");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading students: {ex.Message}");
+        }
+    }
+
+    private async Task CreateLesson()
+    {
+        try
+        {
+            if (selectedStudentId == 0 || string.IsNullOrEmpty(selectedLessonType) || lessonDate == default || lessonPrice <= 0)
+            {
+                errorMessage = "Please fill out all fields correctly.";
+                successMessageVisible = false;
+                errorMessageVisible = true;
+                return;
+            }
+
+            var newLesson = new Lesson
+                {
+                    StudentId = selectedStudentId,
+                    InstructorId = 2, // Replace with the actual instructor ID
+                    Date = lessonDate,
+                    Duration = selectedLessonType == "Single" ? 40 : selectedLessonType == "OneAndAHalf" ? 60 : 80,
+                    LessonType = selectedLessonType,
+                    Price = lessonPrice
+                };
+
+            var response = await Http.PostAsJsonAsync($"api/Instructors/2/lessons", newLesson);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Lesson created successfully!";
+                successMessageVisible = true;
+                errorMessageVisible = false;
+            }
+            else
+            {
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Failed to create lesson: {errorDetails}";
+                successMessageVisible = false;
+                errorMessageVisible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            successMessageVisible = false;
+            errorMessageVisible = true;
+        }
+    }
+
+}

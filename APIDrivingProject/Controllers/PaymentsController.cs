@@ -77,6 +77,26 @@ namespace APIDrivingProject.Controllers
 
             return Ok(payments);
         }
+        [HttpGet("total/{studentId}")]
+        public IActionResult GetTotalPaidByStudent(int studentId)
+        {
+            decimal totalPaid = 0;
+
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"SELECT COALESCE(SUM(Amount), 0) AS TotalPaid 
+                      FROM payments 
+                      WHERE StudentId = @StudentId";
+                var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@StudentId", studentId);
+
+                totalPaid = (decimal)(command.ExecuteScalar() ?? 0);
+            }
+
+            return Ok(totalPaid);
+        }
+
 
         [HttpPost]
         public IActionResult AddPayment([FromBody] Payment payment)

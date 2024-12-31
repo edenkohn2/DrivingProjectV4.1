@@ -1,0 +1,81 @@
+﻿@page "/student_dashboard"
+@using APIDrivingProject.Services
+@using APIDrivingProject.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@rendermode InteractiveServer
+
+<h1 style="text-align: center; font-size: 2.8rem; font-weight: bold; color: #333; margin-bottom: 1rem; text-transform: uppercase;">
+    Student Dashboard
+</h1>
+<p style="text-align: center; font-size: 1.4rem; color: #666; margin-bottom: 2rem;">
+    Welcome, <span style="font-weight: bold; color: #007bff;">@studentName</span>
+</p>
+
+<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px;">
+    <!-- כרטיסיית Student Info -->
+    <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <i class="fas fa-user" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
+            Student Info
+        </h3>
+        <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Email:</strong> @studentEmail</p>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;"><strong>Lessons Completed:</strong> @lessonsCompleted</p>
+        <button @onclick="NavigateToProfile" style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;">
+            View Profile
+        </button>
+    </div>
+
+    <!-- כרטיסיית Payments -->
+    <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <i class="fas fa-wallet" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
+            Payments
+        </h3>
+        <p style="font-size: 1.2rem; margin-bottom: 20px;"><strong>Total Paid:</strong> $@totalPaid</p>
+        <button @onclick="NavigateToPayments" style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;">
+            View Payments
+        </button>
+    </div>
+</div>
+
+@code {
+    private string studentName = string.Empty;
+    private string studentEmail = string.Empty;
+    private int lessonsCompleted = 0;
+    private decimal totalPaid = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (!AuthService.IsAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var studentId = AuthService.UserId;
+
+            // שליפת נתוני סטודנט
+            var studentResponse = await Http.GetFromJsonAsync<Student>($"api/Students/{studentId}");
+            if (studentResponse != null)
+            {
+                studentName = $"{studentResponse.FirstName} {studentResponse.LastName}";
+                studentEmail = studentResponse.Email;
+                lessonsCompleted = studentResponse.LessonsTaken;
+            }
+
+            // שליפת נתוני תשלומים
+            totalPaid = await Http.GetFromJsonAsync<decimal>($"api/Payments/total/{studentId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading dashboard: {ex.Message}");
+        }
+    }
+
+    private void NavigateToProfile() => Navigation.NavigateTo("/student_profile");
+    private void NavigateToPayments() => Navigation.NavigateTo("/payments");
+}
