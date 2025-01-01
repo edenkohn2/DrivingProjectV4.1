@@ -11,22 +11,7 @@ using DrivingProjectSharedModels.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add Google authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-})
-.AddCookie(options =>
-{
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-})
-.AddGoogle(options =>
-{
-    options.ClientId = "618520140270-il7cboe59o8jhcbf0jlf24hk0a28ctif.apps.googleusercontent.com";
-    options.ClientSecret = "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";
-    options.CallbackPath = "/signin-google"; // Path for redirect after Google sign-in
-});
+
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddBlazorBootstrap();
 
@@ -61,8 +46,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 
 var app = builder.Build();
 app.UseRouting();
-app.UseAuthentication(); // זה צריך להיות לפני Authorization
-app.UseAuthorization();
+
 
 // Apply CORS policy
 
