@@ -4,7 +4,7 @@ using APIDrivingProject.Services;
 using BlazorDriveApp.Components;
 using Blazored.LocalStorage;
 using APIDrivingProject.Models;
-using DrivingProjectSharedModels.Models;
+using DrivingClassLibary.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);

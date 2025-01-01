@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APIDrivingProject", "APIDri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDriveApp", "BlazorDriveApp\BlazorDriveApp.csproj", "{C9BC1B45-0A11-4D65-97D7-8217EA590022}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrivingProjectSharedModels", "DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj", "{1DA0329E-BB15-4F9A-9417-8ABB3625D9C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrivingClassLibrary", "DrivingClassLibrary\DrivingClassLibrary.csproj", "{221A761E-4F7A-4E21-82A5-222ADCD86AEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{C9BC1B45-0A11-4D65-97D7-8217EA590022}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9BC1B45-0A11-4D65-97D7-8217EA590022}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9BC1B45-0A11-4D65-97D7-8217EA590022}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DA0329E-BB15-4F9A-9417-8ABB3625D9C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DA0329E-BB15-4F9A-9417-8ABB3625D9C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DA0329E-BB15-4F9A-9417-8ABB3625D9C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DA0329E-BB15-4F9A-9417-8ABB3625D9C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{221A761E-4F7A-4E21-82A5-222ADCD86AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{221A761E-4F7A-4E21-82A5-222ADCD86AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{221A761E-4F7A-4E21-82A5-222ADCD86AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{221A761E-4F7A-4E21-82A5-222ADCD86AEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

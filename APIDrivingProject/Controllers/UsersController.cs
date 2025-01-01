@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using APIDrivingProject.Models;
-using DrivingProjectSharedModels.Models;
+using DrivingClassLibary.Models;
 using APIDrivingProject.Services;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;

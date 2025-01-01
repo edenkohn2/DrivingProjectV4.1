@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using MySql.Data.MySqlClient;
 using APIDrivingProject.Models;
-using DrivingProjectSharedModels.Models;
+using DrivingClassLibary.Models;
 using System.Data;
 
 namespace APIDrivingProject.Services

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj" />
+    <ProjectReference Include="..\DrivingClassLibrary\DrivingClassLibrary.csproj" />
   </ItemGroup>
 
 </Project>

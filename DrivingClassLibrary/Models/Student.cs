@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DrivingProjectSharedModels.Models
+namespace DrivingClassLibary.Models
 
 {
     public class Student : Person

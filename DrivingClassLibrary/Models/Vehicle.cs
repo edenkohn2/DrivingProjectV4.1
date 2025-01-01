@@ -1,4 +1,4 @@
-﻿namespace DrivingProjectSharedModels.Models
+﻿namespace DrivingClassLibary.Models
 
 {
     public class Vehicle

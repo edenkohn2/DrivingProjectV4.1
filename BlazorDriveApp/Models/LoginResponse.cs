@@ -1,7 +1,7 @@
 ﻿namespace BlazorDriveApp.Models
 
 {
-    using DrivingProjectSharedModels.Models;
+    using DrivingClassLibary.Models;
 
     public class LoginResponse
     {
