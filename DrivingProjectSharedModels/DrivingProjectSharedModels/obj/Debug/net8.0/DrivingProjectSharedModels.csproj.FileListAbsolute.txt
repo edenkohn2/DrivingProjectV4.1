@@ -1,0 +1,11 @@
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\bin\Debug\net8.0\DrivingProjectSharedModels.deps.json
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\bin\Debug\net8.0\DrivingProjectSharedModels.dll
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\bin\Debug\net8.0\DrivingProjectSharedModels.pdb
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.AssemblyInfoInputs.cache
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.AssemblyInfo.cs
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.csproj.CoreCompileInputs.cache
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.dll
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\refint\DrivingProjectSharedModels.dll
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\DrivingProjectSharedModels.pdb
+C:\Users\edenk\source\repos\DrivingProjectSharedModels\DrivingProjectSharedModels\obj\Debug\net8.0\ref\DrivingProjectSharedModels.dll

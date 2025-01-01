@@ -1,0 +1,257 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\student.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\lessonviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\lessonviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\lesson.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\lesson.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\instructor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\instructor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\adminsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\adminsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\models\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\models\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|c:\\users\\edenk\\source\\repos\\drivingprojectsharedmodels\\drivingprojectsharedmodels\\drivingprojectsharedmodels.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{296AAF75-FFC7-4A02-BC65-387D2762D2A7}|DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj|solutionrelative:drivingprojectsharedmodels\\drivingprojectsharedmodels.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Vehicle.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Vehicle.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Vehicle.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Vehicle.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Vehicle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:58.21Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "UserRole.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\UserRole.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\UserRole.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\UserRole.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\UserRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:48.383Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\User.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\User.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:43.913Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Student.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Student.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Student.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Student.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Student.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:29.627Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Person.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Person.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Person.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Person.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Person.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:25.754Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Payment.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Payment.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Payment.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Payment.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Payment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:21.6Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "LessonViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\LessonViewModel.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\LessonViewModel.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\LessonViewModel.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\LessonViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:16.092Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Lesson.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Lesson.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Lesson.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Lesson.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Lesson.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:11.218Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Instructor.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Instructor.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Instructor.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Instructor.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Instructor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:57:06.429Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1080960835:0:{bf84ea66-d821-4dba-b1b1-2777d8574775}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{fabf9319-47eb-497e-b8f6-d9f73fba5f55}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AdminSetting.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\AdminSetting.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\AdminSetting.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\AdminSetting.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\AdminSetting.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:56:57.932Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "DrivingProjectSharedModels",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj",
+              "RelativeToolTip": "DrivingProjectSharedModels\\DrivingProjectSharedModels.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-12-31T10:56:33.1Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Test.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Test.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Test.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Test.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Test.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:56:20.535Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Admin.cs",
+              "DocumentMoniker": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Admin.cs",
+              "RelativeDocumentMoniker": "DrivingProjectSharedModels\\Models\\Admin.cs",
+              "ToolTip": "C:\\Users\\edenk\\source\\repos\\DrivingProjectSharedModels\\DrivingProjectSharedModels\\Models\\Admin.cs",
+              "RelativeToolTip": "DrivingProjectSharedModels\\Models\\Admin.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T10:56:16.422Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
