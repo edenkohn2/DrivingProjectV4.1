@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using APIDrivingProject.Services;
 using BlazorDriveApp.Components;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Blazored.LocalStorage;
 using APIDrivingProject.Models;
 using DrivingProjectSharedModels.Models;
