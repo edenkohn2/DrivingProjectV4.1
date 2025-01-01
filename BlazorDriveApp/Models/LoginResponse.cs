@@ -1,5 +1,8 @@
 ﻿namespace BlazorDriveApp.Models
+
 {
+    using DrivingProjectSharedModels.Models;
+
     public class LoginResponse
     {
         public string Message { get; set; }

@@ -15,4 +15,8 @@
     <PackageReference Include="System.Net.Http.Json" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj" />
+  </ItemGroup>
+
 </Project>

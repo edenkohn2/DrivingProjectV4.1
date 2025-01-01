@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj" />
     <ProjectReference Include="..\APIDrivingProject\APIDrivingProject.csproj" />
   </ItemGroup>
 

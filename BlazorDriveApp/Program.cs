@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Blazored.LocalStorage;
 using APIDrivingProject.Models;
+using DrivingProjectSharedModels.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,4 +1,5 @@
 ﻿using APIDrivingProject.Models;
+using DrivingProjectSharedModels.Models;
 
 namespace APIDrivingProject.Services
 {
