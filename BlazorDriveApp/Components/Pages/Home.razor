@@ -19,79 +19,80 @@
 </div>
 
 <style>
-    /* Full-page container */
+    /* Full-page container - מגדיר מיכל שמכסה את כל הדף */
     .welcome-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        display: flex; /* שימוש בפלקסבוקס לסידור תוכן */
+        justify-content: center; /* ממרכז את התוכן אופקית */
+        align-items: center; /* ממרכז את התוכן אנכית */
+        height: 100vh; /* מגדיר גובה של 100% מהמסך */
         background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7)), url('https://assets.nflxext.com/ffe/siteui/vlv3/4f8dba6c-4c12-45c4-b1f4-6d29bff0b3ea/ae93b841-7b4e-47d8-9345-ea70a8fbd7f6/IL-en-20230320-popsignuptwoweeks-perspective_alpha_website_large.jpg') center/cover no-repeat;
-        color: white;
+        /* מגדיר רקע משולב: גרדיאנט + תמונה מותאמת */
+        color: white; /* צבע טקסט לבן */
     }
 
-    /* Welcome content box */
+    /* Welcome content box - מגדיר את הקופסה של תוכן הברכה */
     .welcome-content {
-        text-align: center;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-        max-width: 500px;
-        width: 90%;
+        text-align: center; /* יישור טקסט למרכז */
+        background: rgba(0, 0, 0, 0.7); /* רקע שחור שקוף */
+        padding: 40px; /* ריווח פנימי */
+        border-radius: 15px; /* פינות מעוגלות */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); /* צל מתחת לקופסה */
+        max-width: 500px; /* רוחב מקסימלי של הקופסה */
+        width: 90%; /* רוחב הקופסה בהתאם למסך */
     }
 
-        /* Welcome heading */
+        /* Welcome heading - כותרת הדף */
         .welcome-content h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            font-weight: bold;
+            font-size: 3rem; /* גודל פונט גדול */
+            margin-bottom: 10px; /* רווח תחתון */
+            font-weight: bold; /* טקסט מודגש */
         }
 
         .welcome-content .highlight {
-            color: #e50914;
+            color: #e50914; /* מדגיש חלק מהכותרת בצבע אדום */
         }
 
-        /* Subtitle */
+        /* Subtitle - תת כותרת */
         .welcome-content p {
-            font-size: 1.2rem;
-            color: #b3b3b3;
-            margin-bottom: 30px;
+            font-size: 1.2rem; /* גודל פונט בינוני */
+            color: #b3b3b3; /* צבע אפור בהיר */
+            margin-bottom: 30px; /* רווח תחתון */
         }
 
-    /* Buttons container */
+    /* Buttons container - עיצוב המיכל של הכפתורים */
     .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+        display: flex; /* שימוש בפלקסבוקס לסידור הכפתורים */
+        flex-direction: column; /* מגדיר סידור אנכי */
+        gap: 15px; /* רווח בין הכפתורים */
     }
 
-    /* Button styles */
+    /* Button styles - סגנון בסיסי לכפתורים */
     .btn {
-        padding: 15px 20px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
-        transition: all 0.3s ease;
+        padding: 15px 20px; /* ריווח פנימי */
+        font-size: 1.2rem; /* גודל טקסט בינוני */
+        font-weight: bold; /* טקסט מודגש */
+        cursor: pointer; /* מצביע עכבר משתנה ליד */
+        border: none; /* ללא גבול */
+        border-radius: 5px; /* פינות מעוגלות */
+        transition: all 0.3s ease; /* אפקט מעבר חלק */
     }
 
     .btn-login {
-        background-color: #e50914;
-        color: white;
+        background-color: #e50914; /* צבע רקע אדום */
+        color: white; /* טקסט בצבע לבן */
     }
 
         .btn-login:hover {
-            background-color: #f6121d;
+            background-color: #f6121d; /* שינוי צבע רקע באפקט רחף */
         }
 
     .btn-register {
-        background-color: #007bff;
-        color: white;
+        background-color: #007bff; /* צבע רקע כחול */
+        color: white; /* טקסט בצבע לבן */
     }
 
         .btn-register:hover {
-            background-color: #0056b3;
+            background-color: #0056b3; /* שינוי צבע רקע באפקט רחף */
         }
 </style>
 

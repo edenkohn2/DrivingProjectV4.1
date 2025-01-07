@@ -1,5 +1,6 @@
 ﻿using APIDrivingProject.Models;
 using DrivingClassLibary.Models;
+using Microsoft.AspNetCore.Components;
 
 namespace APIDrivingProject.Services
 {
@@ -22,7 +23,12 @@ namespace APIDrivingProject.Services
         {
             _userName = null;
             _userRole = null;
+            _userId = 0;
+
+            // אם אתה משתמש ב-LocalStorage, נקה גם שם
+            Console.WriteLine("User has been logged out");
         }
+
 
         public bool IsAuthenticated => !string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(UserRole);
         public bool IsAdmin => _userRole == "Admin";
@@ -35,7 +41,9 @@ namespace APIDrivingProject.Services
 
         public void Logout()
         {
-            ClearUser();
+            ClearUser(); // נקה את נתוני המשתמש
+            
         }
+
     }
 }

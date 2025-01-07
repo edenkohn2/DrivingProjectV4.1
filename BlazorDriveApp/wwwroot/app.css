@@ -1,5 +1,5 @@
-html,
-body {
+/* Reset */
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -7,9 +7,11 @@ body {
     background-color: #f7f7f7;
 }
 
+/* Wrapper */
 body {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 #app {
@@ -18,7 +20,49 @@ body {
     height: 100%;
 }
 
-button {
-    border: none;
-    cursor: pointer;
+/* Top Navbar */
+.top-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 10px 20px;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+    .top-navbar ul {
+        list-style: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+    }
+
+    .top-navbar li {
+        margin: 0 15px;
+    }
+
+    .top-navbar a,
+    .top-navbar NavLink {
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        padding: 10px 15px;
+        transition: background-color 0.3s, color 0.3s;
+        border-radius: 5px;
+    }
+
+        .top-navbar a:hover,
+        .top-navbar NavLink.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+/* Main content */
+main {
+    flex: 1;
+    
+    background-color: #f7f7f7;
 }

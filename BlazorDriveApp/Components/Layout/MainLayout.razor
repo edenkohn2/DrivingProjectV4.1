@@ -3,23 +3,57 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
+<div class="top-navbar">
+    <ul>
+        <li><NavLink href="/">Home</NavLink></li>
+        <li><NavLink href="/settings">Settings</NavLink></li>
+
+        @if (AuthService.IsAuthenticated)
+        {
+            @if (AuthService.IsAdmin)
+            {
+                <li><NavLink href="/admin_dashboard">Admin Dashboard</NavLink></li>
+                <li><NavLink href="/manage_users">Manage Users</NavLink></li>
+            }
+            @if (AuthService.IsInstructor)
+            {
+                <li><NavLink href="/teacher_dashboard">Teacher Dashboard</NavLink></li>
+                <li><NavLink href="/student_list">Student List</NavLink></li>
+            }
+            @if (AuthService.IsStudent)
+            {
+                <li><NavLink href="/student_dashboard">My Dashboard</NavLink></li>
+                <li><NavLink href="/my_lessons">My Lessons</NavLink></li>
+            }
+
+            <li>
+                <NavLink href="/" Logout >Logout</NavLink>
+            </li>
 
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-    <main>
-        @Body
-    </main>
+
+            
+
+        }
+
+        
+            
+        
+
+    </ul>
 </div>
 
-
+<main>
+    @Body
+</main>
 
 @code {
-    private void Logout()
-    {
-        AuthService.ClearUser();
-        Navigation.NavigateTo("/login");
-    }
+        private void HandleLogout()
+        {
+            AuthService.Logout(); // קריאה לפונקציה ב-AuthService
+        }
 }
+
+
+
+
