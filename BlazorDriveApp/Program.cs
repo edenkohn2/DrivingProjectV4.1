@@ -28,6 +28,14 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(UserRole.Admin.ToString()));
 });
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login"; // כתובת דף ההתחברות
+        options.AccessDeniedPath = "/unauthorized"; // כתובת דף חוסר הרשאה
+    });
+
+builder.Services.AddAuthorization(); // הרשאות מבוססות תפקידים
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
@@ -43,10 +51,13 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 
 
 var app = builder.Build();
+
 app.UseRouting();
 
+app.UseMiddleware<AuthorizationMiddleware>();
 
 // Apply CORS policy
+
 
 
 // Error handling configuration

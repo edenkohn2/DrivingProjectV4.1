@@ -12,10 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj" />
     <ProjectReference Include="..\APIDrivingProject\APIDrivingProject.csproj" />
-    <ProjectReference Include="..\DrivingClassLibrary\DrivingClassLibrary.csproj" />
-    <ProjectReference Include="..\DrivingProjectSharedModels\DrivingProjectSharedModels\DrivingProjectSharedModels.csproj" />
+    <ProjectReference Include="..\DrivingClassLibrary\DrivingClassLibary.csproj" />
   </ItemGroup>
 
 </Project>

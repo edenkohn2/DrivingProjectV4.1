@@ -1,0 +1,211 @@
+﻿@page "/settings"
+@using APIDrivingProject.Services
+@using DrivingClassLibary.Models;
+@inject NavigationManager Navigation
+@inject HttpClient Http
+@inject AuthService AuthService
+@rendermode InteractiveServer
+
+<div class="settings-container">
+    <h1>Settings</h1>
+
+    @if (AuthService.IsAuthenticated && AuthService.IsStudent)
+    {
+        <div class="assignment-status">
+            <h2>Assignment Status</h2>
+            @if (assignmentStatus == null)
+            {
+                <p>Loading your assignment status...</p>
+            }
+            else
+            {
+                @if (assignmentStatus?.Status == "Approved")
+                {
+                    <div class="status-approved">
+                        <h3>Status: <span class="status-indicator green">✔ Approved</span></h3>
+                        <p>Instructor: <strong>@assignmentStatus?.InstructorName</strong></p>
+                        <button class="button" @onclick="ContactInstructor">Contact Your Instructor</button>
+                    </div>
+                }
+                else if (assignmentStatus?.Status == "Pending")
+                {
+                    <div class="status-pending">
+                        <h3>Status: <span class="status-indicator yellow">⌛ Pending</span></h3>
+                        <p>Your request is still pending approval. Please check back later.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="status-unassigned">
+                        <h3>Status: <span class="status-indicator red">⚠ Not Assigned</span></h3>
+                        <p>You are not currently assigned to any instructor.</p>
+                        <button class="button" @onclick="NavigateToAssignment">Request an Instructor</button>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="account-settings">
+            <h2>Account Information</h2>
+            <p><strong>Username:</strong> @AuthService.UserName</p>
+            <p><strong>Role:</strong> @AuthService.UserRole</p>
+            <p><strong>User ID:</strong> @AuthService.UserId</p>
+        </div>
+
+        <div class="action-buttons">
+            <button class="button logout" @onclick="Logout">Log Out</button>
+        </div>
+    }
+    else if (AuthService.IsAuthenticated && AuthService.IsInstructor)
+    {
+        <div class="instructor-settings">
+            <h2>Instructor Settings</h2>
+            @if (instructorDetails == null)
+            {
+                <p>Loading your details...</p>
+            }
+            else
+            {
+                <p><strong>First Name:</strong> @instructorDetails.FirstName</p>
+                <p><strong>Last Name:</strong> @instructorDetails.LastName</p>
+                <p><strong>Email:</strong> @instructorDetails.Email</p>
+                <p><strong>Total Students:</strong> @instructorDetails.TotalStudents</p>
+                <p><strong>Role:</strong> Driving Instructor</p>
+            }
+        </div>
+
+        <div class="action-buttons">
+            <button class="button logout" @onclick="Logout">Log Out</button>
+        </div>
+    }
+    else
+    {
+        <div class="not-authenticated">
+            <p>Please log in to view your settings.</p>
+            <button class="button" @onclick="NavigateToLogin">Go to Login</button>
+        </div>
+    }
+</div>
+
+<style>
+    .settings-container {
+        margin: 20px auto;
+        max-width: 800px;
+        background: #1c1c1c;
+        color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .student-settings, .instructor-settings {
+        background: #333;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .status-indicator.green {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        padding: 10px 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        font-size: 1.1rem;
+    }
+
+    .status-indicator.yellow {
+        background-color: #ffc107;
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .status-indicator.red {
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .button {
+        background-color: #e50914;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .button:hover {
+            background-color: #f40612;
+        }
+</style>
+
+@code {
+    private AssignmentStatusModel? assignmentStatus;
+    private InstructorDetailsModel? instructorDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthService.IsAuthenticated)
+        {
+            if (AuthService.IsStudent)
+            {
+                await LoadStudentSettings();
+            }
+            else if (AuthService.IsInstructor)
+            {
+                await LoadInstructorSettings();
+            }
+        }
+    }
+
+    private async Task LoadStudentSettings()
+    {
+        try
+        {
+            var studentId = AuthService.UserId;
+            assignmentStatus = await Http.GetFromJsonAsync<AssignmentStatusModel>($"api/Instructors/{studentId}/assignment-status");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading student settings: {ex.Message}");
+        }
+    }
+
+    private async Task LoadInstructorSettings()
+    {
+        try
+        {
+            var instructorId = AuthService.UserId;
+            instructorDetails = await Http.GetFromJsonAsync<InstructorDetailsModel>($"api/Instructors/{instructorId}/details");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading instructor settings: {ex.Message}");
+        }
+    }
+
+    private void NavigateToAssignment()
+    {
+        Navigation.NavigateTo("/request-assignment");
+    }
+
+    private void Logout()
+    {
+        AuthService.ClearUser();
+        Navigation.NavigateTo("/login");
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void ContactInstructor()
+    {
+        Console.WriteLine("Contact Instructor clicked");
+    }
+}

@@ -96,10 +96,10 @@ namespace APIDrivingProject.Controllers
             {
                 connection.Open();
                 var query = @"SELECT p.PersonId, p.FirstName, p.LastName, p.Email, p.PhoneNumber, p.BirthDate, 
-                                     s.LessonsTaken, s.HasPassedTheory, s.IsActive 
-                              FROM student s
-                              INNER JOIN person p ON s.StudentId = p.PersonId
-                              WHERE s.StudentId = @StudentId";
+                             s.LessonsTaken, s.HasPassedTheory, s.IsActive 
+                      FROM student s
+                      INNER JOIN person p ON s.StudentId = p.PersonId
+                      WHERE s.StudentId = @StudentId";
                 var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@StudentId", studentId);
 
@@ -112,9 +112,9 @@ namespace APIDrivingProject.Controllers
                             PersonId = reader.GetInt32("PersonId"),
                             FirstName = reader.GetString("FirstName"),
                             LastName = reader.GetString("LastName"),
-                            Email = reader.GetString("Email"),
-                            PhoneNumber = reader.GetString("PhoneNumber"),
-                            BirthDate = reader.GetDateTime("BirthDate"),
+                            Email = reader["Email"] as string ?? "",
+                            PhoneNumber = reader["PhoneNumber"] as string ?? "",
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("BirthDate")) ? (DateTime?)null : reader.GetDateTime("BirthDate"),
                             LessonsTaken = reader.GetInt32("LessonsTaken"),
                             HasPassedTheory = reader.GetBoolean("HasPassedTheory"),
                             IsActive = reader.GetBoolean("IsActive")
@@ -127,6 +127,7 @@ namespace APIDrivingProject.Controllers
 
             return NotFound();
         }
+
 
         [HttpPut("{studentId}/status")]
         public IActionResult UpdateStudentStatus(int studentId, [FromBody] bool isActive)

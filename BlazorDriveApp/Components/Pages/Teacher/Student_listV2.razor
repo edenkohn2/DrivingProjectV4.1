@@ -1,0 +1,137 @@
+﻿@page "/student_list_v2"
+@using APIDrivingProject.Services;
+@using DrivingClassLibary.Models;
+@inject HttpClient Http
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div style="background: linear-gradient(90deg, #3f51b5, #5c6bc0); padding: 20px; color: white; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2 style="margin: 0; font-size: 1.8rem;">Student List</h2>
+        <p style="margin: 0; font-size: 1rem;">Manage and track the progress of your students.</p>
+    </div>
+</div>
+
+<div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px; gap: 10px;">
+    <input type="text" placeholder="Search by name..."
+           @oninput="(e) => PerformSearch(e.Value?.ToString())"
+           style="padding: 10px; width: 40%; border: 1px solid #ccc; border-radius: 5px;">    <button style="background: #3f51b5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;" @onclick="SearchStudents">
+        <i class="fas fa-search"></i> Search
+    </button>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; box-shadow: 0px 5px 15px rgba(0,0,0,0.1); overflow: hidden;">
+    <thead style="background-color: #3f51b5; color: white;">
+        <tr>
+            <th style="padding: 15px; text-align: left;">Name</th>
+            <th style="padding: 15px; text-align: left;">Email</th>
+            <th style="padding: 15px; text-align: left;">Phone</th>
+            <th style="padding: 15px; text-align: left;">Lessons Taken</th>
+            <th style="padding: 15px; text-align: left;">Status</th>
+            <th style="padding: 15px; text-align: center;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (filteredStudents != null && filteredStudents.Any())
+        {
+            @foreach (var student in filteredStudents)
+            {
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 15px;">@student.FirstName @student.LastName</td>
+                    <td style="padding: 15px;">@student.Email</td>
+                    <td style="padding: 15px;">@student.PhoneNumber</td>
+                    <td style="padding: 15px; text-align: center;">@student.LessonsTaken</td>
+                    <td style="padding: 15px;">
+                        <span style="color: @(student.IsActive ? "#4CAF50" : "#F44336"); font-weight: bold;">
+                            <i class="@(student.IsActive ? "fas fa-check-circle" : "fas fa-times-circle")"></i>
+                            @(student.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        <button style="background-color: #2196F3; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => EditStudent(student.PersonId)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button style="background-color: #F44336; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => DeactivateStudent(student.PersonId)">
+                            <i class="fas fa-ban"></i> Deactivate
+                        </button>
+                        <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => ViewProgress(student.PersonId)">
+                            <i class="fas fa-chart-line"></i> Progress
+                        </button>
+                        <button style="background-color: #FF9800; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;" @onclick="() => AddLesson(student.PersonId)">
+                            <i class="fas fa-plus"></i> Add Lesson
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" style="padding: 20px; text-align: center; color: #999;">No students found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Student> students = new();
+    private List<Student> filteredStudents = new();
+    private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var instructorId = AuthService.UserId;
+            students = await Http.GetFromJsonAsync<List<Student>>($"api/Instructors/{instructorId}/students");
+            filteredStudents = students;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading students: {ex.Message}");
+        }
+    }
+
+    private void PerformSearch(string? input)
+    {
+        searchTerm = input ?? string.Empty;
+        SearchStudents();
+    }
+
+    private void SearchStudents()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredStudents = students;
+        }
+        else
+        {
+            filteredStudents = students.Where(s =>
+                (s.FirstName + " " + s.LastName).Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+
+        StateHasChanged(); // מבטיח שה-UI יתעדכן בזמן אמת
+    }
+
+    private void EditStudent(int studentId)
+    {
+        Navigation.NavigateTo($"/edit_student/{studentId}");
+    }
+
+    private void DeactivateStudent(int studentId)
+    {
+        Console.WriteLine($"Deactivate student with ID: {studentId}");
+    }
+
+    private void ViewProgress(int studentId)
+    {
+        Navigation.NavigateTo($"/progress_student/{studentId}");
+    }
+
+    private void AddLesson(int studentId)
+    {
+        Navigation.NavigateTo($"/add_lesson/{studentId}");
+    }
+}

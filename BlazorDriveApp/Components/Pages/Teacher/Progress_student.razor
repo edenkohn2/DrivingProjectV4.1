@@ -1,0 +1,65 @@
+﻿@using DrivingClassLibary.Models;
+@page "/progress_student/{studentId:int}"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+<h1 style="text-align: center; color: #333; font-size: 2.5rem; margin-bottom: 20px;">Student Progress</h1>
+
+@if (studentProgress == null)
+{
+    <div style="text-align: center; margin-top: 50px;">
+        <p style="color: #999; font-size: 1.2rem;">Loading progress for student ID: @studentId...</p>
+    </div>
+}
+else
+{
+    <div style="display: flex; justify-content: center; margin-top: 40px;">
+        <div style="background: linear-gradient(145deg, #f3f3f3, #ffffff); border-radius: 20px; box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2), -5px -5px 15px rgba(255, 255, 255, 0.7); width: 600px; padding: 20px; text-align: center;">
+            <h2 style="color: #007bff; font-size: 2rem; margin-bottom: 10px;">@studentProgress.StudentName</h2>
+          
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding: 0 20px;">
+                <div>
+                    <h3 style="font-size: 1.5rem; color: #28a745;">Lessons Taken</h3>
+                    <p style="font-size: 1.2rem; font-weight: bold;">@studentProgress.LessonsTaken</p>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.5rem; color: #ffc107;">Theory Passed</h3>
+                    <p style="font-size: 1.2rem; font-weight: bold;">@(studentProgress.HasPassedTheory ? "Yes" : "No")</p>
+                </div>
+            </div>
+
+            <button style="background: #007bff; color: white; border: none; border-radius: 10px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease;" @onclick="GoBack">
+                Back to Student List
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int studentId { get; set; }
+
+    private StudentProgressModel? studentProgress;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            studentProgress = await Http.GetFromJsonAsync<StudentProgressModel>($"api/Students/{studentId}/progress");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading progress for student ID {studentId}: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/student_list_v1");
+    }
+
+    
+}

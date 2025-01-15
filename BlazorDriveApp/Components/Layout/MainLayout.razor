@@ -18,7 +18,7 @@
             @if (AuthService.IsInstructor)
             {
                 <li><NavLink href="/teacher_dashboard">Teacher Dashboard</NavLink></li>
-                <li><NavLink href="/student_list">Student List</NavLink></li>
+                <li><NavLink href="/student_list_v1">Student List</NavLink></li>
             }
             @if (AuthService.IsStudent)
             {
@@ -26,9 +26,7 @@
                 <li><NavLink href="/my_lessons">My Lessons</NavLink></li>
             }
 
-            <li>
-                <NavLink href="/" Logout >Logout</NavLink>
-            </li>
+            
 
 
 

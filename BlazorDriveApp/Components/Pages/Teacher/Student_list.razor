@@ -5,6 +5,8 @@
 @inject HttpClient Http
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@rendermode InteractiveServer
+
 
 <h1 style="text-align: center; margin-bottom: 1rem; font-size: 2.5rem; color: #333;">Student List</h1>
 
@@ -17,9 +19,17 @@
                 <h3 style="font-size: 1.5rem; font-weight: bold; color: #007bff; margin-bottom: 10px;">@student.FirstName @student.LastName</h3>
                 <p style="font-size: 1rem; margin-bottom: 10px;"><strong>Email:</strong> @student.Email</p>
                 <p style="font-size: 1rem; margin-bottom: 10px;"><strong>Phone:</strong> @student.PhoneNumber</p>
-                <button style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;" @onclick="() => EditStudent(student.PersonId)">
-                    Edit
-                </button>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                    <button style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;" @onclick="() => EditStudent(student.PersonId)">
+                        Edit
+                    </button>
+                    <button style="background: #28a745; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;" @onclick="() => ViewProgress(student.PersonId)">
+                        Progress
+                    </button>
+                    <button style="background: #dc3545; color: #fff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;" @onclick="() => DeactivateStudent(student.PersonId)">
+                        Deactivate
+                    </button>
+                </div>
             </div>
         }
     }
@@ -29,6 +39,97 @@
     }
 </div>
 
+<style>
+    .title {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        color: #333;
+    }
+
+    .student-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .student-card {
+        background: linear-gradient(145deg, #e0e0e0, #ffffff);
+        border-radius: 15px;
+        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7);
+        width: 300px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+    }
+
+    .student-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+
+    .actions {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .button {
+        padding: 10px 15px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+        .button.edit {
+            background: #007bff;
+            color: #fff;
+        }
+
+            .button.edit:hover {
+                background: #0056b3;
+            }
+
+        .button.progress {
+            background: #28a745;
+            color: #fff;
+        }
+
+            .button.progress:hover {
+                background: #1e7e34;
+            }
+
+        .button.status {
+            background: #ffc107;
+            color: #fff;
+        }
+
+            .button.status.active {
+                background: #dc3545;
+            }
+
+                .button.status.active:hover {
+                    background: #c82333;
+                }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+    .no-students {
+        text-align: center;
+        color: #666;
+        font-size: 1.2rem;
+    }
+</style>
+
 @code {
     private List<Student> students = new();
 
@@ -36,10 +137,7 @@
     {
         try
         {
-            // קבל את ה-InstructorId מהמורה המחובר
             var instructorId = AuthService.UserId;
-
-            // שלח בקשה ל-API לשליפת התלמידים המשויכים
             students = await Http.GetFromJsonAsync<List<Student>>($"api/Instructors/{instructorId}/students");
         }
         catch (Exception ex)
@@ -50,7 +148,17 @@
 
     private void EditStudent(int studentId)
     {
-        // ניתוב לדף עריכת תלמיד
         Navigation.NavigateTo($"/edit_student/{studentId}");
+    }
+
+    private void ViewProgress(int studentId)
+    {
+        Navigation.NavigateTo($"/progress_student/{studentId}");
+    }
+
+    private void DeactivateStudent(int studentId)
+    {
+        Console.WriteLine($"Deactivate Student ID: {studentId}");
+        // הוספת לוגיקה לביטול תלמיד
     }
 }

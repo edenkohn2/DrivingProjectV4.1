@@ -1,0 +1,189 @@
+﻿@page "/edit_student/{studentId:int}"
+@using APIDrivingProject.Models
+@using APIDrivingProject.Services
+@using DrivingClassLibary.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h1 class="title">Edit Student</h1>
+
+@if (student == null)
+{
+    <p class="loading">Loading student details...</p>
+}
+else
+{
+    <div class="edit-container">
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" class="input-field" @bind="student.FirstName" />
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" class="input-field" @bind="student.LastName" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" class="input-field" @bind="student.Email" />
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" type="text" class="input-field" @bind="student.PhoneNumber" />
+        </div>
+
+        <div class="form-group">
+            <label for="lessonsTaken">Lessons Taken</label>
+            <input id="lessonsTaken" type="number" class="input-field" @bind="student.LessonsTaken" min="0" />
+        </div>
+
+        <div class="form-group checkbox">
+            <input id="hasPassedTheory" type="checkbox" @bind="student.HasPassedTheory" />
+            <label for="hasPassedTheory">Has Passed Theory Exam</label>
+        </div>
+
+        <div class="form-group">
+            <label for="isActive">Student Status</label>
+            <select id="isActive" class="input-field" @bind="student.IsActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+        </div>
+
+        <div class="actions">
+            <button class="button save" @onclick="SaveChanges">Save</button>
+            <button class="button back" @onclick="NavigateBack">Back to Student List</button>
+        </div>
+    </div>
+}
+
+<style>
+    .title {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        color: #333;
+    }
+
+    .edit-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(145deg, #f0f0f0, #ffffff);
+        border-radius: 15px;
+        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .form-group.checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .button.save {
+        background: #28a745;
+        color: white;
+    }
+
+    .button.save:hover {
+        background: #1e7e34;
+    }
+
+    .button.back {
+        background: #007bff;
+        color: white;
+    }
+
+    .button.back:hover {
+        background: #0056b3;
+    }
+
+    .loading {
+        text-align: center;
+        color: #666;
+        font-size: 1.2rem;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int studentId { get; set; }
+
+    private Student student;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            student = await Http.GetFromJsonAsync<Student>($"api/Students/{studentId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching student details: {ex.Message}");
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/Students/{student.PersonId}", student);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Student updated successfully!");
+                NavigateBack();
+            }
+            else
+            {
+                Console.WriteLine("Error updating student.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving changes: {ex.Message}");
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/student_list_v1");
+    }
+}

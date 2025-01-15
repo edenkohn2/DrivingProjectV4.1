@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APIDrivingProject", "APIDri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDriveApp", "BlazorDriveApp\BlazorDriveApp.csproj", "{C9BC1B45-0A11-4D65-97D7-8217EA590022}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrivingClassLibrary", "DrivingClassLibrary\DrivingClassLibrary.csproj", "{221A761E-4F7A-4E21-82A5-222ADCD86AEC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrivingClassLibary", "DrivingClassLibrary\DrivingClassLibary.csproj", "{221A761E-4F7A-4E21-82A5-222ADCD86AEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
