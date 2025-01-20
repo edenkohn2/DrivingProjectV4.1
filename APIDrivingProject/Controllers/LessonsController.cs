@@ -18,17 +18,124 @@ namespace APIDrivingProject.Controllers
             _databaseService = databaseService;
         }
 
+        // Get all lessons
         [HttpGet]
         public IActionResult GetLessons()
+        {
+            var lessons = ExecuteQuery("SELECT * FROM lessons");
+            return Ok(lessons);
+        }
+
+        // Get lessons by student
+        [HttpGet("student/{studentId}")]
+        public IActionResult GetLessonsByStudent(int studentId)
+        {
+            var lessons = ExecuteQuery("SELECT * FROM lessons WHERE StudentId = @StudentId", ("@StudentId", studentId));
+            return Ok(lessons);
+        }
+
+        // Get lessons by instructor
+        [HttpGet("instructor/{instructorId}")]
+        public IActionResult GetLessonsByInstructor(int instructorId)
+        {
+            var lessons = ExecuteQuery("SELECT * FROM lessons WHERE InstructorId = @InstructorId", ("@InstructorId", instructorId));
+            return Ok(lessons);
+        }
+
+        // Add a new lesson
+        [HttpPost]
+        public IActionResult AddLesson([FromBody] Lesson lesson)
+        {
+            if (lesson == null)
+            {
+                return BadRequest(new { message = "The lesson field is required." });
+            }
+
+            if (lesson.Date == DateTime.MinValue)
+            {
+                return BadRequest(new { message = "The Date field must be provided in ISO 8601 format (e.g., yyyy-MM-ddTHH:mm:ss)." });
+            }
+
+            try
+            {
+                using (var connection = _databaseService.GetConnection())
+                {
+                    connection.Open();
+                    var query = @"INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
+                          VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
+                    var command = new MySqlCommand(query, connection);
+                    AddLessonParameters(command, lesson);
+                    command.ExecuteNonQuery();
+                }
+                return Ok("Lesson added successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "An error occurred while adding the lesson.", details = ex.Message });
+            }
+        }
+
+
+        // Update a lesson
+        [HttpPut("{lessonId}")]
+        public IActionResult UpdateLesson(int lessonId, [FromBody] Lesson updatedLesson)
+        {
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"UPDATE lessons 
+                              SET StudentId = @StudentId, InstructorId = @InstructorId, Date = @Date, 
+                                  Duration = @Duration, LessonType = @LessonType, Price = @Price 
+                              WHERE LessonId = @LessonId";
+                var command = new MySqlCommand(query, connection);
+                AddLessonParameters(command, updatedLesson);
+                command.Parameters.AddWithValue("@LessonId", lessonId);
+                command.ExecuteNonQuery();
+            }
+
+            return Ok("Lesson updated successfully");
+        }
+
+        // Delete a lesson
+        [HttpDelete("{lessonId}")]
+        public IActionResult DeleteLesson(int lessonId)
+        {
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"DELETE FROM lessons WHERE LessonId = @LessonId";
+                var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@LessonId", lessonId);
+                command.ExecuteNonQuery();
+            }
+
+            return Ok("Lesson deleted successfully");
+        }
+
+        // Get upcoming lessons for instructor
+        [HttpGet("instructor/{instructorId}/upcoming")]
+        public IActionResult GetUpcomingLessonsForInstructor(int instructorId)
+        {
+            var lessons = ExecuteQuery(@"SELECT * FROM lessons 
+                                         WHERE InstructorId = @InstructorId AND Date > NOW()",
+                                         ("@InstructorId", instructorId));
+            return Ok(lessons);
+        }
+
+        // Helper: Execute query
+        private List<Lesson> ExecuteQuery(string query, params (string paramName, object paramValue)[] parameters)
         {
             var lessons = new List<Lesson>();
 
             using (var connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                var query = @"SELECT l.LessonId, l.StudentId, l.InstructorId, l.Date, l.Duration, l.LessonType, l.Price 
-                              FROM lessons l";
                 var command = new MySqlCommand(query, connection);
+
+                foreach (var (paramName, paramValue) in parameters)
+                {
+                    command.Parameters.AddWithValue(paramName, paramValue);
+                }
 
                 using (var reader = command.ExecuteReader())
                 {
@@ -48,145 +155,18 @@ namespace APIDrivingProject.Controllers
                 }
             }
 
-            return Ok(lessons);
+            return lessons;
         }
 
-        [HttpGet("student/{studentId}")]
-        public IActionResult GetLessonsByStudent(int studentId)
+        // Helper: Add parameters for lesson
+        private void AddLessonParameters(MySqlCommand command, Lesson lesson)
         {
-            var lessons = new List<Lesson>();
-
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price 
-                              FROM lessons l
-                              WHERE l.StudentId = @StudentId";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@StudentId", studentId);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        lessons.Add(new Lesson
-                        {
-                            LessonId = reader.GetInt32("LessonId"),
-                            Date = reader.GetDateTime("Date"),
-                            Duration = reader.GetInt32("Duration"),
-                            LessonType = reader.GetString("LessonType"),
-                            Price = reader.GetDecimal("Price")
-                        });
-                    }
-                }
-            }
-
-            return Ok(lessons);
-        }
-
-        [HttpGet("instructor/{instructorId}")]
-        public IActionResult GetLessonsByInstructor(int instructorId)
-        {
-            var lessons = new List<Lesson>();
-
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price 
-                              FROM lessons l
-                              WHERE l.InstructorId = @InstructorId";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@InstructorId", instructorId);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        lessons.Add(new Lesson
-                        {
-                            LessonId = reader.GetInt32("LessonId"),
-                            Date = reader.GetDateTime("Date"),
-                            Duration = reader.GetInt32("Duration"),
-                            LessonType = reader.GetString("LessonType"),
-                            Price = reader.GetDecimal("Price")
-                        });
-                    }
-                }
-            }
-
-            return Ok(lessons);
-        }
-
-        [HttpPut("{lessonId}")]
-        public IActionResult UpdateLesson(int lessonId, [FromBody] Lesson updatedLesson)
-        {
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"UPDATE lessons 
-                              SET StudentId = @StudentId, Date = @Date, Duration = @Duration, LessonType = @LessonType, Price = @Price 
-                              WHERE LessonId = @LessonId";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@StudentId", updatedLesson.StudentId);
-                command.Parameters.AddWithValue("@Date", updatedLesson.Date);
-                command.Parameters.AddWithValue("@Duration", updatedLesson.Duration);
-                command.Parameters.AddWithValue("@LessonType", updatedLesson.LessonType);
-                command.Parameters.AddWithValue("@Price", updatedLesson.Price);
-                command.Parameters.AddWithValue("@LessonId", lessonId);
-
-                command.ExecuteNonQuery();
-            }
-
-            return Ok("Lesson updated successfully");
-        }
-
-        [HttpDelete("{lessonId}")]
-        public IActionResult DeleteLesson(int lessonId)
-        {
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"DELETE FROM lessons 
-                              WHERE LessonId = @LessonId";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@LessonId", lessonId);
-
-                command.ExecuteNonQuery();
-            }
-
-            return Ok("Lesson deleted successfully");
-        }
-
-        [HttpGet("instructor/{instructorId}/upcoming")]
-        public IActionResult GetUpcomingLessonsForInstructor(int instructorId)
-        {
-            var lessons = new List<Lesson>();
-
-            using (var connection = _databaseService.GetConnection())
-            {
-                connection.Open();
-                var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType 
-                              FROM lessons l
-                              WHERE l.InstructorId = @InstructorId AND l.Date > NOW()";
-                var command = new MySqlCommand(query, connection);
-                command.Parameters.AddWithValue("@InstructorId", instructorId);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        lessons.Add(new Lesson
-                        {
-                            LessonId = reader.GetInt32("LessonId"),
-                            Date = reader.GetDateTime("Date"),
-                            Duration = reader.GetInt32("Duration"),
-                            LessonType = reader.GetString("LessonType")
-                        });
-                    }
-                }
-            }
-
-            return Ok(lessons);
+            command.Parameters.AddWithValue("@StudentId", lesson.StudentId);
+            command.Parameters.AddWithValue("@InstructorId", lesson.InstructorId);
+            command.Parameters.AddWithValue("@Date", lesson.Date);
+            command.Parameters.AddWithValue("@Duration", lesson.Duration);
+            command.Parameters.AddWithValue("@LessonType", lesson.LessonType);
+            command.Parameters.AddWithValue("@Price", lesson.Price);
         }
     }
 }

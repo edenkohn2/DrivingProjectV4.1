@@ -1,0 +1,347 @@
+﻿@page "/add_lesson/{studentId:int}"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using DrivingClassLibary.Models;
+@using APIDrivingProject.Services;
+@inject AuthService AuthService
+@rendermode InteractiveServer
+
+<div class="form-container">
+    <h2>Add Lesson for @StudentName</h2>
+    <form @onsubmit="HandleSubmit">
+        <!-- Lesson Type -->
+        <div class="form-group">
+            <label for="lessonType">Lesson Type</label>
+            <select id="lessonType" class="form-control" @onchange="OnLessonTypeChange">
+                <option value="">Select Lesson Type</option>
+                <option value="Single">Single</option>
+                <option value="OneAndAHalf">One and a Half</option>
+                <option value="Double">Double</option>
+            </select>
+        </div>
+
+        <!-- Select Date -->
+        <div class="form-group">
+            <label for="lessonDate">Select Date</label>
+            <div class="calendar-header">
+                <button type="button" class="btn-nav" @onclick="PreviousMonth" disabled="@(string.IsNullOrEmpty(LessonType))">◀</button>
+                <span class="calendar-title">@SelectedMonthName @SelectedYear</span>
+                <button type="button" class="btn-nav" @onclick="NextMonth" disabled="@(string.IsNullOrEmpty(LessonType))">▶</button>
+            </div>
+            <div class="calendar-container">
+                @for (int day = 1; day <= DaysInMonth; day++)
+                {
+                    var date = new DateTime(SelectedYear, SelectedMonth, day);
+                    <button type="button"
+                            class="calendar-day @(date == SelectedDate ? "selected" : "")"
+                            @onclick="() => SelectDate(date)"
+                            disabled="@(!IsFutureDate(date) || string.IsNullOrEmpty(LessonType))">
+                        @day
+                    </button>
+                }
+            </div>
+            <div class="selected-date">
+                <strong>Selected Date:</strong> @(SelectedDate != DateTime.MinValue ? SelectedDate.ToString("dddd, MMMM dd, yyyy") : "None")
+            </div>
+        </div>
+
+        <!-- Start Time -->
+        <!-- Start Time -->
+        <div class="form-group">
+            <label for="lessonStartTime">Start Time</label>
+            <input type="text" id="lessonStartTime" @bind="LessonStartTime" placeholder="HH:mm" class="form-control" />
+        </div>
+
+
+
+        <!-- End Time -->
+        <div class="form-group">
+            <label for="lessonEndTime">End Time</label>
+            <div class="form-control readonly">@LessonEndTime</div>
+        </div>
+
+
+
+        <!-- Lesson Duration -->
+        <div class="form-group">
+            <label>Lesson Duration</label>
+            <div class="form-control readonly">@Duration minutes</div>
+        </div>
+
+        <!-- Lesson Price -->
+        <div class="form-group">
+            <label>Lesson Price</label>
+            <div class="form-control readonly">@PriceDisplay</div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary" disabled="@(string.IsNullOrEmpty(LessonStartTime) || SelectedDate == DateTime.MinValue || string.IsNullOrEmpty(LessonType))">Add Lesson</button>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .readonly {
+        background: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .calendar-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .btn-nav {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #007bff;
+        transition: color 0.3s;
+    }
+
+        .btn-nav:hover {
+            color: #0056b3;
+        }
+
+    .calendar-container {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .calendar-day {
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s ease, transform 0.2s;
+    }
+
+        .calendar-day:hover:not([disabled]) {
+            background: #007bff;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .calendar-day.selected {
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .calendar-day[disabled] {
+            background: #e9ecef;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+    .selected-date {
+        margin-top: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+@code {
+    [Parameter]
+    public int studentId { get; set; }
+
+    private string StudentName { get; set; } = "Eden Kon"; // Example, replace with dynamic data
+    private string LessonType { get; set; } = "";
+    private string _lessonStartTime;
+
+    private string LessonStartTime
+    {
+        get => _lessonStartTime;
+        set
+        {
+            _lessonStartTime = value;
+            UpdateDurationAndEndTime(); // חישוב אוטומטי של זמן הסיום
+        }
+    }
+    private string LessonEndTime { get; set; } = "";
+    private DateTime SelectedDate { get; set; } = DateTime.MinValue;
+    private int SelectedMonth { get; set; } = DateTime.Today.Month;
+    private int SelectedYear { get; set; } = DateTime.Today.Year;
+
+    private string SelectedMonthName => new DateTime(SelectedYear, SelectedMonth, 1).ToString("MMMM");
+    private int DaysInMonth => DateTime.DaysInMonth(SelectedYear, SelectedMonth);
+
+    private int Duration => LessonType switch
+    {
+        "Single" => 40,
+        "OneAndAHalf" => 60,
+        "Double" => 80,
+        _ => 0
+    };
+
+    private decimal Price => LessonType switch
+    {
+        "Single" => 100m,
+        "OneAndAHalf" => 150m,
+        "Double" => 200m,
+        _ => 0m
+    };
+
+    private string PriceDisplay => $"{Price:C}";
+
+    private void SelectDate(DateTime date)
+    {
+        if (IsFutureDate(date))
+        {
+            SelectedDate = date;
+        }
+    }
+
+    private bool IsFutureDate(DateTime date) => date >= DateTime.Today;
+
+    private void PreviousMonth()
+    {
+        if (SelectedMonth == 1)
+        {
+            SelectedMonth = 12;
+            SelectedYear--;
+        }
+        else
+        {
+            SelectedMonth--;
+        }
+    }
+
+    private void NextMonth()
+    {
+        if (SelectedMonth == 12)
+        {
+            SelectedMonth = 1;
+            SelectedYear++;
+        }
+        else
+        {
+            SelectedMonth++;
+        }
+    }
+
+    private List<string> GetAvailableTimes()
+    {
+        return new List<string>
+        {
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+            "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+            "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+            "17:00", "17:30", "18:00"
+        };
+    }
+
+    private void SelectStartTime(string time)
+    {
+        LessonStartTime = time;
+        UpdateDurationAndEndTime();
+    }
+
+    private void UpdateDurationAndEndTime()
+    {
+        if (TimeSpan.TryParse(LessonStartTime, out var startTime))
+        {
+            var endTime = startTime.Add(TimeSpan.FromMinutes(Duration));
+            LessonEndTime = endTime.ToString(@"hh\:mm");
+        }
+        else
+        {
+            LessonEndTime = string.Empty; // איפוס הערך אם הקלט אינו תקין
+        }
+    }
+
+
+    private void OnLessonTypeChange(ChangeEventArgs e)
+    {
+        LessonType = e.Value.ToString();
+        UpdateDurationAndEndTime();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await AddLesson();
+    }
+
+    private async Task AddLesson()
+    {
+        var lessonDateTime = $"{SelectedDate:yyyy-MM-dd} {LessonStartTime}";
+        var lesson = new Lesson
+            {
+                StudentId = studentId,
+                InstructorId = AuthService.UserId, // Add AuthService for current user ID
+                Date = DateTime.ParseExact(lessonDateTime, "yyyy-MM-dd HH:mm", null),
+                Duration = Duration,
+                LessonType = LessonType,
+                Price = Price
+            };
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Lessons", lesson);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Lesson added successfully!");
+                Navigation.NavigateTo("/student_list_v2");
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error adding lesson: {errorContent}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+}
+}

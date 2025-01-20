@@ -102,11 +102,12 @@ namespace APIDrivingProject.Controllers
             using (var connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                var query = @"SELECT s.StudentId, p.FirstName, p.LastName, p.Email, p.PhoneNumber 
-                      FROM instructor_student is_map
-                      INNER JOIN student s ON is_map.StudentId = s.StudentId
-                      INNER JOIN person p ON s.StudentId = p.PersonId
-                      WHERE is_map.InstructorId = @InstructorId";
+                var query = @"
+            SELECT s.StudentId, p.FirstName, p.LastName, p.Email, p.PhoneNumber, s.LessonsTaken
+            FROM instructor_student is_map
+            INNER JOIN student s ON is_map.StudentId = s.StudentId
+            INNER JOIN person p ON s.StudentId = p.PersonId
+            WHERE is_map.InstructorId = @InstructorId";
                 var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@InstructorId", instructorId);
 
@@ -120,7 +121,8 @@ namespace APIDrivingProject.Controllers
                             FirstName = reader.GetString("FirstName"),
                             LastName = reader.GetString("LastName"),
                             Email = reader.GetString("Email"),
-                            PhoneNumber = reader.GetString("PhoneNumber")
+                            PhoneNumber = reader.GetString("PhoneNumber"),
+                            LessonsTaken = reader.GetInt32("LessonsTaken") // כאן אנו מוודאים שלוקחים את הערך הנכון
                         });
                     }
                 }
@@ -128,6 +130,9 @@ namespace APIDrivingProject.Controllers
 
             return Ok(students);
         }
+
+
+
 
 
         [HttpGet("{instructorId}/schedule")]
