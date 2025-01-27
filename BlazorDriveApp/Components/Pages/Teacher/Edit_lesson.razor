@@ -1,0 +1,278 @@
+﻿@page "/edit-lesson/{lessonId:int}"
+@using APIDrivingProject.Models
+@using DrivingClassLibary.Models;
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<h1 style="text-align: center; margin-bottom: 1rem;">Edit Lesson</h1>
+
+<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+    <label for="student" style="display: block; margin-bottom: 10px; font-weight: bold;">Select Student:</label>
+    <select id="student" @bind="selectedStudentId" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
+        <option value="" disabled>Select a student</option>
+        @foreach (var student in students)
+        {
+            <option value="@student.PersonId">@student.FirstName @student.LastName</option>
+        }
+    </select>
+
+    <select id="lessonType" @onchange="HandleLessonTypeChange" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
+        <option value="" disabled>Select a lesson type</option>
+        <option value="Single">Single</option>
+        <option value="OneAndAHalf">One and a Half</option>
+        <option value="Double">Double</option>
+    </select>
+
+
+ 
+
+    <label for="lessonDate" style="display: block; margin-bottom: 10px; font-weight: bold;">Select Date:</label>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; justify-content: center; margin-bottom: 20px;">
+        @foreach (var day in daysInMonth)
+        {
+            <button class="date-button @(selectedDate == day ? "selected" : "")"
+                    @onclick="() => SelectDate(day)"
+                    disabled="@(!IsDateFuture(day))">
+                @day.Day
+            </button>
+        }
+    </div>
+
+    <p style="text-align: center; font-weight: bold; color: #007bff;">Selected Date: @selectedDate.ToString("yyyy-MM-dd, dddd")</p>
+
+    <label for="lessonStartTime" style="display: block; margin-bottom: 10px; font-weight: bold;">Start Time:</label>
+    <input type="text" id="lessonStartTime" @bind="startTimeInput" placeholder="HH:mm" @oninput="HandleStartTimeInput" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+
+    <label for="lessonDuration" style="display: block; margin-bottom: 10px; font-weight: bold;">Duration (minutes):</label>
+    <input type="number" id="lessonDuration" @bind="lessonDuration" @oninput="HandleDurationChange" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+
+    <label for="lessonPrice" style="display: block; margin-bottom: 10px; font-weight: bold;">Price:</label>
+    <input type="number" id="lessonPrice" @bind="lessonPrice" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+
+    <label for="endTime" style="display: block; margin-bottom: 10px; font-weight: bold;">End Time:</label>
+    <div style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px; background-color: #f9f9f9;">
+        @endTime
+    </div>
+
+    <button @onclick="SaveLesson" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Save Changes
+    </button>
+</div>
+
+<p style="text-align: center; margin-top: 20px; color: green;" hidden="@(successMessageVisible == false)">@successMessage</p>
+<p style="text-align: center; margin-top: 20px; color: red;" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+
+<style>
+    .date-button {
+        width: 40px;
+        height: 40px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        text-align: center;
+        line-height: 40px;
+        cursor: pointer;
+    }
+
+        .date-button.selected {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .date-button:hover:enabled {
+            background-color: #d0e7ff;
+        }
+
+        .date-button:disabled {
+            background-color: #e9e9e9;
+            cursor: not-allowed;
+        }
+</style>
+
+@code {
+    [Parameter]
+    public int lessonId { get; set; }
+
+    private List<Student> students = new();
+    private int selectedStudentId;
+    private string startTimeInput = string.Empty;
+    private int lessonDuration;
+    private decimal lessonPrice;
+    private string endTime = string.Empty;
+    private DateTime selectedDate = DateTime.Today;
+    private List<DateTime> daysInMonth = new();
+    private string successMessage = string.Empty;
+    private bool successMessageVisible = false;
+    private string errorMessage = string.Empty;
+    private bool errorMessageVisible = false;
+    private string selectedLessonType = string.Empty;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            int instructorId = 2;
+            students = await Http.GetFromJsonAsync<List<Student>>($"api/Instructors/{instructorId}/students");
+
+            var lesson = await Http.GetFromJsonAsync<Lesson>($"api/Lessons/{lessonId}");
+            if (lesson != null)
+            {
+                selectedStudentId = lesson.StudentId;
+                selectedDate = lesson.Date.Date;
+                startTimeInput = lesson.Date.ToString("HH:mm");
+                lessonDuration = lesson.Duration;
+
+                lessonPrice = lesson.Price;
+                CalculateEndTime();
+            }
+
+            GenerateDaysInMonth(selectedDate.Year, selectedDate.Month);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading lesson: {ex.Message}";
+            errorMessageVisible = true;
+        }
+    }
+
+    private void GenerateDaysInMonth(int year, int month)
+    {
+        daysInMonth = Enumerable.Range(1, DateTime.DaysInMonth(year, month))
+                                .Select(day => new DateTime(year, month, day))
+                                .ToList();
+    }
+
+    private bool IsDateFuture(DateTime date) => date >= DateTime.Today;
+
+    private void SelectDate(DateTime date)
+    {
+        if (IsDateFuture(date))
+        {
+            selectedDate = date;
+        }
+    }
+
+    private void HandleStartTimeInput(ChangeEventArgs e)
+    {
+        startTimeInput = e.Value?.ToString() ?? string.Empty;
+        CalculateEndTime();
+    }
+
+    private void HandleDurationChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int duration))
+        {
+            lessonDuration = duration;
+            CalculateEndTime();
+        }
+    }
+
+    private void CalculateEndTime()
+    {
+        if (TimeSpan.TryParse(startTimeInput, out TimeSpan startTime) && lessonDuration > 0)
+        {
+            endTime = (startTime + TimeSpan.FromMinutes(lessonDuration)).ToString(@"hh\:mm");
+        }
+        else
+        {
+            endTime = string.Empty;
+        }
+    }
+    private void HandleLessonTypeChange(ChangeEventArgs e)
+    {
+        selectedLessonType = e.Value?.ToString() ?? string.Empty;
+
+        switch (selectedLessonType)
+        {
+            case "Single":
+                lessonDuration = 40; // משך שיעור רגיל
+                lessonPrice = 100.00m; // מחיר שיעור רגיל
+                break;
+            case "OneAndAHalf":
+                lessonDuration = 60; // משך שיעור וחצי
+                lessonPrice = 150.00m; // מחיר שיעור וחצי
+                break;
+            case "Double":
+                lessonDuration = 80; // משך שיעור כפול
+                lessonPrice = 200.00m; // מחיר שיעור כפול
+                break;
+            default:
+                lessonDuration = 0;
+                lessonPrice = 0.00m;
+                break;
+        }
+
+        // עדכון זמן הסיום בהתאם לערכים החדשים
+        CalculateEndTime();
+    }
+
+
+    private async Task SaveLesson()
+    {
+        try
+        {
+            if (selectedStudentId == 0 || string.IsNullOrEmpty(startTimeInput) || selectedDate == default || lessonDuration <= 0 || lessonPrice <= 0)
+            {
+                errorMessage = "Please fill out all fields correctly.";
+                Console.WriteLine("Validation failed.");
+                successMessageVisible = false;
+                errorMessageVisible = true;
+                return;
+            }
+
+            if (!TimeSpan.TryParse(startTimeInput, out TimeSpan startTime))
+            {
+                errorMessage = "Invalid start time format. Please use HH:mm.";
+                Console.WriteLine("Invalid time format: " + startTimeInput);
+                successMessageVisible = false;
+                errorMessageVisible = true;
+                return;
+            }
+
+            var updatedLesson = new Lesson
+                {
+                    LessonId = lessonId,
+                    StudentId = selectedStudentId,
+                    InstructorId = 2,
+                    Date = selectedDate.Add(startTime),
+                    Duration = lessonDuration,
+                    LessonType = selectedLessonType,
+                    Price = lessonPrice
+                };
+
+            Console.WriteLine("Sending update request: " + JsonSerializer.Serialize(updatedLesson));
+
+            var response = await Http.PutAsJsonAsync($"api/Lessons/{lessonId}", updatedLesson);
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Lesson updated successfully!";
+                successMessageVisible = true;
+                errorMessageVisible = false;
+                Console.WriteLine("Lesson updated successfully!");
+                await JSRuntime.InvokeVoidAsync("alert", "Lesson saved successfully!");
+                Navigation.NavigateTo("/schedule");
+            }
+            else
+            {
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                errorMessage = $"Failed to update lesson: {errorDetails}";
+                Console.WriteLine("Failed to update lesson: " + errorDetails);
+                successMessageVisible = false;
+                errorMessageVisible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            Console.WriteLine("Exception: " + ex.Message);
+            errorMessageVisible = true;
+        }
+    }
+
+}

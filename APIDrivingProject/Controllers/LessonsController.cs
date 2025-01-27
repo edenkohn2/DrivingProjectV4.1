@@ -157,6 +157,29 @@ namespace APIDrivingProject.Controllers
 
             return lessons;
         }
+        [HttpGet("{lessonId}")]
+        public IActionResult GetLessonById(int lessonId)
+        {
+            try
+            {
+                Console.WriteLine($"Fetching lesson with ID: {lessonId}");
+                var lesson = ExecuteQuery("SELECT * FROM lessons WHERE LessonId = @LessonId", ("@LessonId", lessonId)).FirstOrDefault();
+                if (lesson == null)
+                {
+                    Console.WriteLine("Lesson not found.");
+                    return NotFound(new { message = "Lesson not found." });
+                }
+                Console.WriteLine("Lesson found and returned.");
+                return Ok(lesson);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while retrieving the lesson.", details = ex.Message });
+            }
+        }
+
+
 
         // Helper: Add parameters for lesson
         private void AddLessonParameters(MySqlCommand command, Lesson lesson)
@@ -169,4 +192,5 @@ namespace APIDrivingProject.Controllers
             command.Parameters.AddWithValue("@Price", lesson.Price);
         }
     }
+
 }

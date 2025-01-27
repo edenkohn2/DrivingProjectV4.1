@@ -1,0 +1,27 @@
+﻿.action-button {
+    color: white !important;
+    border: none !important;
+    padding: 5px 10px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+}
+
+.edit-button {
+    background-color: #28a745 !important;
+    margin-right: 5px !important;
+    transition: background-color 0.3s !important;
+}
+
+    .edit-button:hover {
+        background-color: #218838 !important;
+    }
+
+.delete-button {
+    background-color: #dc3545 !important;
+    transition: background-color 0.3s !important;
+}
+
+    .delete-button:hover {
+        background-color: #c82333 !important;
+    }

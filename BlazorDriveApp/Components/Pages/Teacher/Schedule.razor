@@ -1,7 +1,9 @@
 ﻿@page "/schedule"
 @using APIDrivingProject.Models
 @using DrivingClassLibary.Models;
-
+@using APIDrivingProject.Services;
+@inject AuthService AuthService
+@inject IJSRuntime JSRuntime
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
@@ -17,6 +19,7 @@
                 <th style="padding: 10px; border-bottom: 2px solid #ddd;">Lesson Type</th>
                 <th style="padding: 10px; border-bottom: 2px solid #ddd;">Duration</th>
                 <th style="padding: 10px; border-bottom: 2px solid #ddd;">Price</th>
+                <th style="padding: 10px; border-bottom: 2px solid #ddd;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -30,36 +33,81 @@
                         <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.LessonType</td>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd;">@lesson.Duration minutes</td>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd;">₪@lesson.Price</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+                            <button class="action-button edit-button" @onclick="() => EditLesson(lesson.LessonId)">Edit</button>
+                            <button class="action-button delete-button" @onclick="() => DeleteLesson(lesson.LessonId)">Delete</button>
+
+
+                        </td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px; color: #666;">No lessons scheduled for today.</td>
+                    <td colspan="6" style="text-align: center; padding: 20px; color: #666;">No lessons scheduled for today.</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+<style src="Schedule.razor.css"></style>
+
 
 @code {
     private List<LessonViewModel> schedule = new();
+    private LessonViewModel? selectedLesson; // For editing
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            // Replace `2` with the logged-in instructor's ID
-            int instructorId = 2;
-            DateTime today = DateTime.Today;
+            if (AuthService.IsInstructor)
+            {
+                int instructorId = AuthService.UserId; // שליפת מזהה המורה המחובר
+                DateTime today = DateTime.Today;
 
-            // Fetch today's lessons for the instructor
-            schedule = await Http.GetFromJsonAsync<List<LessonViewModel>>($"api/Instructors/{instructorId}/schedule/today");
+                // Fetch today's lessons for the instructor
+                schedule = await Http.GetFromJsonAsync<List<LessonViewModel>>($"api/Instructors/{instructorId}/schedule/today");
+            }
+            else
+            {
+                Console.WriteLine("Current user is not an instructor.");
+            }
+        }
+        catch (HttpRequestException httpEx)
+        {
+            Console.WriteLine($"HTTP Error: {httpEx.Message}");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading schedule: {ex.Message}");
         }
     }
+
+    private async Task EditLesson(int lessonId)
+    {
+        selectedLesson = schedule.FirstOrDefault(l => l.LessonId == lessonId);
+        if (selectedLesson != null)
+        {
+            Navigation.NavigateTo($"/edit-lesson/{lessonId}");
+        }
+    }
+
+    private async Task DeleteLesson(int lessonId)
+    {
+        bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this lesson?" });
+        if (!confirm) return;
+
+        try
+        {
+            await Http.DeleteAsync($"api/Lessons/{lessonId}");
+            schedule = schedule.Where(l => l.LessonId != lessonId).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting lesson: {ex.Message}");
+        }
+    }
+
 }
