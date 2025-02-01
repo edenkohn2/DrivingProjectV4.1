@@ -1,0 +1,325 @@
+﻿@page "/schedulerPage"
+@inject Radzen.DialogService DialogService
+@inject HttpClient Http
+@inject APIDrivingProject.Services.AuthService AuthService
+@rendermode InteractiveServer
+@using System.Collections.Generic
+@using Radzen
+@using Radzen.Blazor
+@using DrivingClassLibary.Models
+
+<h3 class="page-title">📅 לוח זמני נהיגה של @AuthService.UserName</h3>
+
+<!-- לוח הזמנים -->
+<RadzenScheduler @ref="scheduler" class="custom-scheduler" TItem="Appointment" Data="@appointments"
+                 StartProperty="Start" EndProperty="End" TextProperty="StudentName"
+                 @bind-SelectedDate="selectedDate"
+                 AppointmentSelect="@(e => OnAppointmentSelect(e.Data))">
+    <RadzenDayView StartTime="@TimeSpan.FromHours(0)" EndTime="@TimeSpan.FromHours(24)" />
+    <RadzenWeekView StartTime="@TimeSpan.FromHours(0)" EndTime="@TimeSpan.FromHours(24)" />
+    <RadzenMonthView />
+</RadzenScheduler>
+
+<!-- דיאלוג להצגת פרטי שיעור -->
+<RadzenDialog />
+
+<style>
+    /* כותרת הדף */
+    .page-title {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        color: #007bff;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* התאמת גובה לוח הזמנים */
+    .custom-scheduler {
+        border-radius: 10px;
+        padding: 15px;
+        background-color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        height: 85vh; /* התאמת הגובה כך שהלוח ינצל יותר מקום */
+    }
+
+    /* כפתורי הניווט */
+    .rz-button {
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .rz-button:hover {
+            background-color: #0056b3 !important;
+            color: white !important;
+            transform: scale(1.05);
+        }
+
+    /* תצוגת לוח הזמנים */
+    .rz-scheduler .rz-scheduler-header {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        font-size: 1rem;
+        border-bottom: 2px solid #007bff;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .rz-scheduler .rz-event {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 5px;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .rz-scheduler .rz-event:hover {
+            transform: scale(1.05);
+        }
+
+    /* כרטיס פרטי שיעור */
+    lesson-details {
+        padding: 15px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .lesson-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+        .lesson-info h4 {
+            margin: 0;
+            color: #007bff;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .lesson-info p {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+    .selected-lesson {
+        background: #fffae6;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 5px solid #ffcc00;
+    }
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+
+        .styled-table th, .styled-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .styled-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+    /* סימון שיעור נוכחי */
+    .highlighted {
+        background-color: #d4edda;
+    }
+
+    /* כפתורים */
+    .btn-edit {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-right: 5px;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+</style>
+
+@code {
+    private RadzenScheduler<Appointment> scheduler;
+    private DateTime selectedDate = DateTime.Today;
+    IList<Appointment> appointments = new List<Appointment>();
+    IList<Appointment> sameDayLessons = new List<Appointment>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSchedule();
+    }
+
+    private async Task LoadSchedule()
+    {
+        try
+        {
+            var instructorId = AuthService.UserId;
+            Console.WriteLine($"📅 טוען שיעורים עבור מורה {instructorId}...");
+
+            var lessons = await Http.GetFromJsonAsync<List<Lesson>>($"api/instructors/{instructorId}/schedule");
+
+            if (lessons != null)
+            {
+                Console.WriteLine($"✅ נמצאו {lessons.Count} שיעורים.");
+                appointments = lessons.Select(lesson => new Appointment
+                        {
+                            LessonId = lesson.LessonId,  // העברת ה-LessonId לאובייקט Appointment
+                            Start = lesson.Date,
+                            End = lesson.Date.AddMinutes(lesson.Duration),
+                            StudentName = lesson.StudentName ?? "לא ידוע",
+                            LessonType = lesson.LessonType,
+                            Price = lesson.Price
+                        }).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה בטעינת השיעורים: {ex.Message}");
+        }
+    }
+
+
+    private async Task OnAppointmentSelect(Appointment appointment)
+    {
+        if (appointment != null)
+        {
+            Console.WriteLine($"📌 שיעור נבחר: {appointment.StudentName}, {appointment.Start}");
+
+            selectedDate = appointment.Start;
+            var instructorId = AuthService.UserId;
+            var formattedDate = selectedDate.ToString("yyyy-MM-dd");
+
+            var lessons = await Http.GetFromJsonAsync<List<Lesson>>($"api/Lessons/instructor/{instructorId}/date/{formattedDate}");
+
+            if (lessons != null)
+            {
+                sameDayLessons = lessons.Select(lesson => new Appointment
+                        {
+                            Start = lesson.Date,
+                            End = lesson.Date.AddMinutes(lesson.Duration),
+                            StudentName = lesson.StudentName ?? "לא ידוע",
+                            LessonType = lesson.LessonType,
+                            Price = lesson.Price
+                        }).ToList();
+
+                Console.WriteLine($"📋 כמות שיעורים באותו יום: {sameDayLessons.Count}");
+            }
+
+            StateHasChanged();
+
+            await DialogService.OpenAsync("📌 פרטי שיעור",
+        ds => @<div class="lesson-details">
+        <!-- פרטי השיעור הנבחר -->
+        <div class="selected-lesson">
+            <h4>⭐ שיעור נוכחי</h4>
+            <p><b>⏰ זמן השיעור:</b> @appointment.Start.ToString("dddd, dd MMMM yyyy") | @appointment.Start.ToString("HH:mm") - @appointment.End.ToString("HH:mm")</p>
+            <p><b>🎓 תלמיד:</b> @appointment.StudentName</p>
+            <p><b>🚗 סוג השיעור:</b> @appointment.LessonType</p>
+            <p><b>💰 מחיר:</b> @($"{appointment.Price:C}")</p>
+
+            <!-- כפתורי עריכה ומחיקה -->
+            <div class="lesson-actions">
+                <button class="btn-edit" @onclick="() => EditLesson(appointment)">✏️ עריכה</button>
+                <button class="btn-delete" @onclick="() => DeleteLesson(appointment)">🗑️ מחיקה</button>
+            </div>
+        </div>
+
+        <!-- טבלת שיעורים נוספים -->
+        @if (sameDayLessons.Any())
+    {
+        <h4>📅 שיעורים נוספים באותו יום:</h4>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>⏰ זמן</th>
+                    <th>👤 תלמיד</th>
+                    <th>🚗 סוג שיעור</th>
+                    <th>💰 מחיר</th>
+                    <th>🛠️ פעולות</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lesson in sameDayLessons)
+            {
+                <tr class="@(lesson.Start == appointment.Start ? "highlighted" : "")">
+                    <td>@lesson.Start.ToString("HH:mm") - @lesson.End.ToString("HH:mm")</td>
+                    <td>@lesson.StudentName</td>
+                    <td>@lesson.LessonType</td>
+                    <td>@($"{lesson.Price:C}")</td>
+                    <td>
+                        <button class="btn-edit" @onclick="() => EditLesson(lesson)">✏️</button>
+                        <button class="btn-delete" @onclick="() => DeleteLesson(lesson)">🗑️</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>❌ אין שיעורים נוספים לאותו יום.</p>
+    }
+    </div>, new DialogOptions { Width = "650px", Height = "550px", Resizable = true });
+        }
+    }
+
+    private async Task EditLesson(Appointment lesson)
+    {
+        Console.WriteLine($"✏️ עריכת שיעור: {lesson.StudentName}, {lesson.Start}");
+    }
+
+    private async Task DeleteLesson(Appointment lesson)
+    {
+        bool confirmed = (await DialogService.Confirm("האם אתה בטוח שברצונך למחוק את השיעור?", "אישור מחיקה")) ?? false;
+        if (!confirmed) return;
+
+        try
+        {
+            await Http.DeleteAsync($"api/Lessons/{lesson.LessonId}");
+
+            // עדכון הרשימה לאחר מחיקה
+            sameDayLessons = sameDayLessons.Where(l => l.Start != lesson.Start).ToList();
+            appointments = appointments.Where(l => l.Start != lesson.Start).ToList();
+
+            Console.WriteLine($"🗑️ שיעור של {lesson.StudentName} בתאריך {lesson.Start} נמחק בהצלחה.");
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ שגיאה במחיקת השיעור: {ex.Message}");
+        }
+    }
+
+
+
+}
+

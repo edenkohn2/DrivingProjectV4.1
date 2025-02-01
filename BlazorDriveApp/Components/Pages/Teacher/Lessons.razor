@@ -196,6 +196,17 @@
     private string StudentName { get; set; } = "Eden Kon"; // Example, replace with dynamic data
     private string LessonType { get; set; } = "";
     private string _lessonStartTime;
+    [Inject] private NavigationManager NavManager { get; set; }
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(NavManager.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("name", out var name))
+        {
+            StudentName = name;
+        }
+    }
 
     private string LessonStartTime
     {
@@ -316,12 +327,14 @@
         var lesson = new Lesson
             {
                 StudentId = studentId,
-                InstructorId = AuthService.UserId, // Add AuthService for current user ID
+                StudentName = StudentName, // ✅ תוקן
+                InstructorId = AuthService.UserId,
                 Date = DateTime.ParseExact(lessonDateTime, "yyyy-MM-dd HH:mm", null),
                 Duration = Duration,
                 LessonType = LessonType,
                 Price = Price
             };
+
 
         try
         {

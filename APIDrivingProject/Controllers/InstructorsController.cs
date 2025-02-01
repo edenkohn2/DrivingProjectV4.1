@@ -140,14 +140,20 @@ namespace APIDrivingProject.Controllers
         {
             try
             {
-                var schedule = new List<Lesson>();
+                var schedule = new List<object>();
 
                 using (var connection = _databaseService.GetConnection())
                 {
                     connection.Open();
-                    var query = @"SELECT l.LessonId, l.Date, l.Duration, l.LessonType 
-                          FROM lessons l
-                          WHERE l.InstructorId = @InstructorId";
+                    var query = @"
+                SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price, 
+                       CONCAT(p.FirstName, ' ', p.LastName) AS StudentName
+                FROM lessons l
+                INNER JOIN student s ON l.StudentId = s.StudentId
+                INNER JOIN person p ON s.StudentId = p.PersonId
+                WHERE l.InstructorId = @InstructorId
+                ORDER BY l.Date";
+
                     var command = new MySqlCommand(query, connection);
                     command.Parameters.AddWithValue("@InstructorId", instructorId);
 
@@ -155,12 +161,14 @@ namespace APIDrivingProject.Controllers
                     {
                         while (reader.Read())
                         {
-                            schedule.Add(new Lesson
+                            schedule.Add(new
                             {
                                 LessonId = reader.GetInt32("LessonId"),
                                 Date = reader.GetDateTime("Date"),
                                 Duration = reader.GetInt32("Duration"),
-                                LessonType = reader.GetString("LessonType")
+                                LessonType = reader.GetString("LessonType"),
+                                Price = reader.GetDecimal("Price"),
+                                StudentName = reader.GetString("StudentName")
                             });
                         }
                     }
@@ -173,6 +181,8 @@ namespace APIDrivingProject.Controllers
                 return StatusCode(500, $"Error fetching schedule: {ex.Message}");
             }
         }
+
+
 
 
 

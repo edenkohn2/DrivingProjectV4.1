@@ -149,7 +149,8 @@ namespace APIDrivingProject.Controllers
                             Date = reader.GetDateTime("Date"),
                             Duration = reader.GetInt32("Duration"),
                             LessonType = reader.GetString("LessonType"),
-                            Price = reader.GetDecimal("Price")
+                            Price = reader.GetDecimal("Price"),
+                            StudentName = reader.GetString("StudentName") // הוסף זאת!
                         });
                     }
                 }
@@ -157,6 +158,8 @@ namespace APIDrivingProject.Controllers
 
             return lessons;
         }
+
+
         [HttpGet("{lessonId}")]
         public IActionResult GetLessonById(int lessonId)
         {
@@ -191,6 +194,56 @@ namespace APIDrivingProject.Controllers
             command.Parameters.AddWithValue("@LessonType", lesson.LessonType);
             command.Parameters.AddWithValue("@Price", lesson.Price);
         }
+        [HttpGet("instructor/{instructorId}/date/{date}")]
+        public IActionResult GetLessonsByInstructorAndDate(int instructorId, string date)
+        {
+            var lessons = ExecuteQuery(@"
+        SELECT l.LessonId, l.StudentId, l.InstructorId, l.Date, l.Duration, l.LessonType, l.Price,
+               CONCAT(p.FirstName, ' ', p.LastName) AS StudentName
+        FROM lessons l
+        INNER JOIN student s ON l.StudentId = s.StudentId
+        INNER JOIN person p ON s.StudentId = p.PersonId
+        WHERE l.InstructorId = @InstructorId AND DATE(l.Date) = @Date",
+                ("@InstructorId", instructorId),
+                ("@Date", date));
+
+            return Ok(lessons);
+        }
+
+        public static bool HasColumn(MySqlDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        [HttpGet("instructor/{instructorId}/week/{startOfWeek}/{endOfWeek}")]
+        public IActionResult GetLessonsByInstructorAndWeek(int instructorId, string startOfWeek, string endOfWeek)
+        {
+            var lessons = ExecuteQuery(@"
+        SELECT l.LessonId, l.StudentId, l.InstructorId, l.Date, l.Duration, l.LessonType, l.Price, 
+               CONCAT(p.FirstName, ' ', p.LastName) AS StudentName
+        FROM lessons l
+        INNER JOIN student s ON l.StudentId = s.StudentId
+        INNER JOIN person p ON s.StudentId = p.PersonId
+        WHERE l.InstructorId = @InstructorId 
+        AND DATE(l.Date) BETWEEN @StartOfWeek AND @EndOfWeek",
+                ("@InstructorId", instructorId),
+                ("@StartOfWeek", startOfWeek),
+                ("@EndOfWeek", endOfWeek)
+            );
+
+            return Ok(lessons);
+        }
+        
+
+
+
+
     }
 
 }

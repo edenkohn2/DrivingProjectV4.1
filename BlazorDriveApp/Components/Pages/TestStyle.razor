@@ -1,0 +1,61 @@
+﻿@page "/TestStyle"
+@using Radzen
+@using Radzen.Blazor
+
+<h3>Radzen Scheduler Example</h3>
+
+<RadzenScheduler TItem="Appointment"
+                 Data="@appointments"
+                 StartProperty="Start"
+                 EndProperty="End"
+                 TextProperty="Title"
+                 SlotRender="@OnSlotRender"
+                 AppointmentRender="@OnAppointmentRender"
+                 AppointmentSelect="@OnAppointmentSelect"
+                 style="height: 768px;">
+    <RadzenDayView />
+    <RadzenWeekView />
+    <RadzenMonthView />
+</RadzenScheduler>
+
+@code {
+    // נתוני דוגמה
+    List<Appointment> appointments = new List<Appointment>
+    {
+        new Appointment
+        {
+            Title = "Meeting with Team",
+            Start = new DateTime(2025, 1, 27, 10, 0, 0),
+            End = new DateTime(2025, 1, 27, 11, 0, 0)
+        },
+        new Appointment
+        {
+            Title = "Doctor's Appointment",
+            Start = new DateTime(2025, 1, 28, 14, 0, 0),
+            End = new DateTime(2025, 1, 28, 15, 0, 0)
+        }
+    };
+
+    // פונקציות
+    void OnSlotRender(SchedulerSlotRenderEventArgs args)
+    {
+        Console.WriteLine($"Slot from {args.Start} to {args.End}");
+    }
+
+    void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<Appointment> args)
+    {
+        Console.WriteLine($"Rendering appointment: {args.Data.Title}");
+    }
+
+    void OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<Appointment> args)
+    {
+        Console.WriteLine($"Selected appointment: {args.Data.Title}");
+    }
+
+    public class Appointment
+    {
+        public string Title { get; set; }
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+    }
+}

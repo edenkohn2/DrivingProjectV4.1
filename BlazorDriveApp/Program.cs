@@ -5,6 +5,9 @@ using BlazorDriveApp.Components;
 using Blazored.LocalStorage;
 using APIDrivingProject.Models;
 using DrivingClassLibary.Models;
+using Radzen;
+using Syncfusion.Blazor;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,8 @@ builder.Services.AddHttpClient<UserService>(client =>
 
 builder.Services.AddScoped<UserService>(); // Register UserService
 builder.Services.AddScoped<DatabaseService>();
+builder.Services.AddScoped<DialogService>();
+builder.Services.AddSyncfusionBlazor();
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddAuthorization(options =>
 {
@@ -38,6 +43,8 @@ builder.Services.AddAuthentication("Cookies")
 builder.Services.AddAuthorization(); // הרשאות מבוססות תפקידים
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRadzenComponents();
+
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5082/") });
 

@@ -58,9 +58,11 @@
                         <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => ViewProgress(student.PersonId)">
                             <i class="fas fa-chart-line"></i> Progress
                         </button>
-                        <button style="background-color: #FF9800; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;" @onclick="() => AddLesson(student.PersonId)">
+                        <button style="background-color: #FF9800; color: white; padding: 10px; border: none; border-radius: 5px;"
+                                @onclick="() => AddLesson(student.PersonId, student.FirstName + ' ' + student.LastName)">
                             <i class="fas fa-plus"></i> Add Lesson
                         </button>
+
                     </td>
                 </tr>
             }
@@ -130,8 +132,9 @@
         Navigation.NavigateTo($"/progress_student/{studentId}");
     }
 
-    private void AddLesson(int studentId)
+    private void AddLesson(int studentId, string studentName)
     {
-        Navigation.NavigateTo($"/add_lesson/{studentId}");
+        Navigation.NavigateTo($"/add_lesson/{studentId}?name={Uri.EscapeDataString(studentName)}");
     }
+
 }

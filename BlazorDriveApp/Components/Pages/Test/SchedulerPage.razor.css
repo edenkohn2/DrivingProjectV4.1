@@ -1,0 +1,89 @@
+﻿/* כותרת הדף */
+.page-title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* התאמת גובה לוח הזמנים */
+.custom-scheduler {
+    border-radius: 10px;
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    height: 85vh; /* התאמת הגובה כך שהלוח ינצל יותר מקום */
+}
+
+/* כפתורי הניווט */
+.rz-button {
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+    .rz-button:hover {
+        background-color: #0056b3 !important;
+        color: white !important;
+        transform: scale(1.05);
+    }
+
+/* תצוגת לוח הזמנים */
+.rz-scheduler .rz-scheduler-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    font-size: 1rem;
+    border-bottom: 2px solid #007bff;
+    text-align: center;
+    padding: 10px;
+}
+
+.rz-scheduler .rz-event {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 5px;
+    transition: all 0.3s ease-in-out;
+}
+
+    .rz-scheduler .rz-event:hover {
+        transform: scale(1.05);
+    }
+
+/* כרטיס פרטי שיעור */
+.lesson-details {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.lesson-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+    .lesson-info h4 {
+        margin: 0;
+        color: #007bff;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+
+    .lesson-info p {
+        margin: 0;
+        font-size: 1rem;
+    }
