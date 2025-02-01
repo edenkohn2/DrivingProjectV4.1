@@ -6,19 +6,20 @@
 @using APIDrivingProject.Services;
 @using BlazorDriveApp.Models;
 @using DrivingClassLibary.Models;
+@using System.Globalization;
 
 @if (!shouldRender)
 {
-    <p>Redirecting...</p>
+    <p>מנתב...</p>
 }
 else
 {
     <div class="register-background">
-        <div class="register-container">
+        <div class="register-container animated slideIn">
             <h1 class="register-title">Sign Up</h1>
             <p class="register-subtitle">Join us and start learning today!</p>
 
-            <!-- Form Fields -->
+            <!-- First Name -->
             <div class="input-group">
                 <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
                 @if (!isFirstNameValid)
@@ -26,6 +27,7 @@ else
                     <p class="error-message">First name is required.</p>
                 }
             </div>
+            <!-- Last Name -->
             <div class="input-group">
                 <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
                 @if (!isLastNameValid)
@@ -33,6 +35,7 @@ else
                     <p class="error-message">Last name is required.</p>
                 }
             </div>
+            <!-- Email -->
             <div class="input-group">
                 <input type="email" placeholder="Email" @bind="email" class="input-field" />
                 @if (!isEmailUnique)
@@ -44,6 +47,7 @@ else
                     <p class="error-message">Please enter a valid email.</p>
                 }
             </div>
+            <!-- Password -->
             <div class="input-group">
                 <input type="password" placeholder="Password" @bind="password" class="input-field" />
                 @if (!isPasswordValid)
@@ -51,6 +55,7 @@ else
                     <p class="error-message">Password must be at least 8 characters long.</p>
                 }
             </div>
+            <!-- Confirm Password -->
             <div class="input-group">
                 <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
                 @if (!isPasswordMatch)
@@ -58,6 +63,7 @@ else
                     <p class="error-message">Passwords do not match.</p>
                 }
             </div>
+            <!-- Phone Number -->
             <div class="input-group">
                 <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
                 @if (!isPhoneNumberValid)
@@ -65,13 +71,15 @@ else
                     <p class="error-message">Phone number is required.</p>
                 }
             </div>
+            <!-- Birth Date (Custom Input) -->
             <div class="input-group">
-                <input type="date" @bind="birthDate" class="input-field" />
+                <input type="text" placeholder="Birth Date (DD/MM/YYYY)" @bind="birthDateString" class="input-field" />
                 @if (!isBirthDateValid)
                 {
-                    <p class="error-message">You must be at least 16.5 years old.</p>
+                    <p class="error-message">Please enter a valid birth date (DD/MM/YYYY) and ensure you are at least 16.5 years old.</p>
                 }
             </div>
+            <!-- Address -->
             <div class="input-group">
                 <input type="text" placeholder="Address" @bind="address" class="input-field" />
                 @if (!isAddressValid)
@@ -79,6 +87,7 @@ else
                     <p class="error-message">Address is required.</p>
                 }
             </div>
+            <!-- Role Selection -->
             <div class="input-group">
                 <select @bind="role" class="input-field">
                     <option value="">Select Role</option>
@@ -90,97 +99,115 @@ else
                     <p class="error-message">Role selection is required.</p>
                 }
             </div>
-            <button @onclick="HandleRegister" class="register-button">Register</button>
+            <button @onclick="HandleRegister" class="register-button animated pulse">Register</button>
         </div>
     </div>
 }
 
 <style>
-    /* Background */
+    /* אנימציות */
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+    .animated {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+    }
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    /* רקע הדף – רקע נקי, מלא חלון וללא רווחים מיותרים */
     .register-background {
-        background-color: #141414;
+        background-color: #f4f4f4;
         height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        overflow: hidden;
     }
-
-    /* Container */
+    
+    /* מכולת ההרשמה – חלונית רחבה ונקייה, מותאמת לחלון */
     .register-container {
-        max-width: 400px;
         width: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 20px 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 40px 50px;
+    }
+    
+    .register-title {
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 10px;
         text-align: center;
     }
-
-    .register-title {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
-
+    
     .register-subtitle {
-        font-size: 1rem;
-        color: #b3b3b3;
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    /* קבוצות קלט – עיצוב נקי ומודרני */
+    .input-group {
         margin-bottom: 20px;
     }
-
-    /* Input Fields */
-    .input-group {
-        margin-bottom: 15px;
-        text-align: left;
-    }
-
     .input-field {
         width: 100%;
-        padding: 10px;
+        padding: 14px 16px;
         font-size: 1rem;
-        border: 1px solid #333;
-        border-radius: 4px;
-        background-color: #333;
-        color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        color: #333;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-
-        .input-field::placeholder {
-            color: #b3b3b3;
-        }
-
-        .input-field:focus {
-            border-color: #e50914;
-            outline: none;
-        }
-
-    /* Error Messages */
+    .input-field::placeholder {
+        color: #aaa;
+    }
+    .input-field:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    /* הודעות שגיאה */
     .error-message {
-        color: #e87c03;
+        color: #d9534f;
         font-size: 0.85rem;
         margin-top: 5px;
     }
-
-    /* Register Button */
+    
+    /* כפתור הרשמה – עיצוב מודרני עם Gradient עדין ואפקטי Hover */
     .register-button {
         width: 100%;
-        padding: 12px 20px;
-        font-size: 1rem;
-        color: white;
-        background-color: #e50914;
+        padding: 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(45deg, #007bff, #00c6ff);
         border: none;
-        border-radius: 4px;
+        border-radius: 50px;
         cursor: pointer;
-        margin-top: 15px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-top: 20px;
     }
-
-        .register-button:hover {
-            background-color: #f40612;
-        }
-
-        .register-button:active {
-            transform: scale(0.98);
-        }
+    .register-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
+    .register-button:active {
+        transform: translateY(0);
+    }
 </style>
 
 @code {
@@ -190,6 +217,7 @@ else
     private string password = "";
     private string confirmPassword = "";
     private string phoneNumber = "";
+    private string birthDateString = "";
     private DateTime birthDate;
     private string address = "";
     private string role = "";
@@ -241,7 +269,7 @@ else
 
     private async Task HandleRegister()
     {
-        // Reset validation flags
+        // בדיקות בסיסיות
         isFirstNameValid = !string.IsNullOrEmpty(firstName);
         isLastNameValid = !string.IsNullOrEmpty(lastName);
         isPhoneNumberValid = !string.IsNullOrEmpty(phoneNumber);
@@ -254,21 +282,28 @@ else
             return;
         }
 
-        // Use validation methods
-        isBirthDateValid = RegistrationValidator.IsBirthDateValid(birthDate);
+        // המרת תאריך הלידה ובדיקת תקינות – פורמט DD/MM/yyyy
+        if (!DateTime.TryParseExact(birthDateString, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out birthDate))
+        {
+            isBirthDateValid = false;
+        }
+        else
+        {
+            isBirthDateValid = RegistrationValidator.IsBirthDateValid(birthDate);
+        }
+
+        // בדיקות מתקדמות (בהנחה שקיימות מתודות ב־RegistrationValidator)
         isPasswordValid = RegistrationValidator.IsPasswordValid(password);
         isPasswordMatch = RegistrationValidator.DoPasswordsMatch(password, confirmPassword);
         isEmailUnique = await RegistrationValidator.IsEmailUniqueAsync(email, Http);
         isValidEmail = RegistrationValidator.IsEmailValid(email);
 
-        // Exit if any validation fails
         if (!isBirthDateValid || !isPasswordValid || !isPasswordMatch || !isEmailUnique || !isValidEmail)
         {
             Console.WriteLine("Registration validation failed.");
             return;
         }
 
-        // Register only if all validations pass
         var response = await Http.PostAsJsonAsync("api/users/register", new
         {
             FirstName = firstName,

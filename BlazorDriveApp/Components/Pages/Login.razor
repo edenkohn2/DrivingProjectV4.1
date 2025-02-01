@@ -8,59 +8,192 @@
 
 @if (!shouldRender)
 {
-    <p>Redirecting...</p>
+    <p>מנתב...</p>
 }
 else
 {
-    <div class="auth-container">
-        <div class="auth-box">
-            <h2>Sign In</h2>
-            <p>Welcome back! Please sign in to your account.</p>
-            <div class="input-group">
-                <label>Email</label>
-                <InputText @bind-Value="email" class="input-field" />
+    <div class="login-background">
+        <div class="login-container">
+            <div class="login-card animated fadeInUp">
+                <h2 class="login-title">כניסה למערכת</h2>
+                <p class="login-subtitle">ברוכים השבים! אנא התחבר לחשבונך.</p>
+                <div class="input-group">
+                    <label>דוא"ל</label>
+                    <InputText @bind-Value="email" class="input-field" placeholder="הכנס את דוא''ל שלך" />
+                </div>
+                <div class="input-group">
+                    <label>סיסמה</label>
+                    <InputText @bind-Value="password" type="password" class="input-field" placeholder="הכנס את סיסמתך" />
+                </div>
+                @if (loginFailed)
+                {
+                    <div class="error-message">התחברות נכשלה. אנא נסה שוב.</div>
+                }
+                <button class="login-button" @onclick="HandleLogin">כניסה</button>
             </div>
-            <div class="input-group">
-                <label>Password</label>
-                <InputText @bind-Value="password" type="password" class="input-field" />
-            </div>
-            <button class="auth-button" @onclick="HandleLogin">Sign In</button>
         </div>
     </div>
 }
+
+@if (isRedirecting)
+{
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-message">מכניסים אותך...</div>
+    </div>
+}
+
 <style>
-    .auth-container {
+    /* אנימציית כניסה */
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animated {
+        animation-duration: 0.8s;
+        animation-fill-mode: both;
+    }
+    
+    /* רקע מינימליסטי */
+    .login-background {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: #1c1c1c;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     }
-
-    .auth-box {
-        background: #000;
-        padding: 2rem;
-        border-radius: 10px;
-        color: #fff;
-        text-align: center;
+    
+    /* מכולת הכרטיס */
+    .login-container {
+        width: 100%;
         max-width: 400px;
-        width: 100%;
+        padding: 20px;
     }
-
-    .auth-button {
-        background: #e50914;
-        color: #fff;
-        padding: 10px;
-        width: 100%;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+    .login-card {
+        background: #ffffff;
+        padding: 40px 30px;
+        border-radius: 15px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        color: #333;
+        text-align: center;
+    }
+    
+    /* כותרות וטקסט */
+    .login-title {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .login-subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    /* קבוצת קלט */
+    .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
         font-size: 1rem;
+        color: #555;
     }
-
-        .auth-button:hover {
-            background: #f40612;
+    .input-field {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+        color: #333;
+        transition: border-color 0.3s ease;
+    }
+    .input-field::placeholder {
+        color: #aaa;
+    }
+    .input-field:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    /* כפתור כניסה מעוצב עם Gradient ואפקטי Hover */
+    .login-button {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .login-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+    }
+    .login-button:active {
+        transform: translateY(0);
+    }
+    
+    /* הודעת שגיאה */
+    .error-message {
+        color: #ff4d4d;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+    
+    /* אנימציית הספינר */
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+    /* כותרת "מכניסים אותך..." מעוצבת בצורה מטורפת */
+    .loading-message {
+        font-size: 2.2rem;
+        font-weight: bold;
+        background: linear-gradient(45deg, #00c6ff, #007bff, #00c6ff);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        animation: textGlow 2s infinite alternate, fadeInUp 1s ease;
+        text-shadow: 0px 0px 15px rgba(0, 123, 255, 0.8);
+    }
+    @@keyframes textGlow {
+        from {
+            text-shadow: 0 0 10px #00c6ff, 0 0 20px #007bff, 0 0 30px #00c6ff;
         }
+        to {
+            text-shadow: 0 0 20px #00c6ff, 0 0 30px #007bff, 0 0 40px #00c6ff;
+        }
+    }
 </style>
 
 @code {
@@ -68,6 +201,7 @@ else
     private string password = "";
     private bool loginFailed = false;
     private bool shouldRender = true;
+    private bool isRedirecting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,8 +238,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var jsonResponse = await response.Content.ReadFromJsonAsync<Dictionary<string, JsonElement>>();
-
-                if (jsonResponse.TryGetValue("person", out var personElement))
+                if (jsonResponse != null && jsonResponse.TryGetValue("person", out var personElement))
                 {
                     var userName = $"{personElement.GetProperty("firstName").GetString()} {personElement.GetProperty("lastName").GetString()}";
                     var userId = personElement.GetProperty("personId").GetInt32();
@@ -113,6 +246,10 @@ else
 
                     AuthService.SetUser(userName, role, userId);
 
+                    // מציגים אנימציית ספינר עם הכותרת "מכניסים אותך..." לפני הניתוב
+                    isRedirecting = true;
+                    StateHasChanged();
+                    await Task.Delay(2000); // המתנה של 2 שניות להצגת האנימציה
                     await RedirectToDashboard();
                 }
                 else
@@ -132,88 +269,3 @@ else
         }
     }
 }
-
-
-<style>
-    /* Background */
-    .login-background {
-        background-color: #141414;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Container */
-    .login-container {
-        max-width: 400px;
-        width: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        color: white;
-    }
-
-    .login-title {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
-
-    .login-subtitle {
-        font-size: 1rem;
-        color: #b3b3b3;
-        margin-bottom: 20px;
-    }
-
-    .input-group {
-        margin-bottom: 15px;
-    }
-
-    .input-field {
-        width: 100%;
-        padding: 10px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 4px;
-        background-color: #333;
-        color: white;
-    }
-
-        .input-field::placeholder {
-            color: #b3b3b3;
-        }
-
-        .input-field:focus {
-            border: 1px solid #e50914;
-            outline: none;
-        }
-
-    .login-button {
-        width: 100%;
-        padding: 12px 20px;
-        font-size: 1rem;
-        color: white;
-        background-color: #e50914;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 15px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-        .login-button:hover {
-            background-color: #f40612;
-        }
-
-        .login-button:active {
-            transform: scale(0.98);
-        }
-
-    .error-message {
-        color: #e87c03;
-        font-size: 0.85rem;
-        margin-top: 10px;
-    }
-</style>

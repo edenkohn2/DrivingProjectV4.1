@@ -6,30 +6,32 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<div style="background: linear-gradient(90deg, #3f51b5, #5c6bc0); padding: 20px; color: white; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h2 style="margin: 0; font-size: 1.8rem;">Student List</h2>
-        <p style="margin: 0; font-size: 1rem;">Manage and track the progress of your students.</p>
+<!-- כותרת ראשית -->
+<div class="header-card">
+    <div class="header-text">
+        <h2>רשימת תלמידים</h2>
+        <p>נהל ועקוב אחרי התלמידים שלך</p>
     </div>
 </div>
 
-<div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px; gap: 10px;">
-    <input type="text" placeholder="Search by name..."
-           @oninput="(e) => PerformSearch(e.Value?.ToString())"
-           style="padding: 10px; width: 40%; border: 1px solid #ccc; border-radius: 5px;">    <button style="background: #3f51b5; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;" @onclick="SearchStudents">
-        <i class="fas fa-search"></i> Search
+<!-- שורת חיפוש -->
+<div class="search-container">
+    <input type="text" placeholder="חפש לפי שם..." @oninput="(e) => PerformSearch(e.Value?.ToString())" />
+    <button @onclick="SearchStudents">
+        <i class="fas fa-search"></i> חיפוש
     </button>
 </div>
 
-<table style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 10px; box-shadow: 0px 5px 15px rgba(0,0,0,0.1); overflow: hidden;">
-    <thead style="background-color: #3f51b5; color: white;">
+<!-- טבלת תלמידים -->
+<table class="styled-table">
+    <thead>
         <tr>
-            <th style="padding: 15px; text-align: left;">Name</th>
-            <th style="padding: 15px; text-align: left;">Email</th>
-            <th style="padding: 15px; text-align: left;">Phone</th>
-            <th style="padding: 15px; text-align: left;">Lessons Taken</th>
-            <th style="padding: 15px; text-align: left;">Status</th>
-            <th style="padding: 15px; text-align: center;">Actions</th>
+            <th>שם</th>
+            <th>דוא"ל</th>
+            <th>טלפון</th>
+            <th>שיעורים</th>
+            <th>סטטוס</th>
+            <th>פעולות</th>
         </tr>
     </thead>
     <tbody>
@@ -37,32 +39,30 @@
         {
             @foreach (var student in filteredStudents)
             {
-                <tr style="border-bottom: 1px solid #f0f0f0;">
-                    <td style="padding: 15px;">@student.FirstName @student.LastName</td>
-                    <td style="padding: 15px;">@student.Email</td>
-                    <td style="padding: 15px;">@student.PhoneNumber</td>
-                    <td style="padding: 15px; text-align: center;">@student.LessonsTaken</td>
-                    <td style="padding: 15px;">
-                        <span style="color: @(student.IsActive ? "#4CAF50" : "#F44336"); font-weight: bold;">
+                <tr>
+                    <td>@student.FirstName @student.LastName</td>
+                    <td>@student.Email</td>
+                    <td>@student.PhoneNumber</td>
+                    <td class="center">@student.LessonsTaken</td>
+                    <td>
+                        <span class="status @(student.IsActive ? "active" : "inactive")">
                             <i class="@(student.IsActive ? "fas fa-check-circle" : "fas fa-times-circle")"></i>
-                            @(student.IsActive ? "Active" : "Inactive")
+                            @(student.IsActive ? "פעיל" : "לא פעיל")
                         </span>
                     </td>
-                    <td style="padding: 15px; text-align: center;">
-                        <button style="background-color: #2196F3; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => EditStudent(student.PersonId)">
-                            <i class="fas fa-edit"></i> Edit
+                    <td class="center">
+                        <button class="btn-edit" @onclick="() => EditStudent(student.PersonId)">
+                            <i class="fas fa-edit"></i> עריכה
                         </button>
-                        <button style="background-color: #F44336; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => DeactivateStudent(student.PersonId)">
-                            <i class="fas fa-ban"></i> Deactivate
+                        <button class="btn-deactivate" @onclick="() => DeactivateStudent(student.PersonId)">
+                            <i class="fas fa-ban"></i> נטרול
                         </button>
-                        <button style="background-color: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; margin-right: 5px;" @onclick="() => ViewProgress(student.PersonId)">
-                            <i class="fas fa-chart-line"></i> Progress
+                        <button class="btn-progress" @onclick="() => ViewProgress(student.PersonId)">
+                            <i class="fas fa-chart-line"></i> התקדמות
                         </button>
-                        <button style="background-color: #FF9800; color: white; padding: 10px; border: none; border-radius: 5px;"
-                                @onclick="() => AddLesson(student.PersonId, student.FirstName + ' ' + student.LastName)">
-                            <i class="fas fa-plus"></i> Add Lesson
+                        <button class="btn-add" @onclick="() => AddLesson(student.PersonId, student.FirstName + ' ' + student.LastName)">
+                            <i class="fas fa-plus"></i> הוספת שיעור
                         </button>
-
                     </td>
                 </tr>
             }
@@ -70,11 +70,154 @@
         else
         {
             <tr>
-                <td colspan="6" style="padding: 20px; text-align: center; color: #999;">No students found.</td>
+                <td colspan="6" class="no-results">לא נמצאו תלמידים.</td>
             </tr>
         }
     </tbody>
 </table>
+<style>
+/* הגדרות כלליות */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* כותרת ראשית */
+.header-card {
+    background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1s ease-in-out;
+}
+.header-text h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #fff;
+}
+.header-text p {
+    margin: 0;
+    font-size: 1rem;
+    color: #e0e0e0;
+}
+
+/* שורת חיפוש */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease;
+}
+.search-container input[type="text"] {
+    padding: 10px;
+    width: 40%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+.search-container input[type="text"]:focus {
+    border-color: #3f51b5;
+    outline: none;
+}
+.search-container button {
+    background: linear-gradient(45deg, #3f51b5, #5c6bc0);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.search-container button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* טבלה */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    animation: fadeIn 1s ease;
+}
+.styled-table th, .styled-table td {
+    padding: 15px;
+    text-align: left;
+}
+.styled-table th {
+    background-color: #3f51b5;
+    color: #fff;
+    font-size: 1.1rem;
+}
+.styled-table tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.3s ease;
+}
+.styled-table tr:hover {
+    background-color: #f9f9f9;
+}
+.center { text-align: center; }
+.no-results { padding: 20px; text-align: center; color: #999; }
+
+/* סטיילינג עבור סטטוס תלמיד */
+.status {
+    font-weight: bold;
+}
+.status.active {
+    color: #4CAF50;
+}
+.status.inactive {
+    color: #F44336;
+}
+.status i {
+    margin-right: 5px;
+}
+
+/* כפתורי פעולה */
+.btn-edit, .btn-deactivate, .btn-progress, .btn-add {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-edit {
+    background-color: #2196F3;
+    color: #fff;
+}
+.btn-deactivate {
+    background-color: #F44336;
+    color: #fff;
+}
+.btn-progress {
+    background-color: #4CAF50;
+    color: #fff;
+}
+.btn-add {
+    background-color: #FF9800;
+    color: #fff;
+}
+.btn-edit:hover, .btn-deactivate:hover, .btn-progress:hover, .btn-add:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
+
+
+/* אנימציית fadeIn */
+@@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 
 @code {
     private List<Student> students = new();
@@ -113,8 +256,7 @@
                 (s.FirstName + " " + s.LastName).Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
             ).ToList();
         }
-
-        StateHasChanged(); // מבטיח שה-UI יתעדכן בזמן אמת
+        StateHasChanged(); // רענון הממשק
     }
 
     private void EditStudent(int studentId)
@@ -136,5 +278,4 @@
     {
         Navigation.NavigateTo($"/add_lesson/{studentId}?name={Uri.EscapeDataString(studentName)}");
     }
-
 }

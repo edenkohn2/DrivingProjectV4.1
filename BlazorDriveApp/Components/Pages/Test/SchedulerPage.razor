@@ -24,123 +24,119 @@
 <RadzenDialog />
 
 <style>
-    /* כותרת הדף */
-    .page-title {
-        font-size: 2rem;
-        font-weight: bold;
-        text-align: center;
-        color: #007bff;
-        margin-bottom: 20px;
-        padding: 10px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    }
+  /* כותרת הדף */
+  .page-title {
+      font-size: 2.2rem;
+      font-weight: bold;
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+  }
 
-    /* התאמת גובה לוח הזמנים */
-    .custom-scheduler {
-        border-radius: 10px;
-        padding: 15px;
-        background-color: white;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        height: 85vh; /* התאמת הגובה כך שהלוח ינצל יותר מקום */
-    }
+  /* עיצוב לוח הזמנים */
+  .custom-scheduler {
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      height: 85vh; /* מנצל יותר מקום */
+      animation: fadeIn 1s ease-in-out;
+  }
 
-    /* כפתורי הניווט */
-    .rz-button {
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: bold;
-        transition: all 0.3s ease-in-out;
-    }
+  /* כפתורי ניווט (Radzen) */
+  .rz-button {
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      transition: all 0.3s ease-in-out;
+  }
+  .rz-button:hover {
+      background-color: #0056b3 !important;
+      color: white !important;
+      transform: scale(1.05);
+  }
 
-        .rz-button:hover {
-            background-color: #0056b3 !important;
-            color: white !important;
-            transform: scale(1.05);
-        }
+  /* תצוגת לוח הזמנים – כותרת ראשית של התאריכים */
+  .rz-scheduler .rz-scheduler-header {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      font-size: 1rem;
+      border-bottom: 2px solid #007bff;
+      text-align: center;
+      padding: 10px;
+  }
 
-    /* תצוגת לוח הזמנים */
-    .rz-scheduler .rz-scheduler-header {
-        background-color: #f8f9fa;
-        font-weight: bold;
-        font-size: 1rem;
-        border-bottom: 2px solid #007bff;
-        text-align: center;
-        padding: 10px;
-    }
+  /* אירועים בלוח הזמנים */
+  .rz-scheduler .rz-event {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      padding: 5px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .rz-scheduler .rz-event:hover {
+      transform: scale(1.05);
+  }
 
-    .rz-scheduler .rz-event {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        color: white;
-        font-weight: bold;
-        border-radius: 8px;
-        padding: 5px;
-        transition: all 0.3s ease-in-out;
-    }
+  /* כרטיס פרטי שיעור */
+  .lesson-details {
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+  }
 
-        .rz-scheduler .rz-event:hover {
-            transform: scale(1.05);
-        }
+  .lesson-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 10px;
+  }
+  .lesson-info h4 {
+      margin: 0;
+      color: #007bff;
+      font-size: 1rem;
+      font-weight: bold;
+  }
+  .lesson-info p {
+      margin: 0;
+      font-size: 1rem;
+  }
 
-    /* כרטיס פרטי שיעור */
-    lesson-details {
-        padding: 15px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
-    }
+  .selected-lesson {
+      background: #fffae6;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      border-left: 5px solid #ffcc00;
+  }
 
-    .lesson-info {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px;
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin-bottom: 10px;
-    }
+  .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 16px;
+  }
+  .styled-table th, .styled-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+  }
+  .styled-table th {
+      background-color: #007bff;
+      color: white;
+  }
 
-        .lesson-info h4 {
-            margin: 0;
-            color: #007bff;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .lesson-info p {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-    .selected-lesson {
-        background: #fffae6;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        border-left: 5px solid #ffcc00;
-    }
-
-    .styled-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 16px;
-    }
-
-        .styled-table th, .styled-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .styled-table th {
-            background-color: #007bff;
-            color: white;
-        }
-
-    /* סימון שיעור נוכחי */
     .highlighted {
         background-color: #d4edda;
     }
@@ -164,7 +160,14 @@
         cursor: pointer;
         border-radius: 5px;
     }
+
+  /* אנימציית fadeIn */
+  @@keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
 </style>
+
 
 @code {
     private RadzenScheduler<Appointment> scheduler;
@@ -221,8 +224,13 @@
 
             if (lessons != null)
             {
-                sameDayLessons = lessons.Select(lesson => new Appointment
+                // סינון השיעור הנוכחי מהרשימה של השיעורים הנוספים וסידור לפי זמן
+                sameDayLessons = lessons
+            .Where(lesson => lesson.LessonId != appointment.LessonId) // להסיר את השיעור הנוכחי
+            .OrderBy(lesson => lesson.Date) // סידור לפי זמן התחלה
+            .Select(lesson => new Appointment
                         {
+                            LessonId = lesson.LessonId,
                             Start = lesson.Date,
                             End = lesson.Date.AddMinutes(lesson.Duration),
                             StudentName = lesson.StudentName ?? "לא ידוע",
@@ -230,13 +238,13 @@
                             Price = lesson.Price
                         }).ToList();
 
-                Console.WriteLine($"📋 כמות שיעורים באותו יום: {sameDayLessons.Count}");
+                Console.WriteLine($"📋 כמות שיעורים באותו יום (ללא הנוכחי): {sameDayLessons.Count}");
             }
 
             StateHasChanged();
 
             await DialogService.OpenAsync("📌 פרטי שיעור",
-        ds => @<div class="lesson-details">
+    ds => @<div class="lesson-details">
         <!-- פרטי השיעור הנבחר -->
         <div class="selected-lesson">
             <h4>⭐ שיעור נוכחי</h4>
@@ -269,7 +277,7 @@
             <tbody>
                 @foreach (var lesson in sameDayLessons)
             {
-                <tr class="@(lesson.Start == appointment.Start ? "highlighted" : "")">
+                <tr>
                     <td>@lesson.Start.ToString("HH:mm") - @lesson.End.ToString("HH:mm")</td>
                     <td>@lesson.StudentName</td>
                     <td>@lesson.LessonType</td>
@@ -291,33 +299,53 @@
         }
     }
 
+
     private async Task EditLesson(Appointment lesson)
     {
         Console.WriteLine($"✏️ עריכת שיעור: {lesson.StudentName}, {lesson.Start}");
     }
 
-    private async Task DeleteLesson(Appointment lesson)
+    private async Task DeleteLesson(Appointment appointment)
     {
         bool confirmed = (await DialogService.Confirm("האם אתה בטוח שברצונך למחוק את השיעור?", "אישור מחיקה")) ?? false;
         if (!confirmed) return;
 
         try
         {
-            await Http.DeleteAsync($"api/Lessons/{lesson.LessonId}");
+            var response = await Http.DeleteAsync($"api/Lessons/{appointment.LessonId}");
 
-            // עדכון הרשימה לאחר מחיקה
-            sameDayLessons = sameDayLessons.Where(l => l.Start != lesson.Start).ToList();
-            appointments = appointments.Where(l => l.Start != lesson.Start).ToList();
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"✅ שיעור {appointment.LessonId} נמחק בהצלחה מהדאטהבייס!");
 
-            Console.WriteLine($"🗑️ שיעור של {lesson.StudentName} בתאריך {lesson.Start} נמחק בהצלחה.");
+                // מחיקת השיעור מהרשימה
+                appointments = appointments.Where(l => l.LessonId != appointment.LessonId).ToList();
+                sameDayLessons = sameDayLessons.Where(l => l.LessonId != appointment.LessonId).ToList();
 
-            StateHasChanged();
+                // אם השיעור שנמחק הוא השיעור הנוכחי -> לסגור את הכרטסייה
+                if (selectedDate == appointment.Start)
+                {
+                    Console.WriteLine("📌 השיעור הנוכחי נמחק! סוגר את הכרטסייה...");
+                    DialogService.Close();
+                }
+
+                // רענון UI
+                StateHasChanged();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"❌ שגיאה במחיקת השיעור: {errorMessage}");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ שגיאה במחיקת השיעור: {ex.Message}");
+            Console.WriteLine($"❌ שגיאה בזמן שליחת בקשת מחיקה: {ex.Message}");
         }
     }
+
+
+
 
 
 

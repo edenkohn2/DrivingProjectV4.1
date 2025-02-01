@@ -6,17 +6,89 @@
 
 <div class="home-container">
     <div class="overlay"></div>
-    <div class="content">
-        <h1>Welcome to <span class="highlight">DriveManager</span></h1>
-        <p>Manage your driving school with ease and efficiency.</p>
+    <div class="content animated fadeInDown">
+        <h1 class="animated slideInRight">ברוכים הבאים ל-<span class="highlight">DriveManager</span></h1>
+        <p class="animated fadeInUp">נהל את בית הספר לנהיגה שלך בקלות וביעילות.</p>
         <div class="buttons">
-            <button class="btn btn-login" @onclick="NavigateToLogin">Login</button>
-            <button class="btn btn-register" @onclick="NavigateToRegister">Register</button>
+            <button class="btn btn-login" @onclick="NavigateToLogin">התחברות</button>
+            <button class="btn btn-register" @onclick="NavigateToRegister">הרשמה</button>
         </div>
     </div>
 </div>
 
 <style>
+    /* אנימציות Keyframes */
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    
+
+    @@keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* Classes לאנימציות */
+    .animated {
+        animation-duration: 1s;
+        animation-fill-mode: both;
+    }
+
+    .fadeInDown {
+        animation-name: fadeInDown;
+    }
+
+    .slideInRight {
+        animation-name: slideInRight;
+    }
+
+    .fadeInUp {
+        animation-name: fadeInUp;
+    }
+
+    /* עיצוב מכולת העמוד */
     .home-container {
         position: relative;
         height: 100vh;
@@ -25,8 +97,10 @@
         align-items: center;
         background: url('https://images.pexels.com/photos/14865958/pexels-photo-14865958.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260') center/cover no-repeat;
         overflow: hidden;
+        perspective: 1000px;
     }
 
+    /* שכבת Overaly עם אנימציית Pulse */
     .overlay {
         position: absolute;
         top: 0;
@@ -35,70 +109,130 @@
         height: 100%;
         background: rgba(0, 0, 0, 0.6);
         z-index: 1;
+        animation: pulse 6s infinite alternate ease-in-out;
     }
 
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.9;
+        }
+
+        50% {
+            transform: scale(1.02);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0.9;
+        }
+    }
+
+    /* עיצוב תוכן העמוד */
     .content {
         position: relative;
         z-index: 2;
         text-align: center;
-        color: white;
-        padding: 20px;
-        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 40px;
+        background: rgba(0, 0, 0, 0.85);
         border-radius: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-        max-width: 500px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+        max-width: 600px;
         width: 90%;
+        animation: fadeInDown 1.2s ease-out;
     }
 
         .content h1 {
-            font-size: 2.5rem;
+            font-size: 3.2rem;
             margin-bottom: 20px;
+            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
         }
 
         .content p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
         }
 
+    /* עיצוב טקסט מודגש עם אנימציית שינוי גוונים */
     .highlight {
-        color: #4CAF50;
+        background: linear-gradient(45deg, #ff3cac, #784ba0, #2b86c5);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 3s ease infinite;
     }
 
+    @@keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* עיצוב כפתורים */
     .buttons {
         display: flex;
         justify-content: center;
-        gap: 15px;
+        gap: 20px;
     }
 
     .btn {
-        padding: 15px 25px;
+        padding: 15px 35px;
         font-size: 1.2rem;
         font-weight: bold;
         cursor: pointer;
         border: none;
-        border-radius: 5px;
-        transition: transform 0.2s ease, background 0.3s ease;
+        border-radius: 50px;
+        transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+        text-transform: uppercase;
     }
 
+        .btn:focus {
+            outline: none;
+        }
+
     .btn-login {
-        background-color: #e50914;
+        background: linear-gradient(45deg, #e50914, #f6121d);
         color: white;
+        box-shadow: 5px 5px 15px rgba(229, 9, 20, 0.4), -5px -5px 15px rgba(229, 9, 20, 0.2);
     }
 
         .btn-login:hover {
-            background-color: #f6121d;
             transform: scale(1.1);
+            box-shadow: 0px 8px 20px rgba(229, 9, 20, 0.6);
         }
 
     .btn-register {
-        background-color: #007bff;
+        background: linear-gradient(45deg, #007bff, #0056b3);
         color: white;
+        box-shadow: 5px 5px 15px rgba(0, 123, 255, 0.4), -5px -5px 15px rgba(0, 123, 255, 0.2);
     }
 
         .btn-register:hover {
-            background-color: #0056b3;
             transform: scale(1.1);
+            box-shadow: 0px 8px 20px rgba(0, 123, 255, 0.6);
         }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 @code {

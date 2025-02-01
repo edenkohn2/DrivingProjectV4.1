@@ -1,34 +1,217 @@
-﻿@using APIDrivingProject.Services;
-
-@page "/admin_dashboard"
-@inject AuthService AuthService
+﻿@page "/admin_dashboard"
+@using APIDrivingProject.Services;
+@using DrivingClassLibary.Models;
 @inject NavigationManager Navigation
+@inject HttpClient Http
+@inject AuthService AuthService
 @rendermode InteractiveServer
 
 @if (isLoading)
 {
-    <p>Loading...</p>
+    <div class="loading-message">טוען...</div>
 }
 else if (!isAuthorized)
 {
-    <p>Unauthorized access. Redirecting...</p>
+    <div class="unauthorized-message">גישה לא מורשית. מנתב...</div>
 }
 else
 {
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, @userName</p>
-
-    <div class="dashboard-sections">
-        <div class="section">
-            <h2>Overview</h2>
-            <p>Quick stats like total students, instructors, upcoming lessons, etc.</p>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>דשבורד אדמין</h1>
+            <p>ברוך הבא, <span>@userName</span></p>
         </div>
-        <div class="section">
-            <h2>Student Management</h2>
-            <button @onclick="NavigateToStudents">Manage Students</button>
+
+        <div class="dashboard-cards">
+            <!-- סקירה כללית -->
+            <div class="dashboard-card">
+                <i class="fas fa-chart-pie"></i>
+                <h3>סקירה כללית</h3>
+                <p>סטטיסטיקות מהירות: סך תלמידים, מדריכים, שיעורים עתידיים ועוד.</p>
+                <button @onclick="NavigateToOverview">צפה בסטטיסטיקות</button>
+            </div>
+
+            <!-- ניהול תלמידים -->
+            <div class="dashboard-card">
+                <i class="fas fa-users"></i>
+                <h3>ניהול תלמידים</h3>
+                <p>נהל את רשימת התלמידים ועדכן נתונים.</p>
+                <button @onclick="NavigateToStudents">ניהול תלמידים</button>
+            </div>
+
+            <!-- ניהול מדריכים -->
+            <div class="dashboard-card">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h3>ניהול מדריכים</h3>
+                <p>נהל את רשימת המדריכים ועדכן את סטטוסיהם.</p>
+                <button @onclick="NavigateToInstructors">ניהול מדריכים</button>
+            </div>
+
+            <!-- ניהול שיעורים -->
+            <div class="dashboard-card">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>ניהול שיעורים</h3>
+                <p>נהל את לוח הזמנים והפגישות.</p>
+                <button @onclick="NavigateToLessons">ניהול שיעורים</button>
+            </div>
+
+            <!-- תשלומים והכנסות -->
+            <div class="dashboard-card">
+                <i class="fas fa-wallet"></i>
+                <h3>תשלומים</h3>
+                <p>סקירת תשלומים והכנסות.</p>
+                <button @onclick="NavigateToPayments">ניהול תשלומים</button>
+            </div>
         </div>
     </div>
 }
+<style>
+
+
+/* רקע הדף ומכולת הדשבורד */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 20px;
+    background: linear-gradient(135deg, #f0f4f8, #e8ecf1);
+    min-height: 100vh;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    color: #007bff;
+    text-transform: uppercase;
+    margin: 0;
+    font-weight: bold;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header p {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* עיצוב הקארדס */
+.dashboard-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 360px;
+    padding: 35px;
+    text-align: center;
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border-color: #007bff;
+}
+
+/* רקע אנימציוני לכרטיס */
+.dashboard-card::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 123, 255, 0.15), transparent 80%);
+    transform: scale(0);
+    transition: transform 0.5s ease;
+    pointer-events: none;
+}
+.dashboard-card:hover::before {
+    transform: scale(1);
+}
+
+/* אייקונים וכותרות */
+.dashboard-card i {
+    font-size: 3rem;
+    color: #007bff;
+    margin-bottom: 15px;
+    transition: color 0.3s;
+}
+.dashboard-card:hover i {
+    color: #0056b3;
+}
+
+.dashboard-card h3 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #ff5722;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.dashboard-card p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* כפתורים */
+.dashboard-card button {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0px 5px 15px rgba(0, 91, 255, 0.3);
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-card button:hover {
+    background: linear-gradient(45deg, #0056b3, #007bff);
+    transform: scale(1.05);
+    box-shadow: 0px 8px 20px rgba(0, 91, 255, 0.4);
+}
+
+/* אנימציית fadeIn */
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* התאמה למכשירים ניידים */
+@@media (max-width: 768px) {
+    .dashboard-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+</style>
+}
+
 
 @code {
     private bool isAuthorized = false;
@@ -39,67 +222,34 @@ else
     {
         try
         {
-            // Debugging logs for validation
-            Console.WriteLine($"IsAuthenticated: {AuthService.IsAuthenticated}");
-            Console.WriteLine($"UserRole: {AuthService.UserRole}");
-
-            // Check authentication and authorization
+            // בדיקה האם המשתמש מאומת ובעל תפקיד אדמין
             if (!AuthService.IsAuthenticated)
             {
-                Console.WriteLine("User not authenticated. Redirecting to /welcome.");
                 Navigation.NavigateTo("/welcome", true);
-                return; // Stop further execution
+                return;
             }
-
             if (!AuthService.IsAdmin)
             {
-                Console.WriteLine("Unauthorized access. Redirecting to /unauthorized.");
                 Navigation.NavigateTo("/unauthorized", true);
-                return; // Stop further execution
+                return;
             }
-
-            // Set authorized state and user name
             userName = AuthService.UserName;
             isAuthorized = true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error in AdminDashboard: {ex.Message}");
+            Console.WriteLine($"שגיאה בדשבורד אדמין: {ex.Message}");
             Navigation.NavigateTo("/unauthorized", true);
         }
         finally
         {
-            isLoading = false; // Stop loading state
+            isLoading = false;
         }
     }
 
-    private void NavigateToStudents() => Navigation.NavigateTo("/students");
+    private void NavigateToOverview() => Navigation.NavigateTo("/admin/overview");
+    private void NavigateToStudents() => Navigation.NavigateTo("/admin/students");
+    private void NavigateToInstructors() => Navigation.NavigateTo("/admin/instructors");
+    private void NavigateToLessons() => Navigation.NavigateTo("/admin/lessons");
+    private void NavigateToPayments() => Navigation.NavigateTo("/admin/payments");
 }
-
-<style>
-    .dashboard-sections {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-
-    .section {
-        padding: 20px;
-        background-color: #f4f4f4;
-        border-radius: 8px;
-        text-align: center;
-    }
-
-    button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-
-        button:hover {
-            background-color: #45a049;
-        }
-</style>
