@@ -557,8 +557,118 @@ namespace APIDrivingProject.Controllers
                 });
             }
         }
+        [HttpGet("{instructorId}/settings")]
+        public IActionResult GetInstructorSettings(int instructorId)
+        {
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"
+            SELECT SingleLessonDuration, SingleLessonPrice, 
+                   OneAndAHalfLessonDuration, OneAndAHalfLessonPrice,
+                   DoubleLessonDuration, DoubleLessonPrice
+            FROM instructor_settings
+            WHERE InstructorId = @InstructorId";
 
+                var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@InstructorId", instructorId);
 
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return Ok(new
+                        {
+                            SingleLessonDuration = reader.GetInt32("SingleLessonDuration"),
+                            SingleLessonPrice = reader.GetDecimal("SingleLessonPrice"),
+                            OneAndAHalfLessonDuration = reader.GetInt32("OneAndAHalfLessonDuration"),
+                            OneAndAHalfLessonPrice = reader.GetDecimal("OneAndAHalfLessonPrice"),
+                            DoubleLessonDuration = reader.GetInt32("DoubleLessonDuration"),
+                            DoubleLessonPrice = reader.GetDecimal("DoubleLessonPrice")
+                        });
+                    }
+                }
+            }
+            return NotFound("Settings not found for this instructor.");
+        }
+
+        [HttpPut("{instructorId}/settings")]
+        public IActionResult UpdateInstructorSettings(int instructorId, [FromBody] InstructorSettingsModel model)
+        {
+            if (model == null)
+            {
+                return BadRequest("Invalid request data.");
+            }
+
+            // הדפסת דיבאג: נבדוק אילו נתונים התקבלו
+            Console.WriteLine($"DEBUG: Updating settings for InstructorId: {instructorId}");
+            Console.WriteLine($"DEBUG: Received model - SingleLessonDuration: {model.SingleLessonDuration}, SingleLessonPrice: {model.SingleLessonPrice}");
+
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+
+                // בדיקה אם קיימת רשומה למורה
+                var checkQuery = @"SELECT COUNT(*) FROM instructor_settings WHERE InstructorId = @InstructorId";
+                var checkCommand = new MySqlCommand(checkQuery, connection);
+                checkCommand.Parameters.AddWithValue("@InstructorId", instructorId);
+                var count = Convert.ToInt32(checkCommand.ExecuteScalar());
+
+                if (count == 0)
+                {
+                    // יצירת רשומה חדשה אם אין עדיין נתונים
+                    var insertQuery = @"
+                INSERT INTO instructor_settings 
+                    (InstructorId, SingleLessonDuration, SingleLessonPrice, 
+                     OneAndAHalfLessonDuration, OneAndAHalfLessonPrice, 
+                     DoubleLessonDuration, DoubleLessonPrice)
+                VALUES 
+                    (@InstructorId, @SingleLessonDuration, @SingleLessonPrice, 
+                     @OneAndAHalfLessonDuration, @OneAndAHalfLessonPrice, 
+                     @DoubleLessonDuration, @DoubleLessonPrice)";
+
+                    var insertCommand = new MySqlCommand(insertQuery, connection);
+                    insertCommand.Parameters.AddWithValue("@InstructorId", instructorId);
+                    insertCommand.Parameters.AddWithValue("@SingleLessonDuration", model.SingleLessonDuration);
+                    insertCommand.Parameters.AddWithValue("@SingleLessonPrice", model.SingleLessonPrice);
+                    insertCommand.Parameters.AddWithValue("@OneAndAHalfLessonDuration", model.SingleLessonDuration * 1.5);
+                    insertCommand.Parameters.AddWithValue("@OneAndAHalfLessonPrice", model.SingleLessonPrice * 1.5M);
+                    insertCommand.Parameters.AddWithValue("@DoubleLessonDuration", model.SingleLessonDuration * 2);
+                    insertCommand.Parameters.AddWithValue("@DoubleLessonPrice", model.SingleLessonPrice * 2);
+
+                    insertCommand.ExecuteNonQuery();
+                    Console.WriteLine("DEBUG: Inserted new settings record.");
+                }
+                else
+                {
+                    // עדכון נתונים קיימים
+                    var updateQuery = @"
+                UPDATE instructor_settings 
+                SET 
+                    SingleLessonDuration = @SingleLessonDuration, 
+                    SingleLessonPrice = @SingleLessonPrice,
+                    OneAndAHalfLessonDuration = @OneAndAHalfLessonDuration, 
+                    OneAndAHalfLessonPrice = @OneAndAHalfLessonPrice,
+                    DoubleLessonDuration = @DoubleLessonDuration, 
+                    DoubleLessonPrice = @DoubleLessonPrice
+                WHERE InstructorId = @InstructorId";
+
+                    var updateCommand = new MySqlCommand(updateQuery, connection);
+                    updateCommand.Parameters.AddWithValue("@InstructorId", instructorId);
+                    updateCommand.Parameters.AddWithValue("@SingleLessonDuration", model.SingleLessonDuration);
+                    updateCommand.Parameters.AddWithValue("@SingleLessonPrice", model.SingleLessonPrice);
+                    updateCommand.Parameters.AddWithValue("@OneAndAHalfLessonDuration", model.SingleLessonDuration * 1.5);
+                    updateCommand.Parameters.AddWithValue("@OneAndAHalfLessonPrice", model.SingleLessonPrice * 1.5M);
+                    updateCommand.Parameters.AddWithValue("@DoubleLessonDuration", model.SingleLessonDuration * 2);
+                    updateCommand.Parameters.AddWithValue("@DoubleLessonPrice", model.SingleLessonPrice * 2);
+
+                    updateCommand.ExecuteNonQuery();
+                    Console.WriteLine("DEBUG: Updated existing settings record.");
+                }
+            }
+
+            return Ok("Instructor settings updated successfully.");
+        }
 
 
 

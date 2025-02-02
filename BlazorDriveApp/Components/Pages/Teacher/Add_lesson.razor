@@ -3,64 +3,192 @@
 @using DrivingClassLibary.Models;
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject APIDrivingProject.Services.AuthService AuthService
 @rendermode InteractiveServer
 
-<h1 style="text-align: center; margin-bottom: 1rem;">Create New Lesson</h1>
+<h1 class="page-title">יצירת שיעור חדש</h1>
 
-<div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
-    <label for="student" style="display: block; margin-bottom: 10px; font-weight: bold;">Select Student:</label>
-    <select id="student" @bind="selectedStudentId" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
-        <option value="" disabled>Select a student</option>
+<div class="lesson-form-container">
+    <label for="student" class="form-label">בחר תלמיד:</label>
+    <select id="student" @bind="selectedStudentId" class="input-field">
+        <option value="" disabled>בחר תלמיד</option>
         @foreach (var student in students)
         {
             <option value="@student.PersonId">@student.FirstName @student.LastName</option>
         }
     </select>
 
-    <label for="lessonType" style="display: block; margin-bottom: 10px; font-weight: bold;">Lesson Type:</label>
-    <select id="lessonType" @bind="selectedLessonType" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;">
-        <option value="" disabled>Select a lesson type</option>
-        <option value="Single">Single</option>
-        <option value="OneAndAHalf">One and a Half</option>
-        <option value="Double">Double</option>
+    <label for="lessonType" class="form-label">סוג השיעור:</label>
+    <!-- כאן השתמשנו במאפיין עם setter שיקרא לפונקציה UpdateLessonDetails -->
+    <select id="lessonType" @bind="SelectedLessonType" class="input-field">
+        <option value="" disabled>בחר סוג שיעור</option>
+        <option value="Single">רגיל</option>
+        <option value="OneAndAHalf">שיעור וחצי</option>
+        <option value="Double">כפול</option>
     </select>
 
-    <label for="lessonDate" style="display: block; margin-bottom: 10px; font-weight: bold;">Lesson Date:</label>
-    <input type="datetime-local" id="lessonDate" @bind="lessonDate" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+    <label for="lessonDate" class="form-label">תאריך ושעת השיעור:</label>
+    <input type="datetime-local" id="lessonDate" @bind="lessonDate" class="input-field" />
 
-    <label for="lessonPrice" style="display: block; margin-bottom: 10px; font-weight: bold;">Price:</label>
-    <input type="number" id="lessonPrice" @bind="lessonPrice" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;" />
+    <label for="lessonDuration" class="form-label">משך השיעור (דקות):</label>
+    <input type="number" id="lessonDuration" @bind="lessonDuration" readonly class="input-field readonly-field" />
 
-    <button @onclick="CreateLesson" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Create Lesson
-    </button>
+    <label for="lessonPrice" class="form-label">מחיר (ש"ח):</label>
+    <input type="number" id="lessonPrice" @bind="lessonPrice" class="input-field" />
+
+    <button class="action-button" @onclick="CreateLesson">צור שיעור</button>
 </div>
 
-<p style="text-align: center; margin-top: 20px; color: green;" hidden="@(successMessageVisible == false)">@successMessage</p>
-<p style="text-align: center; margin-top: 20px; color: red;" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+<p class="message success" hidden="@(successMessageVisible == false)">@successMessage</p>
+<p class="message error" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+
+<style>
+    .page-title {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #007bff;
+        animation: fadeIn 1s ease;
+    }
+    .lesson-form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 1s ease;
+    }
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    .input-field:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+    .readonly-field {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+    .action-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(45deg, #007bff, #00c6ff);
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .action-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
+    .message {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 1.1rem;
+    }
+    .message.success {
+        color: #4CAF50;
+    }
+    .message.error {
+        color: #F44336;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 
 @code {
     private List<Student> students = new();
     private int selectedStudentId;
+    
+    // שימוש במאפיין עם setter עבור סוג השיעור
     private string selectedLessonType = string.Empty;
-    private DateTime lessonDate;
+    private string SelectedLessonType
+    {
+        get => selectedLessonType;
+        set
+        {
+            if (selectedLessonType != value)
+            {
+                selectedLessonType = value;
+                UpdateLessonDetails();
+            }
+        }
+    }
+    
+    private DateTime lessonDate = DateTime.Now;
+    private int lessonDuration;
     private decimal lessonPrice;
     private string successMessage = string.Empty;
     private bool successMessageVisible = false;
     private string errorMessage = string.Empty;
     private bool errorMessageVisible = false;
+    private InstructorSettingsModel instructorSettings = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            // Fetching students assigned to the current instructor
-            int instructorId = 2; // Replace with the actual instructor ID from session or auth
+            int instructorId = AuthService.UserId;
             students = await Http.GetFromJsonAsync<List<Student>>($"api/Instructors/{instructorId}/students");
+            instructorSettings = await Http.GetFromJsonAsync<InstructorSettingsModel>($"api/Instructors/{instructorId}/settings");
+
+            if (instructorSettings != null)
+            {
+                // אתחול ברירת המחדל לסוג שיעור רגיל
+                SelectedLessonType = "Single";
+                lessonDuration = instructorSettings.SingleLessonDuration;
+                lessonPrice = instructorSettings.SingleLessonPrice;
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading students: {ex.Message}");
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+    }
+
+    private void UpdateLessonDetails()
+    {
+        if (instructorSettings != null)
+        {
+            switch (SelectedLessonType)
+            {
+                case "Single":
+                    lessonDuration = instructorSettings.SingleLessonDuration;
+                    lessonPrice = instructorSettings.SingleLessonPrice;
+                    break;
+                case "OneAndAHalf":
+                    lessonDuration = instructorSettings.OneAndAHalfLessonDuration;
+                    lessonPrice = instructorSettings.OneAndAHalfLessonPrice;
+                    break;
+                case "Double":
+                    lessonDuration = instructorSettings.DoubleLessonDuration;
+                    lessonPrice = instructorSettings.DoubleLessonPrice;
+                    break;
+                default:
+                    lessonDuration = instructorSettings.SingleLessonDuration;
+                    lessonPrice = instructorSettings.SingleLessonPrice;
+                    break;
+            }
         }
     }
 
@@ -68,46 +196,45 @@
     {
         try
         {
-            if (selectedStudentId == 0 || string.IsNullOrEmpty(selectedLessonType) || lessonDate == default || lessonPrice <= 0)
+            if (selectedStudentId == 0 || string.IsNullOrEmpty(SelectedLessonType) || lessonDate == default || lessonPrice <= 0)
             {
-                errorMessage = "Please fill out all fields correctly.";
+                errorMessage = "אנא מלא את כל השדות כראוי.";
                 successMessageVisible = false;
                 errorMessageVisible = true;
                 return;
             }
 
             var newLesson = new Lesson
-                {
-                    StudentId = selectedStudentId,
-                    InstructorId = 2, // Replace with the actual instructor ID
-                    Date = lessonDate,
-                    Duration = selectedLessonType == "Single" ? 40 : selectedLessonType == "OneAndAHalf" ? 60 : 80,
-                    LessonType = selectedLessonType,
-                    Price = lessonPrice
-                };
+            {
+                StudentId = selectedStudentId,
+                InstructorId = AuthService.UserId,
+                Date = lessonDate,
+                Duration = lessonDuration,
+                LessonType = SelectedLessonType,
+                Price = lessonPrice
+            };
 
-            var response = await Http.PostAsJsonAsync($"api/Instructors/2/lessons", newLesson);
+            var response = await Http.PostAsJsonAsync($"api/Instructors/{AuthService.UserId}/lessons", newLesson);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = "Lesson created successfully!";
+                successMessage = "השיעור נוצר בהצלחה!";
                 successMessageVisible = true;
                 errorMessageVisible = false;
             }
             else
             {
                 var errorDetails = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Failed to create lesson: {errorDetails}";
+                errorMessage = $"נכשל ביצירת השיעור: {errorDetails}";
                 successMessageVisible = false;
                 errorMessageVisible = true;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error: {ex.Message}";
+            errorMessage = $"שגיאה: {ex.Message}";
             successMessageVisible = false;
             errorMessageVisible = true;
         }
     }
-
 }

@@ -4,15 +4,14 @@
 
 <div class="nav-scrollable">
     <ul class="nav flex-column">
-        <!-- Always visible -->
         <li class="nav-item">
             <NavLink class="nav-link" href="/">
-                <span class="bi bi-house-door-fill-nav-menu"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu"></span> דף הבית
             </NavLink>
         </li>
         <li class="nav-item">
             <NavLink class="nav-link" href="/settings">
-                <span class="bi bi-gear-fill-nav-menu"></span> Settings
+                <span class="bi bi-gear-fill-nav-menu"></span> הגדרות
             </NavLink>
         </li>
 
@@ -20,43 +19,40 @@
         {
             @if (AuthService.IsAdmin)
             {
-                <!-- Admin-specific menu -->
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/admin_dashboard">
-                        <span class="bi bi-shield-lock-fill-nav-menu"></span> Admin Dashboard
+                        <span class="bi bi-shield-lock-fill-nav-menu"></span> דשבורד אדמין
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/manage_users">
-                        <span class="bi bi-people-fill-nav-menu"></span> Manage Users
+                        <span class="bi bi-people-fill-nav-menu"></span> ניהול משתמשים
                     </NavLink>
                 </li>
             }
             @if (AuthService.IsInstructor)
             {
-                <!-- Instructor-specific menu -->
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/teacher_dashboard">
-                        <span class="bi bi-chalkboard-teacher-nav-menu"></span> Teacher Dashboard
+                        <span class="bi bi-chalkboard-teacher-nav-menu"></span> דשבורד מורים
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/student_list_v2">
-                        <span class="bi bi-person-lines-fill-nav-menu"></span> Student List
+                        <span class="bi bi-person-lines-fill-nav-menu"></span> רשימת תלמידים
                     </NavLink>
                 </li>
             }
             @if (AuthService.IsStudent)
             {
-                <!-- Student-specific menu -->
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/student_dashboard">
-                        <span class="bi bi-book-fill-nav-menu"></span> My Dashboard
+                        <span class="bi bi-book-fill-nav-menu"></span> הדשבורד שלי
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/my_lessons">
-                        <span class="bi bi-journal-bookmark-fill-nav-menu"></span> My Lessons
+                        <span class="bi bi-journal-bookmark-fill-nav-menu"></span> השיעורים שלי
                     </NavLink>
                 </li>
             }

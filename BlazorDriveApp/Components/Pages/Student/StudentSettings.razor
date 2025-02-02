@@ -70,6 +70,45 @@
                     <p><strong>מספר תלמידים:</strong> @instructorDetails.TotalStudents</p>
                     <p><strong>תפקיד:</strong> מדריך נהיגה</p>
                 }
+
+                <!-- סקשן הגדרות שיעור -->
+                <div class="lesson-settings">
+                    <h2 class="section-title">הגדרות שיעור</h2>
+                    <div class="form-group">
+                        <label>משך שיעור רגיל (דקות):</label>
+                        <input type="number" @bind="regularDuration" class="input-field" min="1" />
+                    </div>
+                    <div class="form-group">
+                        <label>מחיר שיעור רגיל (ש"ח):</label>
+                        <input type="number" @bind="regularPrice" class="input-field" min="0" step="0.01" />
+                    </div>
+                    <div class="computed-settings">
+                        <div class="computed-item">
+                            <label>משך שיעור וחצי (דקות):</label>
+                            <span>@(regularDuration * 1.5)</span>
+                        </div>
+                        <div class="computed-item">
+                            <label>מחיר שיעור וחצי (ש"ח):</label>
+                            <span>@(regularPrice * 1.5)</span>
+                        </div>
+                        <div class="computed-item">
+                            <label>משך שיעור כפול (דקות):</label>
+                            <span>@(regularDuration * 2)</span>
+                        </div>
+                        <div class="computed-item">
+                            <label>מחיר שיעור כפול (ש"ח):</label>
+                            <span>@(regularPrice * 2)</span>
+                        </div>
+                    </div>
+                    <button class="action-button" @onclick="SaveLessonSettings">שמור הגדרות שיעור</button>
+
+                    @if (lessonSettingsMessageVisible)
+                    {
+                        <p class="message @(lessonSettingsMessageIsError ? "error" : "success")">
+                            @lessonSettingsMessage
+                        </p>
+                    }
+                </div>
             </div>
         }
         else if (AuthService.IsAdmin)
@@ -124,7 +163,6 @@
         <div class="loading-message">מנתקים אותך...</div>
     </div>
 }
-
 <style>
     /* הגדרות כלליות לדף */
     .settings-container {
@@ -138,6 +176,7 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         animation: fadeIn 1s ease-in-out;
     }
+
     .main-title {
         text-align: center;
         font-size: 3rem;
@@ -147,13 +186,14 @@
         -webkit-text-fill-color: transparent;
         animation: textGlow 2s infinite alternate;
     }
+
     .section-title {
         font-size: 2rem;
         margin-bottom: 15px;
         border-bottom: 2px solid #007bff;
         padding-bottom: 5px;
     }
-    
+
     /* בלוקים */
     .assignment-status, .account-settings, .instructor-settings, .admin-settings {
         background: rgba(255, 255, 255, 0.1);
@@ -161,44 +201,52 @@
         border-radius: 8px;
         margin-bottom: 25px;
     }
+
     .status-block {
         padding: 15px;
         border-radius: 8px;
         margin-bottom: 15px;
     }
-    .status-block.approved {
-        background: rgba(0, 123, 255, 0.2);
-    }
-    .status-block.pending {
-        background: rgba(255, 193, 7, 0.2);
-    }
-    .status-block.unassigned {
-        background: rgba(220, 53, 69, 0.2);
-    }
+
+        .status-block.approved {
+            background: rgba(0, 123, 255, 0.2);
+        }
+
+        .status-block.pending {
+            background: rgba(255, 193, 7, 0.2);
+        }
+
+        .status-block.unassigned {
+            background: rgba(220, 53, 69, 0.2);
+        }
+
     .status-indicator.approved-text {
         background-color: #007bff;
         padding: 5px 10px;
         border-radius: 10px;
         font-weight: bold;
     }
+
     .status-indicator.pending-text {
         background-color: #ffc107;
         color: #333;
         padding: 5px 10px;
         border-radius: 10px;
     }
+
     .status-indicator.unassigned-text {
         background-color: #dc3545;
         padding: 5px 10px;
         border-radius: 10px;
         font-weight: bold;
     }
-    
+
     /* כפתורי פעולה */
     .action-buttons {
         text-align: center;
         margin-top: 20px;
     }
+
     .action-button {
         background: linear-gradient(45deg, #ff416c, #ff4b2b);
         color: #fff;
@@ -210,13 +258,71 @@
         margin: 5px;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .action-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(255, 65, 108, 0.4);
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(255, 65, 108, 0.4);
+        }
+
+        .action-button.logout {
+            background: linear-gradient(45deg, #007bff, #00c6ff);
+        }
+
+    /* הגדרות לסקשן הגדרות שיעור */
+    .lesson-settings {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 25px;
     }
-    .action-button.logout {
-        background: linear-gradient(45deg, #007bff, #00c6ff);
+
+        .lesson-settings .form-group {
+            margin-bottom: 15px;
+        }
+
+        .lesson-settings label {
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .lesson-settings .input-field {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #fff;
+            color: #333;
+            transition: border 0.3s ease;
+        }
+
+            .lesson-settings .input-field:focus {
+                outline: none;
+                border-color: #007bff;
+                box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+            }
+
+    .computed-settings {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
     }
+
+    .computed-item {
+        flex: 1;
+        background: rgba(0, 123, 255, 0.1);
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+        .computed-item label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
 
     /* הגדרות לאדמין */
     .admin-cards {
@@ -225,6 +331,7 @@
         gap: 20px;
         margin-top: 20px;
     }
+
     .admin-card {
         flex: 1;
         background: #444;
@@ -235,41 +342,58 @@
         transition: transform 0.3s, box-shadow 0.3s;
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     }
-    .admin-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 10px 25px rgba(0, 123, 255, 0.5);
-    }
-    .admin-card i {
-        font-size: 2.5rem;
-        color: #ff9800;
-        margin-bottom: 10px;
-    }
-    .admin-card h3 {
-        font-size: 1.5rem;
-        color: #ffeb3b;
-    }
-    
+
+        .admin-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 123, 255, 0.5);
+        }
+
+        .admin-card i {
+            font-size: 2.5rem;
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+
+        .admin-card h3 {
+            font-size: 1.5rem;
+            color: #ffeb3b;
+        }
+
     /* אנימציית טקסט זוהר */
     @@keyframes textGlow {
         from {
             text-shadow: 0 0 10px #00c6ff, 0 0 20px #007bff;
         }
+
         to {
             text-shadow: 0 0 20px #00c6ff, 0 0 30px #007bff;
         }
     }
-    
+
     /* אנימציית fadeIn */
-   @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    
+
     /* אנימציית הספינר */
     @@keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
+
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -283,6 +407,7 @@
         justify-content: center;
         z-index: 9999;
     }
+
     .spinner {
         width: 70px;
         height: 70px;
@@ -292,6 +417,7 @@
         animation: spin 1s linear infinite;
         margin-bottom: 25px;
     }
+
     .loading-message {
         font-size: 2.2rem;
         font-weight: bold;
@@ -302,7 +428,18 @@
         animation: textGlow 2s infinite alternate, fadeIn 1s ease;
         text-shadow: 0px 0px 15px rgba(0, 123, 255, 0.8);
     }
-    
+
+    /* הודעות הצלחה/שגיאה */
+    .message.success {
+        color: #4CAF50;
+        margin-top: 10px;
+    }
+
+    .message.error {
+        color: #F44336;
+        margin-top: 10px;
+    }
+
     /* מסך לא מאומת */
     .not-authenticated {
         text-align: center;
@@ -311,6 +448,63 @@
 </style>
 
 @code {
+    // עבור הגדרות שיעור (מדריך)
+    private double regularDuration = 40; // ברירת מחדל: 40 דקות
+    private double regularPrice = 200;     // ברירת מחדל: 200 ש"ח
+
+    // משתנים להודעות בשמירת הגדרות שיעור
+    private string lessonSettingsMessage = "";
+    private bool lessonSettingsMessageVisible = false;
+    private bool lessonSettingsMessageIsError = false;
+
+    private async Task SaveLessonSettings()
+    {
+        int instructorId = AuthService.UserId;
+        var updatedSettings = new InstructorSettingsModel
+            {
+                InstructorId = instructorId,
+                SingleLessonDuration = (int)regularDuration,
+                SingleLessonPrice = (decimal)regularPrice
+            };
+
+        try
+        {
+            // הדפסת דיבאג: נתוני השמירה והכתובת
+            Console.WriteLine($"DEBUG: Saving settings for InstructorId: {instructorId}");
+            Console.WriteLine($"DEBUG: regularDuration: {regularDuration}, regularPrice: {regularPrice}");
+            string url = $"api/Instructors/{instructorId}/settings";
+            Console.WriteLine($"DEBUG: PUT URL: {url}");
+
+            var response = await Http.PutAsJsonAsync(url, updatedSettings);
+
+            if (response.IsSuccessStatusCode)
+            {
+                lessonSettingsMessage = "✅ הגדרות השיעור נשמרו בהצלחה!";
+                lessonSettingsMessageIsError = false;
+                Console.WriteLine("DEBUG: Settings saved successfully.");
+            }
+            else
+            {
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                lessonSettingsMessage = $"❌ שגיאה בשמירת ההגדרות: {errorDetails}";
+                lessonSettingsMessageIsError = true;
+                Console.WriteLine($"DEBUG: Error saving settings. Status code: {response.StatusCode}, Details: {errorDetails}");
+            }
+        }
+        catch (Exception ex)
+        {
+            lessonSettingsMessage = $"❌ שגיאה במהלך שמירת ההגדרות: {ex.Message}";
+            lessonSettingsMessageIsError = true;
+            Console.WriteLine("DEBUG: Exception in SaveLessonSettings: " + ex.ToString());
+        }
+        finally
+        {
+            lessonSettingsMessageVisible = true;
+            StateHasChanged();
+        }
+    }
+
+    // קוד קיים לעמוד ההגדרות:
     private AssignmentStatusModel? assignmentStatus;
     private InstructorDetailsModel? instructorDetails;
     private bool isLoggingOut = false;
@@ -321,14 +515,12 @@
     {
         try
         {
-            // בדיקת התחברות ותפקיד
             if (!AuthService.IsAuthenticated)
             {
                 isAuthorized = false;
             }
             else
             {
-                // אם המשתמש מחובר, קבע את תפקידו:
                 if (AuthService.IsStudent)
                 {
                     await LoadStudentSettings();
@@ -337,13 +529,11 @@
                 {
                     await LoadInstructorSettings();
                 }
-                // אם אדמין, אין צורך בטעינת נתונים נוספים – מוצגות הגדרות סטטיות
                 else if (AuthService.IsAdmin)
                 {
                     isAuthorized = true;
                 }
             }
-            // אם מחובר כלשהו, נציג את ההגדרות
             if (AuthService.IsAuthenticated)
                 isAuthorized = true;
         }
@@ -377,6 +567,12 @@
         {
             var instructorId = AuthService.UserId;
             instructorDetails = await Http.GetFromJsonAsync<InstructorDetailsModel>($"api/Instructors/{instructorId}/details");
+            var settings = await Http.GetFromJsonAsync<InstructorSettingsModel>($"api/Instructors/{instructorId}/settings");
+            if (settings != null)
+            {
+                regularDuration = (double)settings.SingleLessonDuration;
+                regularPrice = (double)settings.SingleLessonPrice;
+            }
         }
         catch (Exception ex)
         {
@@ -395,7 +591,7 @@
     {
         isLoggingOut = true;
         StateHasChanged();
-        await Task.Delay(2000); // המתנה להצגת אנימציית ההתנתקות
+        await Task.Delay(2000);
         AuthService.ClearUser();
         Navigation.NavigateTo("/login", true);
     }

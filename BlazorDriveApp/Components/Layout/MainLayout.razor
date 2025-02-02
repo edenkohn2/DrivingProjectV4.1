@@ -3,42 +3,29 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
-
 <div class="top-navbar">
     <ul>
-        <li><NavLink href="/">Home</NavLink></li>
-        <li><NavLink href="/settings">Settings</NavLink></li>
+        <li><NavLink href="/">דף הבית</NavLink></li>
+        <li><NavLink href="/settings">הגדרות</NavLink></li>
 
         @if (AuthService.IsAuthenticated)
         {
             @if (AuthService.IsAdmin)
             {
-                <li><NavLink href="/admin_dashboard">Admin Dashboard</NavLink></li>
-                <li><NavLink href="/manage_users">Manage Users</NavLink></li>
+                <li><NavLink href="/admin_dashboard">דשבורד אדמין</NavLink></li>
+                <li><NavLink href="/manage_users">ניהול משתמשים</NavLink></li>
             }
             @if (AuthService.IsInstructor)
             {
-                <li><NavLink href="/teacher_dashboard">Teacher Dashboard</NavLink></li>
-                <li><NavLink href="/student_list_v2">Student List</NavLink></li>
+                <li><NavLink href="/teacher_dashboard">דשבורד מורים</NavLink></li>
+                <li><NavLink href="/student_list_v2">רשימת תלמידים</NavLink></li>
             }
             @if (AuthService.IsStudent)
             {
-                <li><NavLink href="/student_dashboard">My Dashboard</NavLink></li>
-                <li><NavLink href="/my_lessons">My Lessons</NavLink></li>
+                <li><NavLink href="/student_dashboard">הדשבורד שלי</NavLink></li>
+                <li><NavLink href="/my_lessons">השיעורים שלי</NavLink></li>
             }
-
-            
-
-
-
-            
-
         }
-
-        
-            
-        
-
     </ul>
 </div>
 
@@ -47,12 +34,8 @@
 </main>
 
 @code {
-        private void HandleLogout()
-        {
-            AuthService.Logout(); // קריאה לפונקציה ב-AuthService
-        }
+    private void HandleLogout()
+    {
+        AuthService.Logout();
+    }
 }
-
-
-
-
