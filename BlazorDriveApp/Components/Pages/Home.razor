@@ -1,15 +1,30 @@
 ﻿@page "/"
-@using APIDrivingProject.Services;
+@using APIDrivingProject.Services
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<div class="home-container">
-    <div class="overlay"></div>
-    <div class="content animated fadeInDown">
-        <h1 class="animated slideInRight">ברוכים הבאים ל-<span class="highlight">DriveManager</span></h1>
-        <p class="animated fadeInUp">נהל את בית הספר לנהיגה שלך בקלות וביעילות.</p>
-        <div class="buttons">
+<div class="home-page">
+    <!-- רקע מונפש בגוונים גבריים -->
+    <div class="background"></div>
+    
+    <!-- אפקט פתיתים (particles) -->
+    <div class="particles">
+        @for (int i = 0; i < 30; i++)
+        {
+            <div class="particle" style="left:@(RandomPosition())%; width:@(RandomSize())px; height:@(RandomSize())px; animation-delay:@(RandomDelay())s;"></div>
+        }
+    </div>
+    
+    <!-- תיבת תוכן מרכזית -->
+    <div class="home-content animated fadeInDown">
+        <h1 class="home-title animated slideInRight">
+            ברוכים הבאים ל-<span class="highlight">נהיגה מודרנית</span>
+        </h1>
+        <p class="home-subtitle animated fadeInUp">
+            הפתרון האולטימטיבי לניהול בית הספר לנהיגה שלך – פשוט, עוצמתי ומעוצב בקפידה.
+        </p>
+        <div class="home-buttons">
             <button class="btn btn-login" @onclick="NavigateToLogin">התחברות</button>
             <button class="btn btn-register" @onclick="NavigateToRegister">הרשמה</button>
         </div>
@@ -17,225 +32,156 @@
 </div>
 
 <style>
-    /* אנימציות Keyframes */
-    @@keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-50px);
-        }
+/* עיצוב כללי לדף הבית */
+.home-page {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* רקע עם גוונים כהים וגבריים */
+    background: linear-gradient(135deg, #0d253f, #1a3c59, #243b55);
+    background-size: 400% 400%;
+    animation: backgroundAnimation 15s ease infinite;
+}
+@@keyframes backgroundAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* רקע מונפש */
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -3;
+}
 
-    @@keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(50px);
-        }
+/* אפקט פתיתים – בחרנו בצבע מתכתי גברי */
+.particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -2;
+}
+.particle {
+    position: absolute;
+    bottom: -20px;
+    background: rgba(200, 200, 200, 0.5);
+    border-radius: 50%;
+    animation: floatUp 8s linear infinite;
+}
+@@keyframes floatUp {
+    0% { transform: translateY(0) scale(0.5); opacity: 1; }
+    100% { transform: translateY(-120vh) scale(1); opacity: 0; }
+}
 
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
+/* תיבת תוכן מרכזית */
+.home-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px 30px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    width: 90%;
+}
 
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(50px);
-        }
+/* טיפוגרפיה */
+.home-title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+.home-subtitle {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    color: #555;
+}
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* כפתורים */
+.home-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+}
+.btn-login {
+    background: linear-gradient(45deg, #2980b9, #1c6690);
+    color: #fff;
+}
+.btn-login:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(41, 128, 185, 0.4);
+}
+.btn-register {
+    background: linear-gradient(45deg, #27ae60, #1e8c4d);
+    color: #fff;
+}
+.btn-register:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
 
-    
+/* אנימציות בסיסיות */
+.animated {
+    animation-duration: 1s;
+    animation-fill-mode: both;
+}
+@@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fadeInDown { animation-name: fadeInDown; }
+.slideInRight { animation-name: slideInRight; }
+.fadeInUp { animation-name: fadeInUp; }
 
-    @@keyframes gradientShift {
-        0% {
-            background-position: 0% 50%;
-        }
-
-        50% {
-            background-position: 100% 50%;
-        }
-
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    /* Classes לאנימציות */
-    .animated {
-        animation-duration: 1s;
-        animation-fill-mode: both;
-    }
-
-    .fadeInDown {
-        animation-name: fadeInDown;
-    }
-
-    .slideInRight {
-        animation-name: slideInRight;
-    }
-
-    .fadeInUp {
-        animation-name: fadeInUp;
-    }
-
-    /* עיצוב מכולת העמוד */
-    .home-container {
-        position: relative;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: url('https://images.pexels.com/photos/14865958/pexels-photo-14865958.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260') center/cover no-repeat;
-        overflow: hidden;
-        perspective: 1000px;
-    }
-
-    /* שכבת Overaly עם אנימציית Pulse */
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 1;
-        animation: pulse 6s infinite alternate ease-in-out;
-    }
-
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-            opacity: 0.9;
-        }
-
-        50% {
-            transform: scale(1.02);
-            opacity: 1;
-        }
-
-        100% {
-            transform: scale(1);
-            opacity: 0.9;
-        }
-    }
-
-    /* עיצוב תוכן העמוד */
-    .content {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        color: #fff;
-        padding: 40px;
-        background: rgba(0, 0, 0, 0.85);
-        border-radius: 15px;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
-        max-width: 600px;
-        width: 90%;
-        animation: fadeInDown 1.2s ease-out;
-    }
-
-        .content h1 {
-            font-size: 3.2rem;
-            margin-bottom: 20px;
-            text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .content p {
-            font-size: 1.5rem;
-            margin-bottom: 40px;
-        }
-
-    /* עיצוב טקסט מודגש עם אנימציית שינוי גוונים */
-    .highlight {
-        background: linear-gradient(45deg, #ff3cac, #784ba0, #2b86c5);
-        background-size: 200% 200%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: gradientShift 3s ease infinite;
-    }
-
-    @@keyframes gradientShift {
-        0% {
-            background-position: 0% 50%;
-        }
-
-        50% {
-            background-position: 100% 50%;
-        }
-
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    /* עיצוב כפתורים */
-    .buttons {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-    }
-
-    .btn {
-        padding: 15px 35px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-        border-radius: 50px;
-        transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-        text-transform: uppercase;
-    }
-
-        .btn:focus {
-            outline: none;
-        }
-
-    .btn-login {
-        background: linear-gradient(45deg, #e50914, #f6121d);
-        color: white;
-        box-shadow: 5px 5px 15px rgba(229, 9, 20, 0.4), -5px -5px 15px rgba(229, 9, 20, 0.2);
-    }
-
-        .btn-login:hover {
-            transform: scale(1.1);
-            box-shadow: 0px 8px 20px rgba(229, 9, 20, 0.6);
-        }
-
-    .btn-register {
-        background: linear-gradient(45deg, #007bff, #0056b3);
-        color: white;
-        box-shadow: 5px 5px 15px rgba(0, 123, 255, 0.4), -5px -5px 15px rgba(0, 123, 255, 0.2);
-    }
-
-        .btn-register:hover {
-            transform: scale(1.1);
-            box-shadow: 0px 8px 20px rgba(0, 123, 255, 0.6);
-        }
-
-    @@keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-50px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+/* הדגשת טקסט */
+.highlight {
+    color: #e67e22;
+    font-weight: bold;
+    animation: pulseText 2s infinite alternate;
+}
+@@keyframes pulseText {
+    from { text-shadow: 0 0 10px rgba(230,126,34,0.7); }
+    to { text-shadow: 0 0 20px rgba(230,126,34,1); }
+}
 </style>
 
 @code {
+    Random random = new Random();
+    private string RandomPosition() => random.Next(0, 100).ToString();
+    private string RandomSize() => random.Next(5, 15).ToString();
+    private string RandomDelay() => (random.NextDouble() * 8).ToString("0.00");
+
     private bool shouldRedirect = false;
 
     protected override void OnInitialized()
@@ -270,13 +216,6 @@
         }
     }
 
-    private void NavigateToLogin()
-    {
-        Navigation.NavigateTo("/login");
-    }
-
-    private void NavigateToRegister()
-    {
-        Navigation.NavigateTo("/register");
-    }
+    private void NavigateToLogin() => Navigation.NavigateTo("/login");
+    private void NavigateToRegister() => Navigation.NavigateTo("/register");
 }

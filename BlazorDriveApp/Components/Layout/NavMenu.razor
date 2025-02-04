@@ -2,57 +2,56 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
-<div class="nav-scrollable">
-    <ul class="nav flex-column">
+<div class="side-nav">
+    <ul class="nav-list">
         <li class="nav-item">
             <NavLink class="nav-link" href="/">
-                <span class="bi bi-house-door-fill-nav-menu"></span> דף הבית
+                <i class="bi bi-house-door-fill"></i> דף הבית
             </NavLink>
         </li>
         <li class="nav-item">
             <NavLink class="nav-link" href="/settings">
-                <span class="bi bi-gear-fill-nav-menu"></span> הגדרות
+                <i class="bi bi-gear-fill"></i> הגדרות
             </NavLink>
         </li>
-
         @if (AuthService.IsAuthenticated)
         {
-            @if (AuthService.IsAdmin)
+            if (AuthService.IsAdmin)
             {
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/admin_dashboard">
-                        <span class="bi bi-shield-lock-fill-nav-menu"></span> דשבורד אדמין
+                        <i class="bi bi-shield-lock-fill"></i> דשבורד אדמין
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/manage_users">
-                        <span class="bi bi-people-fill-nav-menu"></span> ניהול משתמשים
+                        <i class="bi bi-people-fill"></i> ניהול משתמשים
                     </NavLink>
                 </li>
             }
-            @if (AuthService.IsInstructor)
+            if (AuthService.IsInstructor)
             {
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/teacher_dashboard">
-                        <span class="bi bi-chalkboard-teacher-nav-menu"></span> דשבורד מורים
+                        <i class="bi bi-chalkboard-teacher"></i> דשבורד מורים
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/student_list_v2">
-                        <span class="bi bi-person-lines-fill-nav-menu"></span> רשימת תלמידים
+                        <i class="bi bi-person-lines-fill"></i> רשימת תלמידים
                     </NavLink>
                 </li>
             }
-            @if (AuthService.IsStudent)
+            if (AuthService.IsStudent)
             {
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/student_dashboard">
-                        <span class="bi bi-book-fill-nav-menu"></span> הדשבורד שלי
+                        <i class="bi bi-book-fill"></i> הדשבורד שלי
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/my_lessons">
-                        <span class="bi bi-journal-bookmark-fill-nav-menu"></span> השיעורים שלי
+                        <i class="bi bi-journal-bookmark-fill"></i> השיעורים שלי
                     </NavLink>
                 </li>
             }

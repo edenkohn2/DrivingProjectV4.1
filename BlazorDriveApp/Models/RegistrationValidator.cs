@@ -29,10 +29,9 @@ namespace BlazorDriveApp.Models
         {
             return password.Length >= 8 &&
                    password.Any(char.IsUpper) &&
-                   password.Any(char.IsLower) &&
-                   password.Any(char.IsDigit) &&
-                   password.Any(ch => "!@#$%^&*".Contains(ch));
+                   password.Any(char.IsDigit);
         }
+
 
         // Check if passwords match
         public static bool DoPasswordsMatch(string password, string confirmPassword)

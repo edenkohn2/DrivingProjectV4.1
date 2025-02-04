@@ -1,29 +1,7 @@
-/* Reset */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f7f7f7;
-}
-
-/* Wrapper */
-body {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-#app {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-/* Top Navbar */
+/* עיצוב תפריט עליון */
 .top-navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     background: linear-gradient(90deg, #1a73e8, #4285f4);
     padding: 12px 24px;
@@ -32,13 +10,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition: background 0.3s ease;
 }
-
-    .top-navbar:hover {
-        background: linear-gradient(90deg, #1665c1, #3367d6);
-        transform: translateY(-2px);
-    }
 
     .top-navbar ul {
         list-style: none;
@@ -51,55 +24,18 @@ body {
         margin: 0 15px;
     }
 
-    .top-navbar a,
-    .top-navbar NavLink {
+    .top-navbar a {
         text-decoration: none;
         color: #fff;
         font-weight: 600;
         padding: 10px 15px;
-        transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+        transition: background 0.3s ease, color 0.3s ease;
         border-radius: 8px;
-        /* אנימציית זוהר לטקסט */
-        animation: navTextGlow 2s infinite alternate;
+        /* הסרת אפקט transform או קו לבן */
     }
 
         .top-navbar a:hover,
-        .top-navbar NavLink.active {
+        .top-navbar a.active {
             background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
+            /* אין שינוי בגודל או קווים נוספים */
         }
-
-/* אנימציית טקסט בזוהר */
-@keyframes navTextGlow {
-    from {
-        text-shadow: 0 0 5px rgba(255,255,255,0.5);
-    }
-
-    to {
-        text-shadow: 0 0 15px rgba(255,255,255,1);
-    }
-}
-
-/* Main content */
-main {
-    flex: 1;
-    background-color: #f7f7f7;
-    padding: 20px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .top-navbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-        .top-navbar ul {
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .top-navbar li {
-            margin: 5px 0;
-        }
-}

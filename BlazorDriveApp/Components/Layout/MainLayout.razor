@@ -3,39 +3,37 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 
-<div class="top-navbar">
-    <ul>
-        <li><NavLink href="/">דף הבית</NavLink></li>
-        <li><NavLink href="/settings">הגדרות</NavLink></li>
-
-        @if (AuthService.IsAuthenticated)
-        {
-            @if (AuthService.IsAdmin)
+<header class="top-navbar">
+    <nav class="navbar-menu">
+        <ul>
+            <li><NavLink href="/" Match="NavLinkMatch.All">דף הבית</NavLink></li>
+            <li><NavLink href="/settings">הגדרות</NavLink></li>
+            @if (AuthService.IsAuthenticated)
             {
-                <li><NavLink href="/admin_dashboard">דשבורד אדמין</NavLink></li>
-                <li><NavLink href="/manage_users">ניהול משתמשים</NavLink></li>
+                if (AuthService.IsAdmin)
+                {
+                    <li><NavLink href="/admin_dashboard">דשבורד אדמין</NavLink></li>
+                    <li><NavLink href="/manage_users">ניהול משתמשים</NavLink></li>
+                }
+                if (AuthService.IsInstructor)
+                {
+                    <li><NavLink href="/teacher_dashboard">דשבורד מורים</NavLink></li>
+                    <li><NavLink href="/student_list_v2">רשימת תלמידים</NavLink></li>
+                }
+                if (AuthService.IsStudent)
+                {
+                    <li><NavLink href="/student_dashboard">הדשבורד שלי</NavLink></li>
+                    <li><NavLink href="/my_lessons">השיעורים שלי</NavLink></li>
+                }
             }
-            @if (AuthService.IsInstructor)
-            {
-                <li><NavLink href="/teacher_dashboard">דשבורד מורים</NavLink></li>
-                <li><NavLink href="/student_list_v2">רשימת תלמידים</NavLink></li>
-            }
-            @if (AuthService.IsStudent)
-            {
-                <li><NavLink href="/student_dashboard">הדשבורד שלי</NavLink></li>
-                <li><NavLink href="/my_lessons">השיעורים שלי</NavLink></li>
-            }
-        }
-    </ul>
-</div>
+        </ul>
+    </nav>
+</header>
 
 <main>
     @Body
 </main>
 
 @code {
-    private void HandleLogout()
-    {
-        AuthService.Logout();
-    }
+    // אין כפתור התנתקות – ההתנתקות מנוהלת במקום אחר.
 }

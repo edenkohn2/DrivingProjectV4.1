@@ -14,200 +14,358 @@
 }
 else
 {
-    <div class="register-background">
-        <div class="register-container animated slideIn">
-            <h1 class="register-title">Sign Up</h1>
-            <p class="register-subtitle">Join us and start learning today!</p>
+    <div class="page-background">
+        <!-- כרטיס (Card) מרכזי -->
+        <div class="register-card animated slideIn">
+            <!-- צד שמאל: תמונה מעוגלת -->
+            <div class="card-illustration">
+                <img src="/images/CarSunset.jpg"
+                     alt="Car Sunset"
+                     class="illustration-img" />
+            </div>
 
-            <!-- First Name -->
-            <div class="input-group">
-                <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
-                @if (!isFirstNameValid)
-                {
-                    <p class="error-message">First name is required.</p>
-                }
+            <!-- צד ימין: טופס ההרשמה -->
+            <div class="card-form">
+                <h1 class="register-title">Create an account</h1>
+                <p class="register-subtitle">
+                    Already have an account?
+                    <a @onclick="GoToLogin" class="login-link">Log in</a>
+                </p>
+
+                <!-- First Name -->
+                <div class="input-group">
+                    <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
+                    @if (!isFirstNameValid)
+                    {
+                        <p class="error-message">שם פרטי הוא שדה חובה.</p>
+                    }
+                </div>
+
+                <!-- Last Name -->
+                <div class="input-group">
+                    <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
+                    @if (!isLastNameValid)
+                    {
+                        <p class="error-message">שם משפחה הוא שדה חובה.</p>
+                    }
+                </div>
+
+                <!-- Email -->
+                <div class="input-group">
+                    <input type="email" placeholder="Email" @bind="email" class="input-field" />
+                    @if (!isEmailUnique)
+                    {
+                        <p class="error-message">אימייל כבר בשימוש.</p>
+                    }
+                    @if (!isValidEmail)
+                    {
+                        <p class="error-message">הזן אימייל חוקי.</p>
+                    }
+                </div>
+
+                <!-- Password -->
+                <div class="input-group">
+                    <input type="password" placeholder="Password" @bind="password" class="input-field" />
+                    @if (!isPasswordValid)
+                    {
+                        <p class="error-message">
+                            הסיסמה חייבת להיות באורך של לפחות 8 תווים ולהכיל לפחות אות גדולה אחת ומספר אחד.
+                        </p>
+                    }
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="input-group">
+                    <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
+                    @if (!isPasswordMatch)
+                    {
+                        <p class="error-message">הסיסמה לא תואמת.</p>
+                    }
+                </div>
+
+                <!-- Phone Number -->
+                <div class="input-group">
+                    <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
+                    @if (!isPhoneNumberValid)
+                    {
+                        <p class="error-message">מספר טלפון הוא שדה חובה.</p>
+                    }
+                </div>
+
+                <!-- Birth Date -->
+                <div class="input-group">
+                    <!-- oninput="maskedDateWithMonthCheck(this)" -->
+                    <input id="birthDateInput"
+                           type="text"
+                           placeholder="DD/MM/YYYY"
+                           @bind="birthDateString"
+                           class="input-field"
+                           oninput="maskedDateWithMonthCheck(this)" />
+                    @if (!isBirthDateValid)
+                    {
+                        <p class="error-message">
+                            הזן תאריך חוקי (DD/MM/YYYY) ותוודא שאתה לפחות בן 16.5 שנים.
+                        </p>
+                    }
+                </div>
+
+                <!-- Address -->
+                <div class="input-group">
+                    <input type="text" placeholder="Address" @bind="address" class="input-field" />
+                    @if (!isAddressValid)
+                    {
+                        <p class="error-message">כתובת היא שדה חובה.</p>
+                    }
+                </div>
+
+                <!-- Role Selection -->
+                <div class="input-group">
+                    <select @bind="role" class="input-field">
+                        <option value="">Select Role</option>
+                        <option value="Student">Student</option>
+                        <option value="Instructor">Instructor</option>
+                    </select>
+                    @if (!isRoleValid)
+                    {
+                        <p class="error-message">בחר תפקיד.</p>
+                    }
+                </div>
+
+                <!-- כפתור הרשמה -->
+                <button @onclick="HandleRegister" class="register-button animated pulse">Create account</button>
             </div>
-            <!-- Last Name -->
-            <div class="input-group">
-                <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
-                @if (!isLastNameValid)
-                {
-                    <p class="error-message">Last name is required.</p>
-                }
-            </div>
-            <!-- Email -->
-            <div class="input-group">
-                <input type="email" placeholder="Email" @bind="email" class="input-field" />
-                @if (!isEmailUnique)
-                {
-                    <p class="error-message">Email is already in use.</p>
-                }
-                @if (!isValidEmail)
-                {
-                    <p class="error-message">Please enter a valid email.</p>
-                }
-            </div>
-            <!-- Password -->
-            <div class="input-group">
-                <input type="password" placeholder="Password" @bind="password" class="input-field" />
-                @if (!isPasswordValid)
-                {
-                    <p class="error-message">Password must be at least 8 characters long.</p>
-                }
-            </div>
-            <!-- Confirm Password -->
-            <div class="input-group">
-                <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
-                @if (!isPasswordMatch)
-                {
-                    <p class="error-message">Passwords do not match.</p>
-                }
-            </div>
-            <!-- Phone Number -->
-            <div class="input-group">
-                <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
-                @if (!isPhoneNumberValid)
-                {
-                    <p class="error-message">Phone number is required.</p>
-                }
-            </div>
-            <!-- Birth Date (Custom Input) -->
-            <div class="input-group">
-                <input type="text" placeholder="Birth Date (DD/MM/YYYY)" @bind="birthDateString" class="input-field" />
-                @if (!isBirthDateValid)
-                {
-                    <p class="error-message">Please enter a valid birth date (DD/MM/YYYY) and ensure you are at least 16.5 years old.</p>
-                }
-            </div>
-            <!-- Address -->
-            <div class="input-group">
-                <input type="text" placeholder="Address" @bind="address" class="input-field" />
-                @if (!isAddressValid)
-                {
-                    <p class="error-message">Address is required.</p>
-                }
-            </div>
-            <!-- Role Selection -->
-            <div class="input-group">
-                <select @bind="role" class="input-field">
-                    <option value="">Select Role</option>
-                    <option value="Student">Student</option>
-                    <option value="Instructor">Instructor</option>
-                </select>
-                @if (!isRoleValid)
-                {
-                    <p class="error-message">Role selection is required.</p>
-                }
-            </div>
-            <button @onclick="HandleRegister" class="register-button animated pulse">Register</button>
         </div>
     </div>
+
+    <!-- סקריפט JavaScript עם הגבלת חודש ל-1..12 -->
+    <script>
+        function maskedDateWithMonthCheck(input) {
+            // ניקוי תווים שאינם ספרות
+            let val = input.value.replace(/\D/g, '');
+
+            // הגבלת אורך ל-8 ספרות (DDMMYYYY)
+            if (val.length > 8) {
+                val = val.slice(0, 8);
+            }
+
+            // חלוקה ל-day, month, year
+            let day = val.slice(0, 2);   // עד 2 ספרות ליום
+            let month = val.slice(2, 4); // עד 2 ספרות לחודש
+            let year = val.slice(4, 8);  // שאר הספרות הן שנה
+
+            // *** הגבלת חודש ל-1..12 ***
+            // מבצעים parseInt רק אם יש 2 ספרות בחודש
+            if (month.length === 2) {
+                let m = parseInt(month, 10);
+
+                // אם המשתמש כתב 00 => נהפוך ל-01
+                if (m < 1) {
+                    m = 1;
+                }
+                // אם המשתמש כתב 13+ => נהפוך ל-12
+                if (m > 12) {
+                    m = 12;
+                }
+
+                // מחזירים בחזרה כמחרוזת של 2 ספרות
+                month = m < 10 ? '0' + m : '' + m;
+            }
+
+            // בניית התוצאה עם הסלאשים
+            let result = '';
+
+            // day
+            if (day) {
+                result += day;
+            }
+            if (val.length >= 3) {
+                result += '/';
+            }
+
+            // month
+            if (month) {
+                result += month;
+            }
+            if (val.length >= 5) {
+                result += '/';
+            }
+
+            // year
+            if (year) {
+                result += year;
+            }
+
+            // עדכון השדה
+            input.value = result;
+        }
+    </script>
 }
 
 <style>
-    /* אנימציות */
+    /* ========== אנימציות ========== */
     @@keyframes slideIn {
-        from { opacity: 0; transform: translateY(50px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
+
     @@keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.03); }
-        100% { transform: scale(1); }
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.03);
+        }
+
+        100% {
+            transform: scale(1);
+        }
     }
+
     .animated {
         animation-duration: 0.8s;
         animation-fill-mode: both;
     }
+
     .pulse {
         animation: pulse 2s infinite;
     }
-    
-    /* רקע הדף – רקע נקי, מלא חלון וללא רווחים מיותרים */
-    .register-background {
-        background-color: #f4f4f4;
-        height: 100vh;
+
+    /* ========== רקע הדף – כחול כהה ========== */
+    .page-background {
+        width: 100%;
+        min-height: 100vh;
+        /* גרדיאנט או צבע אחיד – לדוגמה גרדיאנט כחול כהה */
+        background: linear-gradient(135deg, #0F1B3D, #19345C);
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 20px;
+    }
+
+    /* ========== כרטיס מרכזי ========== */
+    .register-card {
+        display: flex;
+        flex-wrap: wrap;
+        /* שומרים על החום–כתום בפנים */
+        background-color: #2E221A;
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        /* הקטנת הרוחב הכללי עוד יותר */
+        width: clamp(280px, 60%, 850px);
         overflow: hidden;
     }
-    
-    /* מכולת ההרשמה – חלונית רחבה ונקייה, מותאמת לחלון */
-    .register-container {
+
+    /* צד שמאל: תמונה מעוגלת בפינות השמאליות */
+    .card-illustration {
+        flex: 1.3;
+        min-width: 280px;
+        position: relative;
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+        overflow: hidden;
+        background-color: #4A3A2D;
+    }
+
+    /* התמונה עצמה */
+    .illustration-img {
         width: 100%;
-        max-width: 600px;
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        padding: 40px 50px;
+        height: 100%;
+        object-fit: cover;
+        display: block;
     }
-    
+
+    /* צד ימין: טופס (גוונים חומים/כתומים בפנים) */
+    .card-form {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 40px 30px;
+        color: #ffffff;
+        min-width: 280px;
+    }
+
     .register-title {
-        font-size: 2.5rem;
-        color: #333;
-        margin-bottom: 10px;
-        text-align: center;
+        font-size: 2rem;
+        color: #ffa24f;
+        margin-bottom: 8px;
     }
-    
+
     .register-subtitle {
-        font-size: 1.2rem;
-        color: #666;
         margin-bottom: 30px;
-        text-align: center;
+        color: #ffd8b0;
+        font-size: 0.95rem;
     }
-    
-    /* קבוצות קלט – עיצוב נקי ומודרני */
+
+    .login-link {
+        color: #ffbd7f;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    /* ========== קבוצות קלט ========== */
     .input-group {
         margin-bottom: 20px;
     }
+
     .input-field {
         width: 100%;
         padding: 14px 16px;
         font-size: 1rem;
-        border: 1px solid #ddd;
+        border: 1px solid #ab7a4b;
         border-radius: 8px;
-        background: #fff;
-        color: #333;
+        background: #443427;
+        color: #ffffff;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    .input-field::placeholder {
-        color: #aaa;
-    }
-    .input-field:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-    }
-    
-    /* הודעות שגיאה */
+
+        .input-field::placeholder {
+            color: #ccb8a5;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #d8a26c;
+            box-shadow: 0 0 8px rgba(216, 162, 108, 0.5);
+        }
+
+    /* ========== הודעות שגיאה ========== */
     .error-message {
-        color: #d9534f;
+        color: #ff6b6b;
         font-size: 0.85rem;
         margin-top: 5px;
     }
-    
-    /* כפתור הרשמה – עיצוב מודרני עם Gradient עדין ואפקטי Hover */
+
+    /* ========== כפתור הרשמה ========== */
     .register-button {
         width: 100%;
         padding: 15px;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: bold;
-        color: #fff;
-        background: linear-gradient(45deg, #007bff, #00c6ff);
+        color: #ffffff;
+        background: linear-gradient(45deg, #f8904a, #ed5c25);
         border: none;
         border-radius: 50px;
         cursor: pointer;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        margin-top: 20px;
+        margin-top: 10px;
     }
-    .register-button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
-    }
-    .register-button:active {
-        transform: translateY(0);
-    }
+
+        .register-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+        }
+
+        .register-button:active {
+            transform: translateY(0);
+        }
 </style>
 
 @code {
@@ -239,7 +397,7 @@ else
         if (AuthService.IsAuthenticated)
         {
             shouldRender = false;
-            await Task.Delay(100); // להבטיח שהדף נטען
+            await Task.Delay(100);
             RedirectToDashboard();
         }
     }
@@ -267,6 +425,11 @@ else
         }
     }
 
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
     private async Task HandleRegister()
     {
         // בדיקות בסיסיות
@@ -282,17 +445,23 @@ else
             return;
         }
 
-        // המרת תאריך הלידה ובדיקת תקינות – פורמט DD/MM/yyyy
-        if (!DateTime.TryParseExact(birthDateString, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out birthDate))
+        // המרת תאריך הלידה ובדיקת תקינות
+        if (!DateTime.TryParseExact(
+            birthDateString,
+            "dd/MM/yyyy",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out birthDate))
         {
             isBirthDateValid = false;
         }
         else
         {
+            // בדיקת גיל + תקינות
             isBirthDateValid = RegistrationValidator.IsBirthDateValid(birthDate);
         }
 
-        // בדיקות מתקדמות (בהנחה שקיימות מתודות ב־RegistrationValidator)
+        // בדיקות נוספות
         isPasswordValid = RegistrationValidator.IsPasswordValid(password);
         isPasswordMatch = RegistrationValidator.DoPasswordsMatch(password, confirmPassword);
         isEmailUnique = await RegistrationValidator.IsEmailUniqueAsync(email, Http);
@@ -304,6 +473,7 @@ else
             return;
         }
 
+        // שליחת הבקשה ל-API
         var response = await Http.PostAsJsonAsync("api/users/register", new
         {
             FirstName = firstName,
