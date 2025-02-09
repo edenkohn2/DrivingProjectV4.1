@@ -1,10 +1,33 @@
 ﻿@page "/add_lesson/{studentId:int}"
 @using APIDrivingProject.Models
 @using DrivingClassLibary.Models
+@using System.Globalization
+@using System.Text.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject APIDrivingProject.Services.AuthService AuthService
 @rendermode InteractiveServer
+
+@if (showAlert)
+{
+    <div class="alert-banner-sticky">
+        <div class="alert-content">
+            <h3>שיעור תפוס</h3>
+            <p>@errorMessage</p>
+            @if (availableSuggestions.Any())
+            {
+                <p>שעות חלופיות אפשריות:</p>
+                <ul>
+                    @foreach (var suggestion in availableSuggestions.Take(3))
+                    {
+                        <li>@suggestion</li>
+                    }
+                </ul>
+            }
+            <button class="alert-close" @onclick="CloseAlert">×</button>
+        </div>
+    </div>
+}
 
 <div class="form-container">
     <h2 class="page-title">יצירת שיעור חדש עבור @StudentName</h2>
@@ -51,10 +74,15 @@
             </div>
         </div>
 
-        <!-- קלט לשעת התחלת השיעור -->
+        <!-- קלט לשעת התחלת השיעור עם oninput ו-onblur -->
         <div class="form-group">
             <label for="lessonStartTime" class="form-label">שעת התחלה (HH:mm):</label>
-            <input type="text" id="lessonStartTime" @bind="LessonStartTime" placeholder="לדוגמה: 08:30" class="input-field" />
+            <input type="text" id="lessonStartTime" 
+                   @bind="LessonStartTime" 
+                   @oninput="FormatLessonStartTimeOnInput" 
+                   @onblur="FormatLessonStartTime" 
+                   placeholder="לדוגמה: 08:30" 
+                   class="input-field" />
         </div>
 
         <!-- תצוגת שעת סיום (readonly) -->
@@ -83,25 +111,71 @@
 </div>
 
 <p class="message success" hidden="@(successMessageVisible == false)">@successMessage</p>
-<p class="message error" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+<p class="message error" hidden="@(errorMessageVisible == false && !showAlert)">@errorMessage</p>
 
 <style>
-    /* אנימציית fadeIn */
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    @@keyframes slideDown {
+        0% { transform: translateY(-100%); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
     }
-
+    /* באנר הודעה דביק ומרשים */
+    .alert-banner-sticky {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(135deg, #d50000, #ff1744);
+        color: #fff;
+        padding: 20px 40px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        z-index: 1000;
+        animation: slideDown 0.5s ease-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .alert-content {
+        max-width: 600px;
+        text-align: center;
+        position: relative;
+    }
+    .alert-content h3 {
+        margin: 0 0 10px;
+        font-size: 1.8rem;
+    }
+    .alert-content p {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    .alert-content ul {
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 1.2rem;
+    }
+    .alert-content ul li {
+        margin: 5px 0;
+    }
+    .alert-close {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 1.5rem;
+        line-height: 32px;
+        text-align: center;
+        cursor: pointer;
+        color: #d50000;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    /* הגדרת מרווח עליון לטופס כדי שלא יסתתר מאחורי הבאנר */
     .form-container {
         max-width: 600px;
-        margin: 40px auto;
+        margin: 120px auto 40px auto;
         padding: 30px 40px;
         background: #ffffff;
         border: 1px solid #ddd;
@@ -109,25 +183,21 @@
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         animation: fadeIn 1s ease;
     }
-
     .page-title {
         text-align: center;
         font-size: 2.5rem;
         margin-bottom: 20px;
         color: #007bff;
     }
-
     .form-group {
         margin-bottom: 20px;
     }
-
     .form-label {
         display: block;
         margin-bottom: 8px;
         font-weight: bold;
         color: #333;
     }
-
     .input-field {
         width: 100%;
         padding: 10px;
@@ -136,13 +206,11 @@
         border-radius: 5px;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-
-        .input-field:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-        }
-
+    .input-field:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
     .readonly-field {
         width: 100%;
         padding: 10px;
@@ -152,7 +220,6 @@
         background-color: #f5f5f5;
         color: #555;
     }
-
     .action-button {
         width: 100%;
         padding: 12px;
@@ -169,26 +236,21 @@
         justify-content: center;
         gap: 8px;
     }
-
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
-        }
-
+    .action-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0, 123, 255, 0.3);
+    }
     .message {
         text-align: center;
         margin-top: 20px;
         font-size: 1.1rem;
     }
-
-        .message.success {
-            color: #4CAF50;
-        }
-
-        .message.error {
-            color: #F44336;
-        }
-
+    .message.success {
+        color: #4CAF50;
+    }
+    .message.error {
+        color: #F44336;
+    }
     /* Custom Calendar Styles */
     .calendar-header {
         display: flex;
@@ -196,13 +258,11 @@
         align-items: center;
         margin-bottom: 10px;
     }
-
     .calendar-title {
         font-size: 1.2rem;
         font-weight: bold;
         color: #007bff;
     }
-
     .btn-nav {
         background: none;
         border: none;
@@ -211,18 +271,15 @@
         color: #007bff;
         transition: color 0.3s;
     }
-
-        .btn-nav:hover {
-            color: #0056b3;
-        }
-
+    .btn-nav:hover {
+        color: #0056b3;
+    }
     .calendar-container {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 10px;
         margin-top: 10px;
     }
-
     .calendar-day {
         background: #f0f0f0;
         border: 1px solid #ccc;
@@ -232,30 +289,44 @@
         border-radius: 5px;
         transition: background 0.3s ease, transform 0.2s;
     }
-
-        .calendar-day:hover:not([disabled]) {
-            background: #007bff;
-            color: #fff;
-            transform: scale(1.1);
-        }
-
-        .calendar-day.selected {
-            background: #007bff;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .calendar-day[disabled] {
-            background: #e9ecef;
-            color: #aaa;
-            cursor: not-allowed;
-        }
-
+    .calendar-day:hover:not([disabled]) {
+        background: #007bff;
+        color: #fff;
+        transform: scale(1.1);
+    }
+    .calendar-day.selected {
+        background: #007bff;
+        color: #fff;
+        font-weight: bold;
+    }
+    .calendar-day[disabled] {
+        background: #e9ecef;
+        color: #aaa;
+        cursor: not-allowed;
+    }
     .selected-date {
         margin-top: 10px;
         font-size: 1.1rem;
         font-weight: bold;
         color: #007bff;
+    }
+    .suggestions-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 15px;
+        background: #f9f9f9;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .suggestions-container ul {
+        list-style: none;
+        padding: 0;
+    }
+    .suggestions-container li {
+        font-weight: bold;
+        color: #007bff;
+        margin: 5px 0;
     }
 </style>
 
@@ -263,10 +334,10 @@
     [Parameter]
     public int studentId { get; set; }
 
-    // שליפת שם התלמיד מה-Query string, אם קיים
+    // שליפת שם התלמיד (אם קיים בפרמטר Query)
     private string StudentName { get; set; } = "תלמיד לדוגמה";
 
-    // משתנה לסוג השיעור עם setter שמעדכן את פרטי השיעור
+    // משתנה לסוג השיעור – עם setter שמעדכן את פרטי השיעור
     private string selectedLessonType = "";
     private string SelectedLessonType
     {
@@ -281,9 +352,9 @@
         }
     }
 
-    // משתנים עבור ההגדרות (מה שהתקבל מהשרת או ערכי ברירת מחדל)
-    private int baseDuration = 40;          // ברירת מחדל – יתעדכן לפי הגדרות המורה
-    private decimal basePrice = 200m;         // ברירת מחדל – יתעדכן לפי הגדרות המורה
+    // משתנים להגדרות השיעור – ערכי ברירת מחדל או מהגדרות המורה
+    private int baseDuration = 40;      // יתעדכן לפי הגדרות המורה
+    private decimal basePrice = 200m;     // יתעדכן לפי הגדרות המורה
 
     private int lessonDuration;
     private decimal lessonPrice;
@@ -299,18 +370,22 @@
     }
     private string LessonEndTime { get; set; } = "";
 
-    // Calendar properties
+    // מאפייני לוח השנה
     private DateTime SelectedDate { get; set; } = DateTime.Today;
     private int SelectedMonth { get; set; } = DateTime.Today.Month;
     private int SelectedYear { get; set; } = DateTime.Today.Year;
     private string SelectedMonthName => new DateTime(SelectedYear, SelectedMonth, 1).ToString("MMMM");
     private int DaysInMonth => DateTime.DaysInMonth(SelectedYear, SelectedMonth);
 
-    // Variables for messages
+    // משתנים להודעות
     private string successMessage = string.Empty;
     private bool successMessageVisible = false;
     private string errorMessage = string.Empty;
     private bool errorMessageVisible = false;
+    private List<string> availableSuggestions = new List<string>();
+
+    // משתנה לשליטת הופעת הבאנר (alert)
+    private bool showAlert = false;
 
     protected override void OnInitialized()
     {
@@ -330,7 +405,7 @@
             var instructorSettings = await Http.GetFromJsonAsync<InstructorSettingsModel>($"api/Instructors/{instructorId}/settings");
             if (instructorSettings != null)
             {
-                // עדכון הערכים הבסיסיים מההגדרות של המורה
+                // עדכון ערכי ברירת מחדל מהגדרות המורה
                 baseDuration = instructorSettings.SingleLessonDuration;
                 basePrice = instructorSettings.SingleLessonPrice;
             }
@@ -345,7 +420,7 @@
 
     private void UpdateLessonDetails()
     {
-        // עדכון משך ומחיר בהתאם לסוג השיעור לפי ההגדרות של המורה
+        // עדכון משך ומחיר בהתאם לסוג השיעור
         if (SelectedLessonType == "Single")
         {
             lessonDuration = baseDuration;
@@ -430,19 +505,27 @@
                 return;
             }
 
+            // שימוש במערך פורמטים כדי לקבל גם "8:00" וגם "08:00"
+            string[] formats = new[] { "yyyy-MM-dd HH:mm", "yyyy-MM-dd H:mm" };
             var lessonDateTimeString = $"{SelectedDate:yyyy-MM-dd} {LessonStartTime}";
-            var lessonDateTime = DateTime.ParseExact(lessonDateTimeString, "yyyy-MM-dd HH:mm", null);
+            if (!DateTime.TryParseExact(lessonDateTimeString, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var lessonDateTime))
+            {
+                errorMessage = "התאריך או השעה אינם חוקיים. אנא הקפד להכניס שעה בפורמט HH:mm.";
+                successMessageVisible = false;
+                errorMessageVisible = true;
+                return;
+            }
 
             var lesson = new Lesson
-                {
-                    StudentId = studentId,
-                    StudentName = StudentName,
-                    InstructorId = AuthService.UserId,
-                    Date = lessonDateTime,
-                    Duration = lessonDuration,
-                    LessonType = SelectedLessonType,
-                    Price = lessonPrice
-                };
+            {
+                StudentId = studentId,
+                StudentName = StudentName,
+                InstructorId = AuthService.UserId,
+                Date = lessonDateTime,
+                Duration = lessonDuration,
+                LessonType = SelectedLessonType,
+                Price = lessonPrice
+            };
 
             var response = await Http.PostAsJsonAsync($"api/Instructors/{AuthService.UserId}/lessons", lesson);
             if (response.IsSuccessStatusCode)
@@ -450,14 +533,36 @@
                 successMessage = "השיעור נוצר בהצלחה!";
                 successMessageVisible = true;
                 errorMessageVisible = false;
+                showAlert = false;
                 Navigation.NavigateTo("/student_list_v2");
             }
             else
             {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                errorMessage = $"נכשל ביצירת השיעור: {errorDetails}";
+                var errorContent = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    using JsonDocument doc = JsonDocument.Parse(errorContent);
+                    JsonElement root = doc.RootElement;
+                    if (root.TryGetProperty("message", out JsonElement msgElement))
+                    {
+                        errorMessage = msgElement.GetString();
+                    }
+                    if (root.TryGetProperty("suggestions", out JsonElement suggElement) && suggElement.ValueKind == JsonValueKind.Array)
+                    {
+                        availableSuggestions.Clear();
+                        foreach (var suggestion in suggElement.EnumerateArray())
+                        {
+                            availableSuggestions.Add(suggestion.GetString());
+                        }
+                    }
+                }
+                catch
+                {
+                    errorMessage = errorContent;
+                }
                 successMessageVisible = false;
                 errorMessageVisible = true;
+                showAlert = availableSuggestions.Any();
             }
         }
         catch (Exception ex)
@@ -465,6 +570,79 @@
             errorMessage = $"שגיאה: {ex.Message}";
             successMessageVisible = false;
             errorMessageVisible = true;
+        }
+    }
+
+    private void CloseAlert()
+    {
+        showAlert = false;
+    }
+
+    // פונקציה שמתקנת את פורמט שעת ההתחלה תוך כדי הקלדה (oninput)
+    private void FormatLessonStartTimeOnInput(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString() ?? "";
+        // הסרת כל התווים שאינם ספרות
+        var digits = new string(input.Where(char.IsDigit).ToArray());
+        // ודא שאורך הקלט לא עולה על 4 ספרות
+        if (digits.Length > 4)
+        {
+            digits = digits.Substring(0, 4);
+        }
+        if (string.IsNullOrEmpty(digits))
+        {
+            LessonStartTime = "";
+            return;
+        }
+        if (digits.Length <= 2)
+        {
+            // אם יש עד 2 ספרות, נוסיף ":" בסיום (למשל "8" יהפוך ל-"8:")
+            LessonStartTime = digits + ":";
+        }
+        else if (digits.Length == 3)
+        {
+            // לדוגמה: "950" → "9:50"
+            string hour = digits.Substring(0, 1);
+            string minute = digits.Substring(1, 2);
+            LessonStartTime = $"{hour}:{minute}";
+        }
+        else // במקרה של 4 ספרות
+        {
+            string hour = digits.Substring(0, 2);
+            string minute = digits.Substring(2, 2);
+            LessonStartTime = $"{hour}:{minute}";
+        }
+    }
+
+    // פונקציה שמתקנת את פורמט שעת ההתחלה בעת עזיבת השדה (onblur)
+    private void FormatLessonStartTime()
+    {
+        var digits = new string(LessonStartTime.Where(char.IsDigit).ToArray());
+        // ודא שאורך הקלט לא עולה על 4 ספרות
+        if (digits.Length > 4)
+        {
+            digits = digits.Substring(0, 4);
+        }
+        if (string.IsNullOrEmpty(digits))
+        {
+            LessonStartTime = "0:00";
+            return;
+        }
+        if (digits.Length <= 2)
+        {
+            LessonStartTime = digits + ":00";
+        }
+        else if (digits.Length == 3)
+        {
+            string hour = digits.Substring(0, 1);
+            string minute = digits.Substring(1, 2);
+            LessonStartTime = $"{hour}:{minute}";
+        }
+        else // במקרה של 4 ספרות
+        {
+            string hour = digits.Substring(0, 2);
+            string minute = digits.Substring(2, 2);
+            LessonStartTime = $"{hour}:{minute}";
         }
     }
 }

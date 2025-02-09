@@ -195,7 +195,7 @@ namespace APIDrivingProject.Controllers
                 {
                     connection.Open();
 
-                    // בדיקת שיוך התלמיד למורה
+                    // בדיקת שיוך תלמיד למורה
                     var checkQuery = @"SELECT COUNT(*) 
                                FROM instructor_student 
                                WHERE InstructorId = @InstructorId AND StudentId = @StudentId";
@@ -209,18 +209,107 @@ namespace APIDrivingProject.Controllers
                         return BadRequest("Student is not assigned to this instructor.");
                     }
 
-                    // הוספת שיעור
-                    var query = @"INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
-                          VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
-                    var command = new MySqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@StudentId", lesson.StudentId);
-                    command.Parameters.AddWithValue("@InstructorId", instructorId);
-                    command.Parameters.AddWithValue("@Date", lesson.Date);
-                    command.Parameters.AddWithValue("@Duration", lesson.Duration);
-                    command.Parameters.AddWithValue("@LessonType", lesson.LessonType);
-                    command.Parameters.AddWithValue("@Price", lesson.Price);
+                    // הגדרת טווח התאריכים – מהתחלת היום ועד לתחילת היום הבא
+                    DateTime dayStart = lesson.Date.Date;
+                    DateTime dayEnd = dayStart.AddDays(1);
 
-                    command.ExecuteNonQuery();
+                    // שליפת שיעורים קיימים עבור אותו מורה באותו יום (מלבד שיעורים שבוטלו)
+                    var conflictQuery = @"
+                SELECT LessonId, Date, Duration 
+                FROM lessons 
+                WHERE InstructorId = @InstructorId 
+                  AND Date >= @DayStart AND Date < @DayEnd
+                  AND Status <> 'Canceled'
+            ";
+                    var conflictCmd = new MySqlCommand(conflictQuery, connection);
+                    conflictCmd.Parameters.AddWithValue("@InstructorId", instructorId);
+                    conflictCmd.Parameters.AddWithValue("@DayStart", dayStart);
+                    conflictCmd.Parameters.AddWithValue("@DayEnd", dayEnd);
+
+                    var conflictingLessons = new List<(DateTime Start, DateTime End)>();
+                    using (var reader = conflictCmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            DateTime existingStart = reader.GetDateTime("Date");
+                            int existingDuration = reader.GetInt32("Duration");
+                            DateTime existingEnd = existingStart.AddMinutes(existingDuration);
+                            conflictingLessons.Add((existingStart, existingEnd));
+                        }
+                    }
+
+                    // חישוב זמני התחלה וסיום לשיעור החדש
+                    DateTime newStart = lesson.Date;
+                    DateTime newEnd = lesson.Date.AddMinutes(lesson.Duration);
+
+                    // בדיקת התנגשויות – אם שיעור חדש מתנגש עם אחד קיים
+                    bool conflictFound = false;
+                    foreach (var conflict in conflictingLessons)
+                    {
+                        if (newStart < conflict.End && newEnd > conflict.Start)
+                        {
+                            conflictFound = true;
+                            break;
+                        }
+                    }
+
+                    if (conflictFound)
+                    {
+                        // הגדרת שעות עבודה – לדוגמה, 08:00 עד 18:00
+                        TimeSpan workStart = new TimeSpan(8, 0, 0);
+                        TimeSpan workEnd = new TimeSpan(18, 0, 0);
+                        DateTime workDayStart = lesson.Date.Date.Add(workStart);
+                        DateTime workDayEnd = lesson.Date.Date.Add(workEnd);
+
+                        // מיון השיעורים הקיימים לפי זמן התחלה
+                        conflictingLessons.Sort((a, b) => a.Start.CompareTo(b.Start));
+
+                        var availableSlots = new List<string>();
+                        DateTime slotStart = workDayStart;
+                        foreach (var slot in conflictingLessons)
+                        {
+                            if (slot.Start > slotStart)
+                            {
+                                TimeSpan gap = slot.Start - slotStart;
+                                if (gap.TotalMinutes >= lesson.Duration)
+                                {
+                                    // מוצעת שעה חלופית – כאן מוצעת רק התחלת השיעור בתחילת הפער
+                                    availableSlots.Add(slotStart.ToString("HH:mm"));
+                                }
+                            }
+                            if (slot.End > slotStart)
+                                slotStart = slot.End;
+                        }
+                        // בדיקה בין סוף השיעור האחרון לסיום יום העבודה
+                        if (slotStart < workDayEnd)
+                        {
+                            TimeSpan gap = workDayEnd - slotStart;
+                            if (gap.TotalMinutes >= lesson.Duration)
+                            {
+                                availableSlots.Add(slotStart.ToString("HH:mm"));
+                            }
+                        }
+
+                        return BadRequest(new
+                        {
+                            message = "לא ניתן להוסיף שיעור בשעה זו.",
+                            suggestions = availableSlots
+                        });
+                    }
+
+                    // אין התנגשויות – ביצוע הוספת השיעור
+                    var insertQuery = @"
+                INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
+                VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
+                    var insertCmd = new MySqlCommand(insertQuery, connection);
+                    insertCmd.Parameters.AddWithValue("@StudentId", lesson.StudentId);
+                    insertCmd.Parameters.AddWithValue("@InstructorId", instructorId);
+                    insertCmd.Parameters.AddWithValue("@Date", lesson.Date);
+                    insertCmd.Parameters.AddWithValue("@Duration", lesson.Duration);
+                    insertCmd.Parameters.AddWithValue("@LessonType", lesson.LessonType);
+                    insertCmd.Parameters.AddWithValue("@Price", lesson.Price);
+
+                    insertCmd.ExecuteNonQuery();
                 }
 
                 return Ok("Lesson added successfully.");
@@ -230,6 +319,7 @@ namespace APIDrivingProject.Controllers
                 return StatusCode(500, $"Error adding lesson: {ex.Message}");
             }
         }
+
         [HttpGet("{instructorId}/schedule/today")]
         public IActionResult GetTodayScheduleForInstructor(int instructorId)
         {

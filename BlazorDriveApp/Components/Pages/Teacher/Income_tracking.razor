@@ -551,20 +551,35 @@
 
     private async Task SavePaymentInfo(int paymentId)
     {
-        var content = JsonContent.Create(new
+        var payItem = allPayments.FirstOrDefault(p => p.PaymentId == paymentId);
+        if (payItem == null)
         {
-            PaymentMethod = editingPaymentMethod,
-            Description = editingDescription
-        });
+            Console.WriteLine($"[DEBUG] Payment with ID {paymentId} not found.");
+            return;
+        }
+
+        // יוצרים אובייקט `Payment` מלא, אך רק השדות שנערכו ישתנו
+        var updatedPayment = new Payment
+            {
+                PaymentId = payItem.PaymentId,
+                StudentId = payItem.StudentId,
+                InstructorId = payItem.InstructorId,
+                Amount = payItem.Amount,
+                PaymentDate = payItem.PaymentDate,
+                PaymentMethod = editingPaymentMethod, // הערך החדש
+                Description = editingDescription, // הערך החדש
+                Status = payItem.Status,
+                StudentFullName = payItem.StudentFullName
+            };
+
+        var content = JsonContent.Create(updatedPayment);
         var response = await Http.PutAsync($"api/payments/{paymentId}/updatePaymentInfo", content);
+
         if (response.IsSuccessStatusCode)
         {
-            var payItem = allPayments.FirstOrDefault(p => p.PaymentId == paymentId);
-            if (payItem != null)
-            {
-                payItem.PaymentMethod = editingPaymentMethod;
-                payItem.Description = editingDescription;
-            }
+            Console.WriteLine($"[DEBUG] Successfully updated Payment #{paymentId}");
+            payItem.PaymentMethod = editingPaymentMethod;
+            payItem.Description = editingDescription;
             editingPaymentId = null;
             editingPaymentMethod = string.Empty;
             editingDescription = string.Empty;
@@ -572,11 +587,11 @@
         }
         else
         {
-            // הדפסה לדיבאג – נרצה לראות את התגובה מהשרת
             string error = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Failed to update PaymentMethod and Description. " + error);
+            Console.WriteLine($"[DEBUG] Failed to update PaymentMethod and Description. Response: {error}");
         }
     }
+
 
     private void CancelEditPaymentInfo()
     {

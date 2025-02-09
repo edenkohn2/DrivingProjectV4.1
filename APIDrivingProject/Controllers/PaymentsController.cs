@@ -394,34 +394,23 @@ namespace APIDrivingProject.Controllers
             }
         }
         [HttpPut("{paymentId}/updatePaymentInfo")]
-        public IActionResult UpdatePaymentInfo(int paymentId, [FromBody] Payment updateInfo)
+        public IActionResult UpdatePaymentInfo(int paymentId, [FromBody] Payment payment)
         {
             try
             {
-                // נוודא שהערכים מתקבלים כפי שמצופה
-                Console.WriteLine($"[DEBUG] Updating PaymentId {paymentId}: PaymentMethod='{updateInfo.PaymentMethod}', Description='{updateInfo.Description}'");
-
-                // ננקה רווחים מיותרים (אם יש)
-                string paymentMethod = updateInfo.PaymentMethod?.Trim();
-                string description = updateInfo.Description?.Trim();
-
-                // נוודא שהערך עבור PaymentMethod הוא אחד מהערכים המותרים
-                var allowedMethods = new List<string> { "CreditCard", "Cash", "BankTransfer" };
-                if (!allowedMethods.Contains(paymentMethod))
-                {
-                    Console.WriteLine($"[DEBUG] Invalid PaymentMethod: '{paymentMethod}'. Allowed values are: {string.Join(", ", allowedMethods)}");
-                    return BadRequest(new { message = "Invalid PaymentMethod value" });
-                }
+                Console.WriteLine($"[DEBUG] Updating PaymentId {paymentId}: PaymentMethod='{payment.PaymentMethod}', Description='{payment.Description}'");
 
                 using (var connection = _databaseService.GetConnection())
                 {
                     connection.Open();
                     var query = "UPDATE payments SET PaymentMethod=@PaymentMethod, Description=@Description WHERE PaymentId=@PaymentId";
+
                     using (var cmd = new MySqlCommand(query, connection))
                     {
-                        cmd.Parameters.AddWithValue("@PaymentMethod", paymentMethod);
-                        cmd.Parameters.AddWithValue("@Description", description);
+                        cmd.Parameters.AddWithValue("@PaymentMethod", payment.PaymentMethod ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Description", payment.Description ?? (object)DBNull.Value);
                         cmd.Parameters.AddWithValue("@PaymentId", paymentId);
+
                         int rowsAffected = cmd.ExecuteNonQuery();
                         if (rowsAffected > 0)
                         {
@@ -438,10 +427,11 @@ namespace APIDrivingProject.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error updating payment info: " + ex.Message);
+                Console.WriteLine("[DEBUG] Error updating payment info: " + ex.Message);
                 return StatusCode(500, new { message = "Error updating payment info", details = ex.Message });
             }
         }
+
 
 
     }

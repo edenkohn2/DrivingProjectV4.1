@@ -1,6 +1,7 @@
 ﻿@page "/add_lesson"
 @using APIDrivingProject.Models
-@using DrivingClassLibary.Models;
+@using DrivingClassLibary.Models
+@using System.Text.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject APIDrivingProject.Services.AuthService AuthService
@@ -19,7 +20,6 @@
     </select>
 
     <label for="lessonType" class="form-label">סוג השיעור:</label>
-    <!-- כאן השתמשנו במאפיין עם setter שיקרא לפונקציה UpdateLessonDetails -->
     <select id="lessonType" @bind="SelectedLessonType" class="input-field">
         <option value="" disabled>בחר סוג שיעור</option>
         <option value="Single">רגיל</option>
@@ -40,7 +40,20 @@
 </div>
 
 <p class="message success" hidden="@(successMessageVisible == false)">@successMessage</p>
-<p class="message error" hidden="@(errorMessageVisible == false)">@errorMessage</p>
+<p class="message error" hidden="@(errorMessageVisible == false)">@((MarkupString)errorMessage)</p>
+
+@if (availableSuggestions.Any())
+{
+    <div class="suggestions-container">
+        <p>זמני החלופיים הפנויים להיום:</p>
+        <ul>
+            @foreach (var suggestion in availableSuggestions)
+            {
+                <li>@suggestion</li>
+            }
+        </ul>
+    </div>
+}
 
 <style>
     .page-title {
@@ -109,6 +122,29 @@
     }
     .message.error {
         color: #F44336;
+        background-color: #ffeeee;
+        padding: 10px;
+        border-radius: 5px;
+        animation: fadeIn 0.5s ease-in-out;
+        white-space: pre-wrap;
+    }
+    .suggestions-container {
+        max-width: 600px;
+        margin: 10px auto;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px dashed #ccc;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .suggestions-container ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    .suggestions-container li {
+        font-weight: bold;
+        color: #007bff;
     }
     @@keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
@@ -120,7 +156,6 @@
     private List<Student> students = new();
     private int selectedStudentId;
     
-    // שימוש במאפיין עם setter עבור סוג השיעור
     private string selectedLessonType = string.Empty;
     private string SelectedLessonType
     {
@@ -143,6 +178,7 @@
     private string errorMessage = string.Empty;
     private bool errorMessageVisible = false;
     private InstructorSettingsModel instructorSettings = new();
+    private List<string> availableSuggestions = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -154,7 +190,6 @@
 
             if (instructorSettings != null)
             {
-                // אתחול ברירת המחדל לסוג שיעור רגיל
                 SelectedLessonType = "Single";
                 lessonDuration = instructorSettings.SingleLessonDuration;
                 lessonPrice = instructorSettings.SingleLessonPrice;
@@ -194,12 +229,18 @@
 
     private async Task CreateLesson()
     {
+        // איפוס הודעות והצעות קיימות
+        successMessage = "";
+        errorMessage = "";
+        availableSuggestions.Clear();
+        successMessageVisible = false;
+        errorMessageVisible = false;
+
         try
         {
             if (selectedStudentId == 0 || string.IsNullOrEmpty(SelectedLessonType) || lessonDate == default || lessonPrice <= 0)
             {
                 errorMessage = "אנא מלא את כל השדות כראוי.";
-                successMessageVisible = false;
                 errorMessageVisible = true;
                 return;
             }
@@ -224,17 +265,36 @@
             }
             else
             {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                errorMessage = $"נכשל ביצירת השיעור: {errorDetails}";
-                successMessageVisible = false;
+                var errorContent = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    using JsonDocument doc = JsonDocument.Parse(errorContent);
+                    JsonElement root = doc.RootElement;
+                    if (root.TryGetProperty("message", out JsonElement msgElement))
+                    {
+                        errorMessage = msgElement.GetString();
+                    }
+                    if (root.TryGetProperty("suggestions", out JsonElement suggElement) && suggElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var suggestion in suggElement.EnumerateArray())
+                        {
+                            availableSuggestions.Add(suggestion.GetString());
+                        }
+                    }
+                }
+                catch
+                {
+                    errorMessage = errorContent;
+                }
                 errorMessageVisible = true;
+                successMessageVisible = false;
             }
         }
         catch (Exception ex)
         {
             errorMessage = $"שגיאה: {ex.Message}";
-            successMessageVisible = false;
             errorMessageVisible = true;
+            successMessageVisible = false;
         }
     }
 }

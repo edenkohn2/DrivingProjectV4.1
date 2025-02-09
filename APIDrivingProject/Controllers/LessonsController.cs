@@ -46,14 +46,18 @@ namespace APIDrivingProject.Controllers
         [HttpPost]
         public IActionResult AddLesson([FromBody] Lesson lesson)
         {
+            Console.WriteLine("[DEBUG] AddLesson endpoint called.");
+
             if (lesson == null)
             {
-                return BadRequest(new { message = "The lesson field is required." });
+                Console.WriteLine("[DEBUG] Lesson is null.");
+                return BadRequest(new { message = "יש למלא את פרטי השיעור." });
             }
 
             if (lesson.Date == DateTime.MinValue)
             {
-                return BadRequest(new { message = "The Date field must be provided in ISO 8601 format (e.g., yyyy-MM-ddTHH:mm:ss)." });
+                Console.WriteLine("[DEBUG] Lesson Date is invalid.");
+                return BadRequest(new { message = "יש לספק תאריך ושעה תקינים לשיעור." });
             }
 
             try
@@ -61,19 +65,138 @@ namespace APIDrivingProject.Controllers
                 using (var connection = _databaseService.GetConnection())
                 {
                     connection.Open();
-                    var query = @"INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
-                          VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
-                    var command = new MySqlCommand(query, connection);
-                    AddLessonParameters(command, lesson);
-                    command.ExecuteNonQuery();
+                    Console.WriteLine("[DEBUG] Database connection opened.");
+                    Console.WriteLine($"[DEBUG] InstructorId: {lesson.InstructorId}, Lesson Date: {lesson.Date}, Duration: {lesson.Duration} minutes.");
+
+                    // הגדרת טווח התאריכים – מהתחלת היום ועד לתחילת היום הבא
+                    DateTime dayStart = lesson.Date.Date;
+                    DateTime dayEnd = dayStart.AddDays(1);
+
+                    // שליפת שיעורים קיימים לאותו מורה באותו יום (מלבד שיעורים שבוטלו)
+                    var conflictQuery = @"
+                SELECT LessonId, Date, Duration 
+                FROM lessons 
+                WHERE InstructorId = @InstructorId 
+                  AND Date >= @DayStart AND Date < @DayEnd
+                  AND Status <> 'Canceled'
+            ";
+                    var conflictCmd = new MySqlCommand(conflictQuery, connection);
+                    conflictCmd.Parameters.AddWithValue("@InstructorId", lesson.InstructorId);
+                    conflictCmd.Parameters.AddWithValue("@DayStart", dayStart);
+                    conflictCmd.Parameters.AddWithValue("@DayEnd", dayEnd);
+
+                    Console.WriteLine("[DEBUG] Executing conflict query...");
+                    var conflictingLessons = new List<(DateTime Start, DateTime End)>();
+                    using (var reader = conflictCmd.ExecuteReader())
+                    {
+                        Console.WriteLine("[DEBUG] Reading conflict query results...");
+                        while (reader.Read())
+                        {
+                            int conflictLessonId = reader.GetInt32("LessonId");
+                            DateTime existingStart = reader.GetDateTime("Date");
+                            int existingDuration = reader.GetInt32("Duration");
+                            DateTime existingEnd = existingStart.AddMinutes(existingDuration);
+                            conflictingLessons.Add((existingStart, existingEnd));
+                            Console.WriteLine($"[DEBUG] Found existing lesson (ID: {conflictLessonId}) from {existingStart:HH:mm} to {existingEnd:HH:mm}.");
+                        }
+                    }
+
+                    // חישוב זמני התחלה וסיום לשיעור החדש
+                    DateTime newStart = lesson.Date;
+                    DateTime newEnd = lesson.Date.AddMinutes(lesson.Duration);
+                    Console.WriteLine($"[DEBUG] New lesson time: Start = {newStart:HH:mm}, End = {newEnd:HH:mm}.");
+
+                    // בדיקת התנגשויות: אם שיעור חדש מתחיל לפני שסיום שיעור קיים וסופו אחרי תחילת שיעור קיים
+                    bool conflictFound = false;
+                    foreach (var conflict in conflictingLessons)
+                    {
+                        Console.WriteLine($"[DEBUG] Checking conflict: Existing lesson from {conflict.Start:HH:mm} to {conflict.End:HH:mm}.");
+                        if (newStart < conflict.End && newEnd > conflict.Start)
+                        {
+                            conflictFound = true;
+                            Console.WriteLine($"[DEBUG] Conflict detected with lesson from {conflict.Start:HH:mm} to {conflict.End:HH:mm}.");
+                            break; // מספיק למצוא התנגשויות אחת
+                        }
+                    }
+
+                    if (conflictFound)
+                    {
+                        // הגדרת שעות עבודה – ניתן לשנות בהתאם לצורך (לדוגמה: 08:00 עד 18:00)
+                        TimeSpan workStart = new TimeSpan(8, 0, 0);
+                        TimeSpan workEnd = new TimeSpan(18, 0, 0);
+                        DateTime workDayStart = lesson.Date.Date.Add(workStart);
+                        DateTime workDayEnd = lesson.Date.Date.Add(workEnd);
+
+                        // מיון השיעורים הקיימים לפי זמן התחלה
+                        conflictingLessons.Sort((a, b) => a.Start.CompareTo(b.Start));
+
+                        var availableSlots = new List<string>();
+                        DateTime slotStart = workDayStart;
+                        foreach (var slot in conflictingLessons)
+                        {
+                            if (slot.Start > slotStart)
+                            {
+                                TimeSpan gap = slot.Start - slotStart;
+                                if (gap.TotalMinutes >= lesson.Duration)
+                                {
+                                    // מוצעים זמנים חלופיים – כאן מוצעת רק התחלת השיעור בתחילת הפער
+                                    availableSlots.Add(slotStart.ToString("HH:mm"));
+                                }
+                            }
+                            if (slot.End > slotStart)
+                                slotStart = slot.End;
+                        }
+                        // בדיקה בין סוף השיעור האחרון לסיום יום העבודה
+                        if (slotStart < workDayEnd)
+                        {
+                            TimeSpan gap = workDayEnd - slotStart;
+                            if (gap.TotalMinutes >= lesson.Duration)
+                            {
+                                availableSlots.Add(slotStart.ToString("HH:mm"));
+                            }
+                        }
+
+                        Console.WriteLine("[DEBUG] Conflict found, returning error with suggestions.");
+                        return BadRequest(new
+                        {
+                            message = "לא ניתן להוסיף שיעור בשעה זו.",
+                            suggestions = availableSlots
+                        });
+                    }
+
+                    // אין התנגשויות – ביצוע הוספת השיעור
+                    var insertQuery = @"
+                INSERT INTO lessons (StudentId, InstructorId, Date, Duration, LessonType, Price) 
+                VALUES (@StudentId, @InstructorId, @Date, @Duration, @LessonType, @Price)";
+                    using (var insertCmd = new MySqlCommand(insertQuery, connection))
+                    {
+                        insertCmd.Parameters.AddWithValue("@StudentId", lesson.StudentId);
+                        insertCmd.Parameters.AddWithValue("@InstructorId", lesson.InstructorId);
+                        insertCmd.Parameters.AddWithValue("@Date", lesson.Date);
+                        insertCmd.Parameters.AddWithValue("@Duration", lesson.Duration);
+                        insertCmd.Parameters.AddWithValue("@LessonType", lesson.LessonType);
+                        insertCmd.Parameters.AddWithValue("@Price", lesson.Price);
+                        Console.WriteLine("[DEBUG] Executing insert command for lesson...");
+                        int rowsInserted = insertCmd.ExecuteNonQuery();
+                        Console.WriteLine($"[DEBUG] Insert command affected {rowsInserted} row(s).");
+                    }
+
+                    Console.WriteLine("[DEBUG] Lesson added successfully.");
+                    return Ok("השיעור נוסף בהצלחה.");
                 }
-                return Ok("Lesson added successfully");
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "An error occurred while adding the lesson.", details = ex.Message });
+                Console.WriteLine($"[DEBUG] Exception in AddLesson: {ex.Message}");
+                return BadRequest(new { message = "אירעה שגיאה בהוספת השיעור.", details = ex.Message });
             }
         }
+
+
+
+
+
+
 
 
         // Update a lesson
