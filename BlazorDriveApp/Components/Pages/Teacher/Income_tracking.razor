@@ -1,0 +1,587 @@
+﻿@page "/income_tracking"
+@using APIDrivingProject.Services;
+@using DrivingClassLibary.Models;
+@inject HttpClient Http
+@inject AuthService AuthService;
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<!-- כרטיס כותרת -->
+<div class="header-card">
+    <div class="header-text">
+        <h2>רשימת תשלומים</h2>
+        <p>נהל ועקוב אחרי כל התשלומים</p>
+    </div>
+</div>
+
+<!-- הודעה בעיצוב: תשלומים עתידיים יופיעו בטום השיעורי -->
+<div class="info-note">
+    <p>תשלום עבור שיעורים עתידיים יופיעו רק לאחר סיום השיעור.</p>
+</div>
+
+<!-- שורת חיפוש ופילטר -->
+<div class="search-container">
+    <input type="text" placeholder="חפש לפי Description..."
+           @oninput="(e) => PerformSearch(e.Value?.ToString())" />
+    <button @onclick="SearchPayments">
+        <i class="fas fa-search"></i> חיפוש
+    </button>
+
+    <!-- פילטר לסדר לפי תאריך -->
+    <select @onchange="OnSortOrderChanged">
+        <option value="desc">מהחדש לישן</option>
+        <option value="asc">מהישן לחדש</option>
+    </select>
+</div>
+
+<!-- טבלת תשלומים -->
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>תלמיד</th>
+            <th>תאריך</th>
+            <th>סכום</th>
+            <th>אמצעי תשלום</th>
+            <th>תיאור</th>
+            <th>סטטוס</th>
+            <th>פעולות</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (filteredPayments != null && filteredPayments.Any())
+        {
+            @foreach (var pay in filteredPayments.Take(visibleCount))
+            {
+                <tr>
+                    <td>@pay.StudentFullName</td>
+                    <td>@pay.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@pay.Amount</td>
+                    <!-- עמודת PaymentMethod -->
+                    <td>
+                        @if (editingPaymentId == pay.PaymentId)
+                        {
+                            <select @bind="editingPaymentMethod" class="inline-select">
+                                <option value="CreditCard">CreditCard</option>
+                                <option value="Cash">Cash</option>
+                                <option value="BankTransfer">BankTransfer</option>
+                            </select>
+                        }
+                        else
+                        {
+                            @pay.PaymentMethod
+                        }
+                    </td>
+                    <!-- עמודת Description -->
+                    <td>
+                        @if (editingPaymentId == pay.PaymentId)
+                        {
+                            <input type="text" @bind="editingDescription" class="inline-input" />
+                        }
+                        else
+                        {
+                            @pay.Description
+                        }
+                    </td>
+                    <td>@pay.Status</td>
+                    <!-- עמודת פעולות -->
+                    <td class="center">
+                        @if (editingPaymentId == pay.PaymentId)
+                        {
+                            <button class="btn-save" @onclick="() => SavePaymentInfo(pay.PaymentId)">שמור</button>
+                            <button class="btn-cancel" @onclick="CancelEditPaymentInfo">בטל</button>
+                        }
+                        else
+                        {
+                            @if (pay.Status == "Pending")
+                            {
+                                <button class="btn-xyz" @onclick="() => ConfirmMarkPaid(pay.PaymentId)">
+                                    סמן כמשולם
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-deactivate" @onclick="() => ConfirmCancelPayment(pay.PaymentId)">
+                                    <i class="fas fa-ban"></i> בטל תשלום
+                                </button>
+                                <button class="btn-edit" @onclick="() => ShowPaymentDetails(pay)">
+                                    פרטי תשלום
+                                </button>
+                            }
+                            <!-- כפתור לעריכת פרטי תשלום -->
+                            <button class="btn-edit-inline" title="ערוך פרטי תשלום" @onclick="() => BeginEditPaymentInfo(pay)">ערוך פרטים</button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="no-results">לא נמצאו תשלומים.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- כפתור "הצג עוד תשלומים" – תמיד ממורכז -->
+@if (filteredPayments != null && filteredPayments.Count > visibleCount)
+{
+    <div class="show-more-container">
+        <button class="btn-show-more" @onclick="ShowMorePayments">הצג עוד תשלומים</button>
+    </div>
+}
+
+<style>
+    .header-card {
+        background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    .header-text h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        color: #fff;
+    }
+
+    .header-text p {
+        margin: 0;
+        font-size: 1rem;
+        color: #e0e0e0;
+    }
+
+    .info-note {
+        background-color: #e0f7fa;
+        color: #006064;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .search-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        animation: fadeIn 1s ease;
+    }
+
+        .search-container input[type="text"] {
+            padding: 10px;
+            width: 35%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .search-container input[type="text"]:focus {
+                border-color: #3f51b5;
+                outline: none;
+            }
+
+        .search-container button {
+            background: linear-gradient(45deg, #3f51b5, #5c6bc0);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .search-container button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+        .search-container select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .search-container select:focus {
+                border-color: #3f51b5;
+                outline: none;
+            }
+
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        animation: fadeIn 1s ease;
+    }
+
+        .styled-table th, .styled-table td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .styled-table th {
+            background-color: #3f51b5;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .styled-table tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+
+            .styled-table tr:hover {
+                background-color: #f9f9f9;
+            }
+
+    .center {
+        text-align: center;
+    }
+
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        color: #999;
+    }
+
+    .btn-deactivate {
+        background-color: #F44336;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 0.9rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-deactivate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+        }
+
+    .btn-xyz {
+        background-color: #4CAF50;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-xyz:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+        }
+
+    .btn-edit {
+        background-color: #2196F3;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-right: 5px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-edit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+        }
+    /* כפתור עריכה inline – מופיע כאשר השורה אינה במצב עריכה */
+    .btn-edit-inline {
+        background: #e0e0e0;
+        border: 1px solid #ccc;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+
+        .btn-edit-inline:hover {
+            background: #d5d5d5;
+        }
+
+    .btn-save {
+        background-color: #4CAF50;
+        color: #fff;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-right: 5px;
+    }
+
+        .btn-save:hover {
+            transform: scale(1.05);
+        }
+
+    .btn-cancel {
+        background-color: #F44336;
+        color: #fff;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        margin-right: 5px;
+    }
+
+        .btn-cancel:hover {
+            transform: scale(1.05);
+        }
+
+    .inline-select {
+        padding: 5px;
+        font-size: 0.8rem;
+        border-radius: 5px;
+    }
+
+    .inline-input {
+        padding: 5px;
+        font-size: 0.8rem;
+        width: 90%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    /* עיצוב לכפתור "הצג עוד תשלומים" */
+    .show-more-container {
+        text-align: center;
+        margin: 30px 0;
+        width: 100%;
+    }
+
+    .btn-show-more {
+        background: linear-gradient(45deg, #ff9800, #f57c00);
+        color: #fff;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-show-more:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@code {
+    private List<Payment> allPayments = new();
+    private List<Payment> filteredPayments = new();
+    private string searchTerm = string.Empty;
+    private string sortOrder = "desc"; // ברירת מחדל: מהחדש לישן
+    private int visibleCount = 5; // מספר התשלומים שיוצגו בתחילה
+
+    // משתנים לעריכת שורה – עבור PaymentMethod ו-Description
+    private int? editingPaymentId = null;
+    private string editingPaymentMethod = string.Empty;
+    private string editingDescription = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPayments();
+    }
+
+    private async Task LoadPayments()
+    {
+        int instructorId = AuthService.UserId;
+        try
+        {
+            allPayments = await Http.GetFromJsonAsync<List<Payment>>($"api/payments/instructor/{instructorId}");
+            ApplySortAndFilter();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading payments: {ex.Message}");
+        }
+    }
+
+    private void ApplySortAndFilter()
+    {
+        IEnumerable<Payment> temp = allPayments;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            temp = temp.Where(p => (p.Description ?? "").Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        temp = sortOrder == "asc"
+            ? temp.OrderBy(p => p.PaymentDate)
+            : temp.OrderByDescending(p => p.PaymentDate);
+
+       
+        filteredPayments = temp.ToList();
+        StateHasChanged();
+    }
+
+    private void PerformSearch(string? input)
+    {
+        searchTerm = input ?? string.Empty;
+        ApplySortAndFilter();
+    }
+
+    private void OnSortOrderChanged(ChangeEventArgs e)
+    {
+        sortOrder = e.Value?.ToString() ?? "desc";
+        ApplySortAndFilter();
+    }
+
+    private async Task ConfirmMarkPaid(int paymentId)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "האם אתה בטוח שהשיעור שולם?");
+        if (confirmed)
+        {
+            await MarkPaid(paymentId);
+            await LoadPayments();
+        }
+    }
+
+    private async Task MarkPaid(int paymentId)
+    {
+        var response = await Http.PutAsync($"api/payments/{paymentId}/markPaid", null);
+        if (response.IsSuccessStatusCode)
+        {
+            var payItem = allPayments.FirstOrDefault(p => p.PaymentId == paymentId);
+            if (payItem != null)
+            {
+                payItem.Status = "Paid";
+                payItem.PaymentMethod = "CreditCard";
+            }
+        }
+        else
+        {
+            Console.WriteLine("Failed to mark payment as paid.");
+        }
+    }
+
+    private async Task ConfirmCancelPayment(int paymentId)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", $"האם אתה בטוח שתרצה לבטל את התשלום #{paymentId}?");
+        if (confirmed)
+        {
+            await CancelPayment(paymentId);
+            await LoadPayments();
+        }
+    }
+
+    private async Task CancelPayment(int paymentId)
+    {
+        var response = await Http.DeleteAsync($"api/payments/{paymentId}");
+        if (response.IsSuccessStatusCode)
+        {
+            var payToRemove = allPayments.FirstOrDefault(p => p.PaymentId == paymentId);
+            if (payToRemove != null)
+            {
+                allPayments.Remove(payToRemove);
+                filteredPayments.Remove(payToRemove);
+            }
+            Console.WriteLine($"Payment #{paymentId} canceled successfully!");
+        }
+        else
+        {
+            Console.WriteLine("Failed to cancel payment.");
+        }
+    }
+
+    private void ShowPaymentDetails(Payment pay)
+    {
+        Console.WriteLine($"Showing details for Payment #{pay.PaymentId}");
+    }
+
+    private void SearchPayments()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredPayments = allPayments;
+        }
+        else
+        {
+            filteredPayments = allPayments
+                .Where(p => (p.Description ?? "").Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ShowMorePayments()
+    {
+        visibleCount += 5;
+    }
+
+    // --- פונקציות לעריכת פרטי תשלום (PaymentMethod ו-Description) ---
+    private void BeginEditPaymentInfo(Payment pay)
+    {
+        editingPaymentId = pay.PaymentId;
+        editingPaymentMethod = pay.PaymentMethod;
+        editingDescription = pay.Description;
+    }
+
+    private async Task SavePaymentInfo(int paymentId)
+    {
+        var content = JsonContent.Create(new
+        {
+            PaymentMethod = editingPaymentMethod,
+            Description = editingDescription
+        });
+        var response = await Http.PutAsync($"api/payments/{paymentId}/updatePaymentInfo", content);
+        if (response.IsSuccessStatusCode)
+        {
+            var payItem = allPayments.FirstOrDefault(p => p.PaymentId == paymentId);
+            if (payItem != null)
+            {
+                payItem.PaymentMethod = editingPaymentMethod;
+                payItem.Description = editingDescription;
+            }
+            editingPaymentId = null;
+            editingPaymentMethod = string.Empty;
+            editingDescription = string.Empty;
+            StateHasChanged();
+        }
+        else
+        {
+            // הדפסה לדיבאג – נרצה לראות את התגובה מהשרת
+            string error = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Failed to update PaymentMethod and Description. " + error);
+        }
+    }
+
+    private void CancelEditPaymentInfo()
+    {
+        editingPaymentId = null;
+        editingPaymentMethod = string.Empty;
+        editingDescription = string.Empty;
+    }
+}

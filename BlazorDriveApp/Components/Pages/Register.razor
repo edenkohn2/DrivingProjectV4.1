@@ -14,191 +14,195 @@
 }
 else
 {
-    <div class="page-background">
-        <!-- כרטיס (Card) מרכזי -->
-        <div class="register-card animated slideIn">
-            <!-- צד שמאל: תמונה מעוגלת -->
-            <div class="card-illustration">
-                <img src="/images/CarSunset.jpg"
-                     alt="Car Sunset"
-                     class="illustration-img" />
-            </div>
+   
 
-            <!-- צד ימין: טופס ההרשמה -->
-            <div class="card-form">
-                <h1 class="register-title">Create an account</h1>
-                <p class="register-subtitle">
-                    Already have an account?
-                    <a @onclick="GoToLogin" class="login-link">Log in</a>
-                </p>
-
-                <!-- First Name -->
-                <div class="input-group">
-                    <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
-                    @if (!isFirstNameValid)
-                    {
-                        <p class="error-message">שם פרטי הוא שדה חובה.</p>
-                    }
+        <div class="page-background">
+            <!-- כרטיס (Card) מרכזי -->
+            <div class="register-card animated slideIn">
+                <!-- צד שמאל: תמונה מעוגלת -->
+                <div class="card-illustration">
+                    <img src="/images/CarSunset.jpg"
+                         alt="Car Sunset"
+                         class="illustration-img" />
                 </div>
 
-                <!-- Last Name -->
-                <div class="input-group">
-                    <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
-                    @if (!isLastNameValid)
-                    {
-                        <p class="error-message">שם משפחה הוא שדה חובה.</p>
-                    }
-                </div>
+                <!-- צד ימין: טופס ההרשמה -->
+                <div class="card-form">
+                    <h1 class="register-title">Create an account</h1>
+                    <p class="register-subtitle">
+                        Already have an account?
+                        <a @onclick="GoToLogin" class="login-link">Log in</a>
+                    </p>
 
-                <!-- Email -->
-                <div class="input-group">
-                    <input type="email" placeholder="Email" @bind="email" class="input-field" />
-                    @if (!isEmailUnique)
-                    {
-                        <p class="error-message">אימייל כבר בשימוש.</p>
-                    }
-                    @if (!isValidEmail)
-                    {
-                        <p class="error-message">הזן אימייל חוקי.</p>
-                    }
-                </div>
+                    <!-- First Name -->
+                    <div class="input-group">
+                        <input type="text" placeholder="First Name" @bind="firstName" class="input-field" />
+                        @if (!isFirstNameValid)
+                        {
+                            <p class="error-message">שם פרטי הוא שדה חובה.</p>
+                        }
+                    </div>
 
-                <!-- Password -->
-                <div class="input-group">
-                    <input type="password" placeholder="Password" @bind="password" class="input-field" />
-                    @if (!isPasswordValid)
-                    {
-                        <p class="error-message">
-                            הסיסמה חייבת להיות באורך של לפחות 8 תווים ולהכיל לפחות אות גדולה אחת ומספר אחד.
-                        </p>
-                    }
-                </div>
+                    <!-- Last Name -->
+                    <div class="input-group">
+                        <input type="text" placeholder="Last Name" @bind="lastName" class="input-field" />
+                        @if (!isLastNameValid)
+                        {
+                            <p class="error-message">שם משפחה הוא שדה חובה.</p>
+                        }
+                    </div>
 
-                <!-- Confirm Password -->
-                <div class="input-group">
-                    <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
-                    @if (!isPasswordMatch)
-                    {
-                        <p class="error-message">הסיסמה לא תואמת.</p>
-                    }
-                </div>
+                    <!-- Email -->
+                    <div class="input-group">
+                        <input type="email" placeholder="Email" @bind="email" class="input-field" />
+                        @if (!isEmailUnique)
+                        {
+                            <p class="error-message">אימייל כבר בשימוש.</p>
+                        }
+                        @if (!isValidEmail)
+                        {
+                            <p class="error-message">הזן אימייל חוקי.</p>
+                        }
+                    </div>
 
-                <!-- Phone Number -->
-                <div class="input-group">
-                    <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
-                    @if (!isPhoneNumberValid)
-                    {
-                        <p class="error-message">מספר טלפון הוא שדה חובה.</p>
-                    }
-                </div>
+                    <!-- Password -->
+                    <div class="input-group">
+                        <input type="password" placeholder="Password" @bind="password" class="input-field" />
+                        @if (!isPasswordValid)
+                        {
+                            <p class="error-message">
+                                הסיסמה חייבת להיות באורך של לפחות 8 תווים ולהכיל לפחות אות גדולה אחת ומספר אחד.
+                            </p>
+                        }
+                    </div>
 
-                <!-- Birth Date -->
-                <div class="input-group">
-                    <!-- oninput="maskedDateWithMonthCheck(this)" -->
-                    <input id="birthDateInput"
-                           type="text"
-                           placeholder="DD/MM/YYYY"
-                           @bind="birthDateString"
-                           class="input-field"
-                           oninput="maskedDateWithMonthCheck(this)" />
-                    @if (!isBirthDateValid)
-                    {
-                        <p class="error-message">
-                            הזן תאריך חוקי (DD/MM/YYYY) ותוודא שאתה לפחות בן 16.5 שנים.
-                        </p>
-                    }
-                </div>
+                    <!-- Confirm Password -->
+                    <div class="input-group">
+                        <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="input-field" />
+                        @if (!isPasswordMatch)
+                        {
+                            <p class="error-message">הסיסמה לא תואמת.</p>
+                        }
+                    </div>
 
-                <!-- Address -->
-                <div class="input-group">
-                    <input type="text" placeholder="Address" @bind="address" class="input-field" />
-                    @if (!isAddressValid)
-                    {
-                        <p class="error-message">כתובת היא שדה חובה.</p>
-                    }
-                </div>
+                    <!-- Phone Number -->
+                    <div class="input-group">
+                        <input type="text" placeholder="Phone Number" @bind="phoneNumber" class="input-field" />
+                        @if (!isPhoneNumberValid)
+                        {
+                            <p class="error-message">מספר טלפון הוא שדה חובה.</p>
+                        }
+                    </div>
 
-                <!-- Role Selection -->
-                <div class="input-group">
-                    <select @bind="role" class="input-field">
-                        <option value="">Select Role</option>
-                        <option value="Student">Student</option>
-                        <option value="Instructor">Instructor</option>
-                    </select>
-                    @if (!isRoleValid)
-                    {
-                        <p class="error-message">בחר תפקיד.</p>
-                    }
-                </div>
+                    <!-- Birth Date -->
+                    <div class="input-group">
+                        <!-- oninput="maskedDateWithMonthCheck(this)" -->
+                        <input id="birthDateInput"
+                               type="text"
+                               placeholder="DD/MM/YYYY"
+                               @bind="birthDateString"
+                               class="input-field"
+                               oninput="maskedDateWithMonthCheck(this)" />
+                        @if (!isBirthDateValid)
+                        {
+                            <p class="error-message">
+                                הזן תאריך חוקי (DD/MM/YYYY) ותוודא שאתה לפחות בן 16.5 שנים.
+                            </p>
+                        }
+                    </div>
 
-                <!-- כפתור הרשמה -->
-                <button @onclick="HandleRegister" class="register-button animated pulse">Create account</button>
+                    <!-- Address -->
+                    <div class="input-group">
+                        <input type="text" placeholder="Address" @bind="address" class="input-field" />
+                        @if (!isAddressValid)
+                        {
+                            <p class="error-message">כתובת היא שדה חובה.</p>
+                        }
+                    </div>
+
+                    <!-- Role Selection -->
+                    <div class="input-group">
+                        <select @bind="role" class="input-field">
+                            <option value="">Select Role</option>
+                            <option value="Student">Student</option>
+                            <option value="Instructor">Instructor</option>
+                        </select>
+                        @if (!isRoleValid)
+                        {
+                            <p class="error-message">בחר תפקיד.</p>
+                        }
+                    </div>
+
+                    <!-- כפתור הרשמה -->
+                    <button @onclick="HandleRegister" class="register-button animated pulse">Create account</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- סקריפט JavaScript עם הגבלת חודש ל-1..12 -->
-    <script>
-        function maskedDateWithMonthCheck(input) {
-            // ניקוי תווים שאינם ספרות
-            let val = input.value.replace(/\D/g, '');
+        <!-- סקריפט JavaScript עם הגבלת חודש ל-1..12 -->
+        <script>
+            function maskedDateWithMonthCheck(input) {
+                // ניקוי תווים שאינם ספרות
+                let val = input.value.replace(/\D/g, '');
 
-            // הגבלת אורך ל-8 ספרות (DDMMYYYY)
-            if (val.length > 8) {
-                val = val.slice(0, 8);
-            }
-
-            // חלוקה ל-day, month, year
-            let day = val.slice(0, 2);   // עד 2 ספרות ליום
-            let month = val.slice(2, 4); // עד 2 ספרות לחודש
-            let year = val.slice(4, 8);  // שאר הספרות הן שנה
-
-            // *** הגבלת חודש ל-1..12 ***
-            // מבצעים parseInt רק אם יש 2 ספרות בחודש
-            if (month.length === 2) {
-                let m = parseInt(month, 10);
-
-                // אם המשתמש כתב 00 => נהפוך ל-01
-                if (m < 1) {
-                    m = 1;
-                }
-                // אם המשתמש כתב 13+ => נהפוך ל-12
-                if (m > 12) {
-                    m = 12;
+                // הגבלת אורך ל-8 ספרות (DDMMYYYY)
+                if (val.length > 8) {
+                    val = val.slice(0, 8);
                 }
 
-                // מחזירים בחזרה כמחרוזת של 2 ספרות
-                month = m < 10 ? '0' + m : '' + m;
-            }
+                // חלוקה ל-day, month, year
+                let day = val.slice(0, 2);   // עד 2 ספרות ליום
+                let month = val.slice(2, 4); // עד 2 ספרות לחודש
+                let year = val.slice(4, 8);  // שאר הספרות הן שנה
 
-            // בניית התוצאה עם הסלאשים
-            let result = '';
+                // *** הגבלת חודש ל-1..12 ***
+                // מבצעים parseInt רק אם יש 2 ספרות בחודש
+                if (month.length === 2) {
+                    let m = parseInt(month, 10);
 
-            // day
-            if (day) {
-                result += day;
-            }
-            if (val.length >= 3) {
-                result += '/';
-            }
+                    // אם המשתמש כתב 00 => נהפוך ל-01
+                    if (m < 1) {
+                        m = 1;
+                    }
+                    // אם המשתמש כתב 13+ => נהפוך ל-12
+                    if (m > 12) {
+                        m = 12;
+                    }
 
-            // month
-            if (month) {
-                result += month;
-            }
-            if (val.length >= 5) {
-                result += '/';
-            }
+                    // מחזירים בחזרה כמחרוזת של 2 ספרות
+                    month = m < 10 ? '0' + m : '' + m;
+                }
 
-            // year
-            if (year) {
-                result += year;
-            }
+                // בניית התוצאה עם הסלאשים
+                let result = '';
 
-            // עדכון השדה
-            input.value = result;
-        }
-    </script>
+                // day
+                if (day) {
+                    result += day;
+                }
+                if (val.length >= 3) {
+                    result += '/';
+                }
+
+                // month
+                if (month) {
+                    result += month;
+                }
+                if (val.length >= 5) {
+                    result += '/';
+                }
+
+                // year
+                if (year) {
+                    result += year;
+                }
+
+                // עדכון השדה
+                input.value = result;
+            }
+        </script>
+
+   
 }
 
 <style>

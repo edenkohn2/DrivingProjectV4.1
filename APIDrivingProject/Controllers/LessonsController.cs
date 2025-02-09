@@ -239,7 +239,85 @@ namespace APIDrivingProject.Controllers
 
             return Ok(lessons);
         }
-        
+
+        // בודק אם השיעור הסתיים (תאריך + משך < Now), אם כן -> מסמן Completed, יוצר תשלום Pending
+        [HttpPut("{lessonId}/check")]
+        public IActionResult CheckIfLessonEndedAndComplete(int lessonId)
+        {
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+
+                // שליפת נתוני השיעור
+                var selectLessonQuery = @"
+            SELECT StudentId, Date, Duration, Price, Status
+            FROM lessons
+            WHERE LessonId = @LessonId
+        ";
+                using var selectCmd = new MySqlCommand(selectLessonQuery, connection);
+                selectCmd.Parameters.AddWithValue("@LessonId", lessonId);
+
+                int studentId = 0;
+                DateTime startTime = DateTime.MinValue;
+                int duration = 0;
+                decimal price = 0;
+                string lessonStatus = "";
+                bool found = false;
+
+                using (var reader = selectCmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        found = true;
+                        studentId = reader.GetInt32("StudentId");
+                        startTime = reader.GetDateTime("Date");
+                        duration = reader.GetInt32("Duration");
+                        price = reader.GetDecimal("Price");
+                        lessonStatus = reader.GetString("Status");
+                    }
+                }
+                if (!found)
+                {
+                    return NotFound("Lesson not found");
+                }
+                if (lessonStatus == "Completed" || lessonStatus == "Canceled")
+                {
+                    return BadRequest("Lesson is already completed or canceled.");
+                }
+
+                // חישוב זמן סיום השיעור
+                DateTime endTime = startTime.AddMinutes(duration);
+
+                if (DateTime.Now < endTime)
+                {
+                    return BadRequest($"Lesson not ended yet. It ends at {endTime}.");
+                }
+
+                // עדכון השיעור ל-Completed
+                var updateLessonQuery = "UPDATE lessons SET Status='Completed' WHERE LessonId=@LessonId";
+                using var updateLessonCmd = new MySqlCommand(updateLessonQuery, connection);
+                updateLessonCmd.Parameters.AddWithValue("@LessonId", lessonId);
+                updateLessonCmd.ExecuteNonQuery();
+
+                // יצירת רשומת תשלום עם סטטוס 'Pending'
+                var insertPaymentQuery = @"
+            INSERT INTO payments (StudentId, Amount, PaymentDate, PaymentMethod, Description, Status)
+            VALUES (@StudentId, @Amount, @PaymentDate, 'Pending', @Desc, 'Pending')
+        ";
+                using var insertPayCmd = new MySqlCommand(insertPaymentQuery, connection);
+                insertPayCmd.Parameters.AddWithValue("@StudentId", studentId);
+                insertPayCmd.Parameters.AddWithValue("@Amount", price);
+                insertPayCmd.Parameters.AddWithValue("@PaymentDate", DateTime.Now);
+                insertPayCmd.Parameters.AddWithValue("@Desc", $"Payment for lesson #{lessonId}");
+                insertPayCmd.ExecuteNonQuery();
+
+                return Ok($"Lesson #{lessonId} marked as Completed, Payment created (Pending).");
+            }
+        }
+
+
+        // שאר ה-CRUD (AddLesson, DeleteLesson, וכו') בהתאם להגדרות הקיימות...
+
 
 
 

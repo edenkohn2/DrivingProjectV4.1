@@ -11,6 +11,8 @@
         public string LessonType { get; set; } // "Single", "OneAndAHalf", or "Double"
         public decimal Price { get; set; }
         public string StudentName { get; set; }
+        public string Status { get; set; } = "Scheduled"; // ברירת מחדל
+
     }
 
 }
