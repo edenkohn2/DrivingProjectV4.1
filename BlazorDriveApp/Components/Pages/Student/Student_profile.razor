@@ -1,47 +1,372 @@
-﻿@page "/student_list"
-@using APIDrivingProject.Models
-@using DrivingClassLibary.Models;
+﻿@page "/student/{StudentId:int}"
+@using DrivingClassLibary.Models
+@using APIDrivingProject.Services
+@using DrivingClassLibrary.Models
 @inject HttpClient Http
-@inject NavigationManager Navigation
+@inject AuthService Auth
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
 
-<h1 style="text-align: center; font-size: 2.8rem; font-weight: bold; color: #333; margin-bottom: 1rem; text-transform: uppercase;">
-    Student List
-</h1>
+<PageTitle>Student Profile</PageTitle>
 
-<div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px;">
-    @foreach (var student in students)
-    {
-        <div style="background: linear-gradient(145deg, #e0e0e0, #ffffff); border-radius: 15px; box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(255, 255, 255, 0.7); width: 350px; padding: 30px; text-align: left; transition: transform 0.3s ease, box-shadow 0.3s ease;">
-            <h3 style="font-size: 1.8rem; font-weight: bold; color: #ff5722; margin-bottom: 15px; text-transform: uppercase;">
-                @student.FirstName @student.LastName
-            </h3>
-            <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Email:</strong> @student.Email</p>
-            <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Phone:</strong> @student.PhoneNumber</p>
-            <p style="font-size: 1.2rem; margin-bottom: 20px;"><strong>Lessons Taken:</strong> @student.LessonsTaken</p>
-            <button style="background: #007bff; color: #fff; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease;" @onclick="() => EditStudent(student.PersonId)">
-                Edit
-            </button>
-        </div>
+<style>
+  /* ==================== Global Resets ==================== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  html, body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    background: linear-gradient(135deg, #1e1e2f, #2d2d44, #1e1e2f);
+    background-size: 400% 400%;
+    animation: backgroundShift 15s ease infinite;
+    color: #fff;
+  }
+
+  /* ==================== Background Animation ==================== */
+  @@keyframes backgroundShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ==================== Fade In Animation ==================== */
+  @@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 1s ease-out both;
+  }
+
+  /* ==================== Container ==================== */
+  .profile-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  /* ==================== Card Styling ==================== */
+  .card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ==================== Profile Header ==================== */
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  .profile-image {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  .profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .profile-image::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ff6ec4, #7873f5);
+    mix-blend-mode: overlay;
+    opacity: 0.3;
+  }
+  .profile-name {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+  }
+  .profile-email {
+    font-size: 1.1rem;
+    color: #d1d1d1;
+  }
+
+  /* ==================== Cards Grid ==================== */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .info-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, background 0.3s ease;
+  }
+  .info-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #fff;
+  }
+  .card-content {
+    font-size: 1rem;
+    color: #e0e0e0;
+  }
+
+  /* ==================== Chart Area ==================== */
+  .chart-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  .chart-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #fff;
+  }
+  canvas {
+    width: 100% !important;
+    height: 300px !important;
+  }
+
+  /* ==================== Responsive Design ==================== */
+  @@media (min-width: 768px) {
+    .profile-header {
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
     }
-</div>
+    .profile-details {
+      margin-left: 1.5rem;
+    }
+  }
+
+  /* ==================== Extra Animations ==================== */
+  @@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* ==================== Custom Scrollbar ==================== */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+  }
+
+  /* ==================== Typography ==================== */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  p {
+    line-height: 1.6;
+  }
+
+  /* ==================== Button Styling ==================== */
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(45deg, #ff6ec4, #7873f5);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+    text-align: center;
+  }
+  .btn:hover {
+    background: linear-gradient(45deg, #7873f5, #ff6ec4);
+    transform: scale(1.05);
+  }
+
+  /* ==================== Footer ==================== */
+  .footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #ccc;
+  }
+
+  /* ==================== Decorative Elements ==================== */
+  .decorative-border {
+    position: relative;
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  .decorative-border::before, .decorative-border::after {
+    content: "";
+    position: absolute;
+    width: 50%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    top: 50%;
+  }
+  .decorative-border::before {
+    left: 0;
+  }
+  .decorative-border::after {
+    right: 0;
+  }
+  
+  /* ==================== Extra Spacing ==================== */
+  .mt-2 { margin-top: 0.5rem; }
+  .mt-4 { margin-top: 1rem; }
+  .mt-8 { margin-top: 2rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .mb-4 { margin-bottom: 1rem; }
+  .mb-8 { margin-bottom: 2rem; }
+  
+  /* ==================== Utility Classes ==================== */
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .rounded-xl { border-radius: 1rem; }
+  .shadow-lg { box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+</style>
+
+@if (student != null)
+{
+  <div class="profile-container">
+    <div class="card animate-fadeIn">
+      
+      <!-- פרופיל – תמונה ופרטים בסיסיים -->
+      <div class="profile-header">
+        <div class="profile-image float-animation">
+          <!-- לחיצה על התמונה תחליף בין התמונות -->
+          <img src="@CurrentProfileImage" alt="Profile Image" @onclick="ToggleProfileImage" style="cursor: pointer;" />
+        </div>
+        <div class="profile-details">
+          <h2 class="profile-name animate-fadeIn">@student.FirstName @student.LastName</h2>
+          <p class="profile-email animate-fadeIn">@student.Email</p>
+        </div>
+      </div>
+      
+      <!-- כרטיסי פרטים -->
+      <div class="cards-grid">
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">טלפון</p>
+          <p class="card-content">@student.PhoneNumber</p>
+        </div>
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">תאריך לידה</p>
+          <p class="card-content">@student.BirthDate?.ToShortDateString()</p>
+        </div>
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">מורה מלווה</p>
+          <p class="card-content">@(assignmentStatus?.InstructorName ?? "לא משויך")</p>
+        </div>
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">שיעורים שנלקחו</p>
+          <p class="card-content">@student.LessonsTaken</p>
+        </div>
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">עבר תיאוריה</p>
+          <p class="card-content">@(student.HasPassedTheory ? "כן" : "לא")</p>
+        </div>
+        <div class="info-card animate-fadeIn">
+          <p class="card-title">סטטוס</p>
+          <p class="card-content">@(student.IsActive ? "פעיל" : "לא פעיל")</p>
+        </div>
+      </div>
+      
+      <!-- אזור גרפים -->
+      <div class="chart-container animate-fadeIn">
+        <h3 class="chart-title">סטטיסטיקות שיעורים</h3>
+        <canvas id="lessonsChart" class="rounded-xl shadow-lg"></canvas>
+      </div>
+      
+      <!-- Footer אופציונלי -->
+      <div class="footer animate-fadeIn">
+        <p>© 2025 Driving School. All rights reserved.</p>
+      </div>
+      
+    </div>
+  </div>
+}
+else
+{
+  <div class="profile-container">
+    <p class="text-center text-2xl animate-fadeIn">טוען...</p>
+  </div>
+}
 
 @code {
-    private List<Student> students = new();
+    [Parameter] public int StudentId { get; set; }
+    private Student student;
+    private AssignmentStatusModel assignmentStatus;
+
+    // משתנה בוליאני לקביעת סוג התמונת פרופיל
+    private bool isMale = true;
+    private string CurrentProfileImage => 
+        // להוסיף פרמטר כדי למנוע caching (לא חובה, אבל מומלץ)
+        (isMale ? "/images/MalePic.jpg" : "/images/FemalePic.jpg") + $"?v={(isMale ? "male" : "female")}";
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        if (Auth.IsAuthenticated && Auth.IsStudent)
         {
-            students = await Http.GetFromJsonAsync<List<Student>>("api/Students");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading students: {ex.Message}");
+            // שליפת נתוני התלמיד
+            student = await Http.GetFromJsonAsync<Student>($"api/Students/{Auth.UserId}");
+            // שליפת סטטוס שיוך למורה
+            assignmentStatus = await Http.GetFromJsonAsync<AssignmentStatusModel>($"api/Instructors/{Auth.UserId}/assignment-status");
+            // אתחול הגרף לאחר טעינת הנתונים
+            await Task.Delay(500);
+            InitializeChart();
         }
     }
 
-    private void EditStudent(int personId)
+    private void InitializeChart()
     {
-        Navigation.NavigateTo($"/edit_student/{personId}");
+        // קריאה ל-JS כדי לאתחל את הגרף, לדוגמה באמצעות Chart.js
+        JSRuntime.InvokeVoidAsync("initLessonsChart", student.LessonsTaken);
+    }
+
+    // מתודה להחלפת תמונת הפרופיל בעת לחיצה
+    private void ToggleProfileImage()
+    {
+        isMale = !isMale;
     }
 }

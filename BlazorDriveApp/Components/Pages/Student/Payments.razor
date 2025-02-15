@@ -1,13 +1,310 @@
 ﻿@page "/payments"
-<h1 style="text-align: center; font-size: 2.5rem; font-weight: bold; color: #333;">Payment Tracking</h1>
-<p style="text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 20px;">View your payment history and balances.</p>
+@using APIDrivingProject.Services
+@using DrivingClassLibary.Models
+@inject HttpClient Http
+@inject AuthService Auth
+@rendermode InteractiveServer
 
-<div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
-    <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); width: 80%; max-width: 600px;">
-        <h3 style="color: #007bff; margin-bottom: 10px;">Total Paid: $250</h3>
-        <p style="margin-bottom: 10px;">Next Payment Due: 15/03/2024</p>
-        <button style="background-color: #007bff; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer;">
-            View Full Payment History
-        </button>
+
+<PageTitle>תשלומים</PageTitle>
+
+<style>
+    .page-bg {
+        background-color: #f9f9f9;
+        min-height: 100vh;
+        padding: 1rem;
+    }
+
+    .payments-container {
+        max-width: 1100px;
+        margin: 2rem auto;
+        background: #fff;
+        border-radius: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: #007bff;
+        font-weight: 600;
+    }
+
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+        .payments-table th, .payments-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .payments-table th {
+            background-color: #007bff;
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .payments-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+    .no-payments {
+        text-align: center;
+        color: #666;
+        margin-top: 1rem;
+    }
+
+    .status-paid {
+        color: green;
+        font-weight: bold;
+    }
+
+    .status-pending {
+        color: #e53e3e;
+        font-weight: bold;
+    }
+
+    .summary {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: #f2f2f2;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* כפתורי "הצג עוד" ו"סדר לפי" */
+    .btn-show-more,
+    .btn-sort {
+        background: linear-gradient(45deg, #38a169, #2f855a);
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin: 0.5rem 0;
+    }
+
+        .btn-show-more:hover,
+        .btn-sort:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    /* מכולה לפילטרים */
+    .filters-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="page-bg">
+    <div class="payments-container">
+        <h2 class="section-title">תשלומים - @Auth.UserName</h2>
+
+        <!-- פילטרים / כפתורי מיון -->
+        <div class="filters-container">
+            <button class="btn-sort" @onclick="ToggleSort">
+                סדר לפי תאריך @(isAscending ? "מהישן לחדש" : "מהחדש לישן")
+            </button>
+        </div>
+
+        <section>
+            <h3 style="color: #e53e3e;">תשלומים תלויים (Pending)</h3>
+            @if (pendingPaymentsToShow != null && pendingPaymentsToShow.Count > 0)
+            {
+                <table class="payments-table">
+                    <thead>
+                        <tr>
+                            <th>תאריך</th>
+                            <th>שיטת תשלום</th>
+                            <th>סכום</th>
+                            <th>תיאור</th>
+                            <th>סטטוס</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in pendingPaymentsToShow)
+                        {
+                            <tr>
+                                <td>@p.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@p.PaymentMethod</td>
+                                <td>@($"{p.Amount:C}")</td>
+                                <td>@p.Description</td>
+                                <td><span class="status-pending">@p.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (pendingPayments.Count > pendingLimit)
+                {
+                    if (pendingPaymentsToShow.Count < pendingPayments.Count)
+                    {
+                        <button class="btn-show-more" @onclick="ShowMorePending">הצג עוד</button>
+                    }
+                }
+            }
+            else
+            {
+                <p class="no-payments">אין תשלומים תלויים</p>
+            }
+        </section>
+
+        <hr style="margin: 2rem 0;" />
+
+        <section>
+            <h3 style="color: #38a169;">תשלומים ששולמו (Paid)</h3>
+            @if (paidPaymentsToShow != null && paidPaymentsToShow.Count > 0)
+            {
+                <table class="payments-table">
+                    <thead>
+                        <tr>
+                            <th>תאריך</th>
+                            <th>שיטת תשלום</th>
+                            <th>סכום</th>
+                            <th>תיאור</th>
+                            <th>סטטוס</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in paidPaymentsToShow)
+                        {
+                            <tr>
+                                <td>@p.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@p.PaymentMethod</td>
+                                <td>@($"{p.Amount:C}")</td>
+                                <td>@p.Description</td>
+                                <td><span class="status-paid">@p.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (paidPayments.Count > paidLimit)
+                {
+                    if (paidPaymentsToShow.Count < paidPayments.Count)
+                    {
+                        <button class="btn-show-more" @onclick="ShowMorePaid">הצג עוד</button>
+                    }
+                }
+            }
+            else
+            {
+                <p class="no-payments">אין תשלומים ששולמו</p>
+            }
+        </section>
+
+        <div class="summary">
+            סה"כ ששולם: @($"{totalPaid:C}") | סה"כ תלוי: @($"{totalPending:C}")
+        </div>
     </div>
 </div>
+
+@code {
+    private List<Payment> allPayments = new();
+    private List<Payment> pendingPayments = new(); // כל התשלומים בסטטוס Pending
+    private List<Payment> paidPayments = new();    // כל התשלומים בסטטוס Paid
+
+    // רשימות שיוצגו בפועל (עם מגבלה של 5 בהתחלה)
+    private List<Payment> pendingPaymentsToShow = new();
+    private List<Payment> paidPaymentsToShow = new();
+
+    // סכומים לסיכום
+    private decimal totalPaid = 0m;
+    private decimal totalPending = 0m;
+
+    // מגבלת כמות תשלומים להצגה
+    private int pendingLimit = 5;
+    private int paidLimit = 5;
+
+    // בורר מיון: true = עולה (ישן לחדש), false = יורד (חדש לישן)
+    private bool isAscending = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsAuthenticated && Auth.IsStudent)
+        {
+            var studentId = Auth.UserId;
+
+            // שליפת כל התשלומים של התלמיד
+            allPayments = await Http.GetFromJsonAsync<List<Payment>>($"api/Payments/student/{studentId}");
+
+            // סיווג לפי סטטוס
+            pendingPayments = allPayments.Where(p => p.Status == "Pending").ToList();
+            paidPayments = allPayments.Where(p => p.Status == "Paid").ToList();
+
+            // חישוב סה"כ
+            totalPending = pendingPayments.Sum(p => p.Amount);
+            totalPaid = paidPayments.Sum(p => p.Amount);
+
+            // תחילה מיון ברירת מחדל (מהחדש לישן)
+            SortPaymentsDescending();
+
+            // מילוי רשימות התצוגה
+            pendingPaymentsToShow = pendingPayments.Take(pendingLimit).ToList();
+            paidPaymentsToShow = paidPayments.Take(paidLimit).ToList();
+        }
+    }
+
+    private void ShowMorePending()
+    {
+        pendingLimit += 5;
+        pendingPaymentsToShow = pendingPayments.Take(pendingLimit).ToList();
+    }
+
+    private void ShowMorePaid()
+    {
+        paidLimit += 5;
+        paidPaymentsToShow = paidPayments.Take(paidLimit).ToList();
+    }
+
+    private void ToggleSort()
+    {
+        // הפוך את כיוון המיון
+        isAscending = !isAscending;
+
+        if (isAscending)
+        {
+            // מיין מהישן לחדש
+            pendingPayments = pendingPayments.OrderBy(p => p.PaymentDate).ToList();
+            paidPayments = paidPayments.OrderBy(p => p.PaymentDate).ToList();
+        }
+        else
+        {
+            // מיין מהחדש לישן
+            SortPaymentsDescending();
+        }
+
+        // אפס מגבלות והצגה
+        pendingLimit = 5;
+        paidLimit = 5;
+
+        pendingPaymentsToShow = pendingPayments.Take(pendingLimit).ToList();
+        paidPaymentsToShow = paidPayments.Take(paidLimit).ToList();
+    }
+
+    private void SortPaymentsDescending()
+    {
+        // מיין מהחדש לישן
+        pendingPayments = pendingPayments.OrderByDescending(p => p.PaymentDate).ToList();
+        paidPayments = paidPayments.OrderByDescending(p => p.PaymentDate).ToList();
+    }
+
+    
+}

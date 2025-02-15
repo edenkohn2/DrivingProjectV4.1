@@ -1,75 +1,45 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
-public class AuthorizationMiddleware
+namespace APIDrivingProject.Middleware
 {
-    private readonly RequestDelegate _next;
-
-    public AuthorizationMiddleware(RequestDelegate next)
+    public class AssignmentRestrictionMiddleware
     {
-        _next = next;
-    }
+        private readonly RequestDelegate _next;
 
-    public async Task InvokeAsync(HttpContext context, APIDrivingProject.Services.AuthService authService)
-    {
-        var path = context.Request.Path;
-
-        // אם הנתיב אינו מוגן, המשך לבקשה הבאה
-        if (!path.StartsWithSegments("/request-assignment"))
+        public AssignmentRestrictionMiddleware(RequestDelegate next)
         {
-            await _next(context);
-            return;
+            _next = next;
         }
 
-        // בדיקה אם המשתמש מחובר
-        if (!authService.IsAuthenticated)
+        public async Task InvokeAsync(HttpContext context, APIDrivingProject.Services.AuthService authService)
         {
-            context.Response.Redirect("/login");
-            return;
-        }
+            string path = context.Request.Path.Value ?? string.Empty;
 
-        // ניהול גישה לדף /request-assignment
-        if (path.StartsWithSegments("/request-assignment"))
-        {
-            if (authService.IsInstructor)
+            // אם המשתמש אינו מחובר – המשך לעיבוד
+            if (!authService.IsAuthenticated)
             {
-                // אם המשתמש הוא מורה
-                context.Response.Redirect("/unauthorized");
+                await _next(context);
                 return;
             }
 
-            if (authService.IsStudent)
+            // אם המשתמש הוא תלמיד ואינו משויך,
+            // נאפשר גישה רק ל-/settings ול-/request-assignment
+            if (authService.IsStudent && !authService.IsAssigned)
             {
-                var isAssigned = await IsStudentAssignedToInstructor(authService.UserId, context);
-                if (isAssigned)
+                if (!path.StartsWith("/settings", StringComparison.OrdinalIgnoreCase) &&
+                    !path.StartsWith("/request-assignment", StringComparison.OrdinalIgnoreCase) &&
+                    !path.StartsWith("/student/schedule", StringComparison.OrdinalIgnoreCase))  // מאפשרים גישה ללוח הזמנים
                 {
-                    // אם התלמיד משויך למורה
                     context.Response.Redirect("/settings");
                     return;
                 }
             }
-        }
 
-        // המשך לעיבוד הבקשה אם הכל תקין
-        await _next(context);
-    }
 
-    private async Task<bool> IsStudentAssignedToInstructor(int userId, HttpContext context)
-    {
-        try
-        {
-            var httpClient = context.RequestServices.GetRequiredService<HttpClient>();
-            var response = await httpClient.GetAsync($"api/Instructors/{userId}/is-assigned");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<bool>();
-            }
-
-            return false;
-        }
-        catch
-        {
-            return false;
+            await _next(context);
         }
     }
 }

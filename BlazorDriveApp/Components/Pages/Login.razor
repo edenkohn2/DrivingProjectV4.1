@@ -212,24 +212,6 @@ else
         }
     }
 
-    private async Task RedirectToDashboard()
-    {
-        await Task.Delay(10); // מאפשר לדף להיטען בצורה תקינה
-
-        if (AuthService.IsStudent)
-        {
-            Navigation.NavigateTo("/student_dashboard", true);
-        }
-        else if (AuthService.IsInstructor)
-        {
-            Navigation.NavigateTo("/teacher_dashboard", true);
-        }
-        else if (AuthService.IsAdmin)
-        {
-            Navigation.NavigateTo("/admin_dashboard", true);
-        }
-    }
-
     private async Task HandleLogin()
     {
         try
@@ -246,10 +228,23 @@ else
 
                     AuthService.SetUser(userName, role, userId);
 
-                    // מציגים אנימציית ספינר עם הכותרת "מכניסים אותך..." לפני הניתוב
+                    if (AuthService.IsStudent)
+                    {
+                        try
+                        {
+                            bool assigned = await Http.GetFromJsonAsync<bool>($"api/Instructors/{userId}/is-assigned");
+                            AuthService.SetAssignmentStatus(assigned);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error checking assignment: {ex.Message}");
+                            AuthService.SetAssignmentStatus(false);
+                        }
+                    }
+
                     isRedirecting = true;
                     StateHasChanged();
-                    await Task.Delay(2000); // המתנה של 2 שניות להצגת האנימציה
+                    await Task.Delay(2000);
                     await RedirectToDashboard();
                 }
                 else
@@ -266,6 +261,33 @@ else
         {
             Console.WriteLine($"Error during login: {ex}");
             loginFailed = true;
+        }
+    }
+
+    private async Task RedirectToDashboard()
+    {
+        await Task.Delay(10);
+
+        if (AuthService.IsStudent)
+        {
+            if (!AuthService.IsAssigned)
+            {
+                Navigation.NavigateTo("/settings", true);
+                return;
+            }
+            else
+            {
+                Navigation.NavigateTo("/student_dashboard", true);
+                return;
+            }
+        }
+        else if (AuthService.IsInstructor)
+        {
+            Navigation.NavigateTo("/teacher_dashboard", true);
+        }
+        else if (AuthService.IsAdmin)
+        {
+            Navigation.NavigateTo("/admin_dashboard", true);
         }
     }
 }

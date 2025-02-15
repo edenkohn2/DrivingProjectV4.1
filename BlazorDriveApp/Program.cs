@@ -61,7 +61,8 @@ var app = builder.Build();
 
 app.UseRouting();
 
-app.UseMiddleware<AuthorizationMiddleware>();
+app.UseMiddleware<APIDrivingProject.Middleware.AssignmentRestrictionMiddleware>();
+
 
 // Apply CORS policy
 

@@ -1,182 +1,206 @@
 ﻿@page "/student_dashboard"
 @using APIDrivingProject.Services
 @using APIDrivingProject.Models
-@using DrivingClassLibary.Models;
+@using DrivingClassLibary.Models
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject AuthService AuthService
 @rendermode InteractiveServer
 
+<PageTitle>דשבורד תלמידים</PageTitle>
+
 <style>
-  /* עיצוב כללי */
-  .dashboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 50px 20px;
-    background: linear-gradient(135deg, #f0f4f8, #e8ecf1);
-    min-height: 100vh;
-    animation: fadeIn 1s ease-in-out;
-  }
-
-  /* כותרת ראשית */
-  .dashboard-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .dashboard-header h1 {
-    font-size: 3rem;
-    color: #007bff;
-    text-transform: uppercase;
-    margin: 0;
-    font-weight: bold;
-    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  .dashboard-header p {
-    font-size: 1.5rem;
-    color: #333;
-  }
-
-  /* עיצוב הכרטיסיות */
-  .dashboard-cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 25px;
-    width: 100%;
-    max-width: 1200px;
-  }
-
-  .dashboard-card {
-    background: #ffffff;
-    border-radius: 20px;
-    width: 360px;
-    padding: 35px;
-    text-align: center;
-    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    border: 2px solid transparent;
-  }
-
-  /* אפקטי hover לכרטיסיות */
-  .dashboard-card:hover {
-    transform: translateY(-10px) scale(1.03);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-    border-color: #007bff;
-  }
-
-  /* רקע עם אנימציית זרימה */
-  .dashboard-card::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(0, 123, 255, 0.15), transparent 80%);
-    transform: scale(0);
-    transition: transform 0.5s ease;
-    pointer-events: none;
-  }
-  .dashboard-card:hover::before {
-    transform: scale(1);
-  }
-
-  /* אייקונים */
-  .dashboard-card i {
-    font-size: 3rem;
-    color: #007bff;
-    margin-bottom: 15px;
-    transition: color 0.3s;
-  }
-  .dashboard-card:hover i {
-    color: #0056b3;
-  }
-
-  /* כותרת הכרטיסיות */
-  .dashboard-card h3 {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #ff5722;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-  }
-
-  /* תיאור הכרטיסיות */
-  .dashboard-card p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #555;
-  }
-
-  /* כפתורים מעוצבים */
-  .dashboard-card button {
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 25px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0px 5px 15px rgba(0, 91, 255, 0.3);
-    position: relative;
-    z-index: 2;
-  }
-  .dashboard-card button:hover {
-    background: linear-gradient(45deg, #0056b3, #007bff);
-    transform: scale(1.05);
-    box-shadow: 0px 8px 20px rgba(0, 91, 255, 0.4);
-  }
-
-  /* אנימציית fadeIn */
-  @@keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
+    /* עיצוב כללי לדשבורד התלמידים */
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 20px;
+        background: linear-gradient(135deg, #f0f4f8, #e8ecf1);
+        min-height: 100vh;
+        animation: fadeIn 1s ease-in-out;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 40px;
     }
-  }
-  
-  /* התאמה למכשירים ניידים */
-  @@media (max-width: 768px) {
+
+        .dashboard-header h1 {
+            font-size: 3rem;
+            color: #007bff;
+            text-transform: uppercase;
+            margin: 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-header p {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
     .dashboard-cards {
-      flex-direction: column;
-      align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 25px;
+        width: 100%;
+        max-width: 1200px;
     }
-  }
+
+    .dashboard-card {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 360px;
+        padding: 35px;
+        text-align: center;
+        box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-color: #007bff;
+        }
+
+        .dashboard-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.15), transparent 80%);
+            transform: scale(0);
+            transition: transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .dashboard-card:hover::before {
+            transform: scale(1);
+        }
+
+        .dashboard-card i {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+
+        .dashboard-card:hover i {
+            color: #0056b3;
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff5722;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .dashboard-card p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .dashboard-card button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0px 5px 15px rgba(0, 91, 255, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+            .dashboard-card button:hover {
+                background: linear-gradient(45deg, #0056b3, #007bff);
+                transform: scale(1.05);
+                box-shadow: 0px 8px 20px rgba(0, 91, 255, 0.4);
+            }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-cards {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
 </style>
 
 <div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>🎓 דשבורד תלמידים</h1>
-    <p>ברוך הבא, <span style="font-weight: bold; color: #007bff;">@studentName</span></p>
-  </div>
-
-  <div class="dashboard-cards">
-    <!-- כרטיסיית פרטי תלמיד -->
-    <div class="dashboard-card">
-      <i class="fas fa-user"></i>
-      <h3>פרטי תלמיד</h3>
-      <p><strong>דוא"ל:</strong> @studentEmail</p>
-      <p><strong>שיעורים שהושלמו:</strong> @lessonsCompleted</p>
-      <button @onclick="NavigateToProfile">צפה בפרופיל</button>
+    <div class="dashboard-header">
+        <h1>🎓 דשבורד תלמידים</h1>
+        <p>ברוך הבא, <span style="font-weight: bold; color: #007bff;">@studentName</span></p>
     </div>
 
-    <!-- כרטיסיית תשלומים -->
-    <div class="dashboard-card">
-      <i class="fas fa-wallet"></i>
-      <h3>תשלומים</h3>
-      <p><strong>סה"כ שולם:</strong> $@totalPaid</p>
-      <button @onclick="NavigateToPayments">צפה בתשלומים</button>
+    <div class="dashboard-cards">
+        <!-- כרטיסיית פרטי תלמיד -->
+        <div class="dashboard-card">
+            <i class="fas fa-user"></i>
+            <h3>פרטי תלמיד</h3>
+            <p><strong>דוא"ל:</strong> @studentEmail</p>
+            <p><strong>שיעורים שהושלמו:</strong> @lessonsCompleted</p>
+            <button @onclick="NavigateToProfile">צפה בפרופיל</button>
+        </div>
+
+        <!-- כרטיסיית תשלומים -->
+        <div class="dashboard-card">
+            <i class="fas fa-wallet"></i>
+            <h3>תשלומים</h3>
+            <!-- במקום להציג כמה שולם, טקסט כללי -->
+            <p>עקוב אחרי ההוצאות שלך</p>
+            <button @onclick="NavigateToPayments">צפה בתשלומים</button>
+        </div>
+
+        <!-- כרטיסיית לוח זמנים -->
+        <div class="dashboard-card">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>לוח זמנים</h3>
+            @if (upcomingLessons != null && upcomingLessons.Count > 0)
+            {
+                <ul style="list-style: none; padding: 0;">
+                    @foreach (var lesson in upcomingLessons)
+                    {
+                        <li style="margin-bottom: 8px;">
+                            יש לך שיעור בתאריך
+                            <strong>@lesson.Date.ToString("dd/MM/yyyy")</strong>
+                            בשעה <strong>@lesson.Date.ToString("HH:mm")</strong>
+                            (<em>@lesson.LessonType</em>)
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>אין שיעורים קרובים כעת.</p>
+            }
+            <button @onclick="NavigateToSchedule">צפה בלוח זמנים מלא</button>
+        </div>
     </div>
-  </div>
 </div>
 
 @code {
@@ -184,6 +208,7 @@
     private string studentEmail = string.Empty;
     private int lessonsCompleted = 0;
     private decimal totalPaid = 0;
+    private List<Lesson> upcomingLessons = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -195,9 +220,9 @@
                 return;
             }
 
-            var studentId = AuthService.UserId;
+            int studentId = AuthService.UserId;
 
-            // שליפת נתוני סטודנט
+            // שליפת נתוני תלמיד
             var studentResponse = await Http.GetFromJsonAsync<Student>($"api/Students/{studentId}");
             if (studentResponse != null)
             {
@@ -206,8 +231,11 @@
                 lessonsCompleted = studentResponse.LessonsTaken;
             }
 
-            // שליפת נתוני תשלומים
+            // שליפת סכום תשלומים (כרגע לא מציגים אותו, אך משאירים אם תרצה להשתמש בהמשך)
             totalPaid = await Http.GetFromJsonAsync<decimal>($"api/Payments/total/{studentId}");
+
+            // שליפת שיעורים קרובים
+            upcomingLessons = await Http.GetFromJsonAsync<List<Lesson>>($"api/Students/{studentId}/upcoming");
         }
         catch (Exception ex)
         {
@@ -215,6 +243,7 @@
         }
     }
 
-    private void NavigateToProfile() => Navigation.NavigateTo("/student_profile");
+    private void NavigateToProfile() => Navigation.NavigateTo($"/student/{AuthService.UserId}");
     private void NavigateToPayments() => Navigation.NavigateTo("/payments");
+    private void NavigateToSchedule() => Navigation.NavigateTo("/student_schedule");
 }

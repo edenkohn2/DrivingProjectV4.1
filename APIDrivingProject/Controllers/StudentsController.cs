@@ -177,5 +177,82 @@ namespace APIDrivingProject.Controllers
 
             return NotFound();
         }
+        [HttpGet("{studentId}/upcoming")]
+        public IActionResult GetUpcomingLessons(int studentId)
+        {
+            var lessons = new List<Lesson>();
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"
+                    SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price, 
+                           CONCAT(p.FirstName, ' ', p.LastName) AS StudentName, l.Status
+                    FROM lessons l
+                    INNER JOIN student s ON l.StudentId = s.StudentId
+                    INNER JOIN person p ON s.StudentId = p.PersonId
+                    WHERE l.StudentId = @StudentId 
+                      AND l.Status = 'Scheduled'
+                      AND l.Date >= NOW()
+                    ORDER BY l.Date";
+                var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@StudentId", studentId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lessons.Add(new Lesson
+                        {
+                            LessonId = reader.GetInt32("LessonId"),
+                            Date = reader.GetDateTime("Date"),
+                            Duration = reader.GetInt32("Duration"),
+                            LessonType = reader.GetString("LessonType"),
+                            Price = reader.GetDecimal("Price"),
+                            StudentName = reader.GetString("StudentName"),
+                            Status = reader.GetString("Status")
+                        });
+                    }
+                }
+            }
+            return Ok(lessons);
+        }
+        [HttpGet("{studentId}/completed")]
+        public IActionResult GetCompletedLessons(int studentId)
+        {
+            var lessons = new List<Lesson>();
+            using (var connection = _databaseService.GetConnection())
+            {
+                connection.Open();
+                var query = @"
+                    SELECT l.LessonId, l.Date, l.Duration, l.LessonType, l.Price, 
+                           CONCAT(p.FirstName, ' ', p.LastName) AS StudentName, l.Status
+                    FROM lessons l
+                    INNER JOIN student s ON l.StudentId = s.StudentId
+                    INNER JOIN person p ON s.StudentId = p.PersonId
+                    WHERE l.StudentId = @StudentId 
+                      AND l.Status = 'Completed'
+                    ORDER BY l.Date DESC";
+                var command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@StudentId", studentId);
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        lessons.Add(new Lesson
+                        {
+                            LessonId = reader.GetInt32("LessonId"),
+                            Date = reader.GetDateTime("Date"),
+                            Duration = reader.GetInt32("Duration"),
+                            LessonType = reader.GetString("LessonType"),
+                            Price = reader.GetDecimal("Price"),
+                            StudentName = reader.GetString("StudentName"),
+                            Status = reader.GetString("Status")
+                        });
+                    }
+                }
+            }
+            return Ok(lessons);
+        }
     }
+
+    
 }

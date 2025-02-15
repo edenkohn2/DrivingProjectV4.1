@@ -229,10 +229,19 @@ namespace APIDrivingProject.Controllers
             using (var connection = _databaseService.GetConnection())
             {
                 connection.Open();
-                var query = @"SELECT PaymentId, Amount, PaymentDate 
-                              FROM payments 
-                              WHERE StudentId = @StudentId";
-                var command = new MySqlCommand(query, connection);
+                var query = @"
+            SELECT 
+                PaymentId, 
+                StudentId,
+                Amount, 
+                PaymentDate,
+                PaymentMethod,
+                Description,
+                Status
+            FROM payments 
+            WHERE StudentId = @StudentId
+        ";
+                using var command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue("@StudentId", studentId);
 
                 using (var reader = command.ExecuteReader())
@@ -242,8 +251,12 @@ namespace APIDrivingProject.Controllers
                         payments.Add(new Payment
                         {
                             PaymentId = reader.GetInt32("PaymentId"),
+                            StudentId = reader.GetInt32("StudentId"),
                             Amount = reader.GetDecimal("Amount"),
-                            PaymentDate = reader.GetDateTime("PaymentDate")
+                            PaymentDate = reader.GetDateTime("PaymentDate"),
+                            PaymentMethod = reader.IsDBNull(reader.GetOrdinal("PaymentMethod")) ? null : reader.GetString("PaymentMethod"),
+                            Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? null : reader.GetString("Description"),
+                            Status = reader.IsDBNull(reader.GetOrdinal("Status")) ? null : reader.GetString("Status")
                         });
                     }
                 }
@@ -251,6 +264,7 @@ namespace APIDrivingProject.Controllers
 
             return Ok(payments);
         }
+
         [HttpGet("total/{studentId}")]
         public IActionResult GetTotalPaidByStudent(int studentId)
         {

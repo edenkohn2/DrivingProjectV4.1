@@ -1,0 +1,342 @@
+﻿@page "/student_schedule"
+@using DrivingClassLibary.Models
+@using APIDrivingProject.Services
+@using Radzen
+@using Radzen.Blazor
+@inject HttpClient Http
+@inject AuthService Auth
+@inject Radzen.DialogService DialogService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>לוח זמנים - שיעורים לתלמיד</PageTitle>
+
+<style>
+    /* רקע בהיר בלבד */
+    .page-bg {
+        background-color: #f9f9f9;
+        min-height: 100vh;
+    }
+    /* מיכל עיקרי */
+    .container-card {
+        background: #fff;
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 1200px;
+    }
+    /* כותרות – מעוצבות ומרוכזות */
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #1a202c;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    /* טבלה לעיצוב שיעורים שהושלמו */
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .styled-table th {
+            background-color: #3182ce;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .styled-table tbody tr:hover {
+            background-color: #edf2f7;
+        }
+    /* עיצוב ללוח הזמנים */
+    .custom-scheduler {
+        border-radius: 1rem;
+        padding: 1rem;
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        min-height: 400px;
+    }
+    /* כפתור "הצג עוד" */
+    .btn-show-more {
+        background: linear-gradient(45deg, #38a169, #2f855a);
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-top: 1rem;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .btn-show-more:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+    /* כרטיס פרטי שיעור מעוצב */
+    .lesson-details {
+        position: relative;
+        padding: 25px;
+        border-radius: 15px;
+        /* רקע גרדיאנט עדין */
+        background: linear-gradient(120deg, #fafafa 40%, #ffffff 100%);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+    }
+        /* פס צד צבעוני */
+        .lesson-details::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: #007bff; /* פס כחול */
+            border-radius: 15px 0 0 15px;
+        }
+
+    .selected-lesson {
+        background: #fffae6;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 5px solid #ffcc00;
+    }
+
+        .selected-lesson h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+            font-size: 1.4rem;
+        }
+
+        .selected-lesson p {
+            margin: 5px 0;
+            font-size: 1.05rem;
+        }
+
+            .selected-lesson p b {
+                color: #444;
+            }
+
+    /* כותרת טבלה פנימית */
+    .lesson-details h4 {
+        color: #007bff;
+        margin-top: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="page-bg p-8">
+    <div class="container-card">
+        <h2 class="text-4xl font-bold text-center text-gray-800 mb-10">
+            📅 לוח זמנים - שיעורים לתלמיד: @Auth.UserName
+        </h2>
+
+        <!-- חלק 1: שיעורים קרובים -->
+        <section class="mb-12">
+            <h3 class="section-title text-green-700">שיעורים קרובים</h3>
+            @if (upcomingLessons != null && upcomingLessons.Any())
+            {
+                <RadzenScheduler TItem="Appointment" Data="@upcomingAppointments.Take(upcomingLimit)"
+                                 StartProperty="Start" EndProperty="End" TextProperty="StudentName"
+                                 @bind-SelectedDate="selectedDate"
+                                 AppointmentSelect="@(e => OnAppointmentSelect(e.Data))"
+                                 class="custom-scheduler">
+                    <RadzenDayView StartTime="@TimeSpan.FromHours(0)" EndTime="@TimeSpan.FromHours(24)" />
+                    <RadzenWeekView StartTime="@TimeSpan.FromHours(0)" EndTime="@TimeSpan.FromHours(24)" />
+                    <RadzenMonthView />
+                </RadzenScheduler>
+
+                @if (upcomingLessons.Count > upcomingLimit)
+                {
+                    <button class="btn-show-more" @onclick="ShowMoreUpcoming">הצג עוד שיעורים קרובים</button>
+                }
+            }
+            else
+            {
+                <p class="text-center text-gray-600">אין שיעורים קרובים לתצוגה</p>
+            }
+        </section>
+
+        <!-- חלק 2: שיעורים שהושלמו -->
+        <section>
+            <h3 class="section-title text-blue-700">שיעורים שהושלמו</h3>
+            @if (completedLessons != null && completedLessons.Any())
+            {
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>תאריך</th>
+                            <th>שעה</th>
+                            <th>סוג שיעור</th>
+                            <th>מחיר</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lesson in completedLessons.OrderByDescending(l => l.Date).Take(completedLimit))
+                        {
+                            <tr>
+                                <td>@lesson.Date.ToString("dd/MM/yyyy")</td>
+                                <td>@lesson.Date.ToString("HH:mm")</td>
+                                <td>@lesson.LessonType</td>
+                                <td>@($"{lesson.Price:C}")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @if (completedLessons.Count > completedLimit)
+                {
+                    <button class="btn-show-more" @onclick="ShowMoreCompleted">הצג עוד שיעורים שהושלמו</button>
+                }
+            }
+            else
+            {
+                <p class="text-center text-gray-600">אין שיעורים שהושלמו לתצוגה</p>
+            }
+        </section>
+    </div>
+</div>
+
+<!-- דיאלוג להצגת פרטי שיעור -->
+<RadzenDialog />
+
+@code {
+    private DateTime selectedDate = DateTime.Today;
+    private List<Lesson> upcomingLessons = new();
+    private List<Lesson> completedLessons = new();
+    private List<Appointment> upcomingAppointments = new();
+
+    // משתנים להגבלת מספר הפריטים המוצגים
+    private int upcomingLimit = 5;
+    private int completedLimit = 5;
+
+    // רשימה לשיעורים נוספים באותו יום (לצורך הדיאלוג)
+    private List<Appointment> sameDayLessons = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.IsAuthenticated && Auth.IsStudent)
+        {
+            var studentId = Auth.UserId;
+
+            // שליפת שיעורים קרובים
+            upcomingLessons = await Http.GetFromJsonAsync<List<Lesson>>($"api/Students/{studentId}/upcoming");
+
+            // שליפת שיעורים שהושלמו
+            completedLessons = await Http.GetFromJsonAsync<List<Lesson>>($"api/Students/{studentId}/completed");
+
+            // המרת השיעורים למודל Appointment עבור לוח הזמנים
+            upcomingAppointments = upcomingLessons.Select(lesson => new Appointment
+                    {
+                        LessonId = lesson.LessonId,
+                        Start = lesson.Date,
+                        End = lesson.Date.AddMinutes(lesson.Duration),
+                        StudentName = !string.IsNullOrEmpty(lesson.StudentName) ? lesson.StudentName : "לא ידוע",
+                        LessonType = lesson.LessonType,
+                        Price = lesson.Price
+                    }).ToList();
+        }
+    }
+
+    private async Task OnAppointmentSelect(Appointment appointment)
+    {
+        if (appointment != null)
+        {
+            // תאריך השיעור הנבחר
+            selectedDate = appointment.Start;
+
+            // מסננים מתוך upcomingLessons את השיעורים באותו תאריך (למעט הנוכחי)
+            sameDayLessons = upcomingLessons
+            .Where(l => l.Date.Date == appointment.Start.Date && l.LessonId != appointment.LessonId)
+            .OrderBy(l => l.Date)
+            .Select(l => new Appointment
+                    {
+                        LessonId = l.LessonId,
+                        Start = l.Date,
+                        End = l.Date.AddMinutes(l.Duration),
+                        StudentName = !string.IsNullOrEmpty(l.StudentName) ? l.StudentName : "לא ידוע",
+                        LessonType = l.LessonType,
+                        Price = l.Price
+                    })
+            .ToList();
+
+            // פתיחת דיאלוג עם פרטי השיעור
+            await DialogService.OpenAsync("פרטי שיעור",
+            ds => @<div class="lesson-details">
+        <div class="selected-lesson">
+            <h4>⭐ שיעור נוכחי</h4>
+            <p>
+                <b>⏰ זמן השיעור:</b> @appointment.Start.ToString("dddd, dd MMMM yyyy")
+                <br />
+                @appointment.Start.ToString("HH:mm") - @appointment.End.ToString("HH:mm")
+            </p>
+            <p><b>👤 תלמיד:</b> @appointment.StudentName</p>
+            <p><b>🚗 סוג השיעור:</b> @appointment.LessonType</p>
+            <p><b>💰 מחיר:</b> @($"{appointment.Price:C}")</p>
+        </div>
+
+        @if (sameDayLessons.Any())
+    {
+        <h4>📅 שיעורים נוספים באותו יום:</h4>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>⏰ זמן</th>
+                    <th>👤 תלמיד</th>
+                    <th>🚗 סוג שיעור</th>
+                    <th>💰 מחיר</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lesson in sameDayLessons)
+            {
+                <tr>
+                    <td>@lesson.Start.ToString("HH:mm") - @lesson.End.ToString("HH:mm")</td>
+                    <td>@lesson.StudentName</td>
+                    <td>@lesson.LessonType</td>
+                    <td>@($"{lesson.Price:C}")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>❌ אין שיעורים נוספים לאותו יום.</p>
+    }
+    </div>,
+        new DialogOptions { Width = "650px", Height = "550px", Resizable = true }
+    );
+        }
+    }
+
+    private void ShowMoreUpcoming()
+    {
+        upcomingLimit += 5;
+    }
+
+    private void ShowMoreCompleted()
+    {
+        completedLimit += 5;
+    }
+}
